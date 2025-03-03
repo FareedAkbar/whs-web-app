@@ -2,6 +2,7 @@ import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials"
 import { api } from "@/trpc/server";
+import { env } from "@/env";
 
 
 /**
@@ -14,6 +15,9 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      imageUrl: string;
+      token: string;
+      role: string;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
@@ -31,6 +35,14 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authConfig = {
+  secret: env.AUTH_SECRET,
+  pages: {
+    signIn: "/auth/login",
+    signOut: '/',
+  },
+  session: {
+    strategy: "jwt",
+  },
   providers: [
     // DiscordProvider,
     Google({
@@ -74,11 +86,9 @@ export const authConfig = {
               id: response.user.id.toString(),
               name: response.user.name,
               email: response.user.email,
-              image: response.user.mediaId,
+              imageUrl: response.user.imageUrl,
+              role: response.user.role,
               token: response.token,
-              isCaptain: response.user.isCaptain,
-              role: response.user.isAdmin ? "admin" : "user",
-              teamName: response.user.teamName,
             };
             return user;
           }

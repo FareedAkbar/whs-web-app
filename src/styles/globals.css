@@ -1,3 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Space+Grotesk:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Roboto+Slab:wght@100..900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Style+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+    font-family: 'nulshock';
+    src: url('/fonts/nulshock/nulshock-bd.otf') format('opentype'),
+}
+
+.font-nulshock {
+    font-family: 'nulshock', sans-serif;
+}
+
+.font-space {
+    font-family: "Space Grotesk", sans-serif;
+    font-optical-sizing: auto;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+.font-open {
+    font-family: "Open Sans", serif;
+    font-optical-sizing: auto;
+}
+
+.font-roboto {
+    font-family: "Roboto", serif;
+    font-optical-sizing: auto;
+}
+
+.font-geist {
+    font-family: "Geist", serif;
+    font-optical-sizing: auto;
+}
+
+.font-mont {
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+}

@@ -28,14 +28,14 @@ export default function RootLayout({ children }: {
     }
 
     return (
-        <div className="relative min-h-screen flex justify-center items-center w-full sm:p-0 p-2">
+        <div className="relative min-h-screen flex justify-center items-center w-full sm:p-0 p-2" style={{ background: "url('/images/gradient.webp')", backgroundSize: "cover" }}>
             <div className="relative z-50 flex justify-center items-center h-full w-full overflow-auto">
                 <Link href={"/"} className="fixed top-0 left-0 p-4 flex justify-start items-center gap-4 dark:text-white text-white">
                     <ArrowLeft className="cursor-pointer" />
                     Back
                 </Link>
-                {children}
             </div>
+            {children}
         </div>
     );
 }
