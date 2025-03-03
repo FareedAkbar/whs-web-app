@@ -4,9 +4,14 @@ import Image from "next/image";
 import TopBar from "../_components/topbar";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 export default function Home() {
   const session = useSession();
+  useEffect(() => {
+    void session.update();
+  }, []);
+
   return (
     <main className="bg-white w-full h-full">
       <div className="flex items-center justify-center gap-4 bg-[#160104] w-full h-full">

@@ -2,7 +2,6 @@ interface User {
     id: string;
     name: string;
     email: string;
-    isAdmin: boolean;
     mediaId: string;
     imageUrl: string;
     token: string;

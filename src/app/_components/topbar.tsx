@@ -7,17 +7,16 @@ import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 
 export default function TopBar() {
     const session = useSession();
-    const [showNav, setShowNav] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const router = useRouter();
     const optionsRef = useRef(null);
     const options = [
-        { value: "Profile", label: "Profile", icon: <Image width={100} height={100} className="w-4 h-4 rounded-full cursor-pointer" src={session.data?.user.image && session.data.user.image !== '' ? session.data.user.image : "/assets/user.webp"} alt="" /> },
+        { value: "Profile", label: "Profile", icon: <Image width={100} height={100} className="w-4 h-4 rounded-full cursor-pointer" src={session.data?.user.image && session.data.user.image !== '' ? session.data.user.image : "/images/user.webp"} alt="" /> },
         { value: "settings", label: "Settings", icon: <SettingsIcon className="icon stroke-[1px] w-4 h-4" /> },
         { value: "logout", label: "Logout", icon: <LogOutIcon className="icon stroke-[1px] w-4 h-4" /> },
     ];
@@ -79,7 +78,7 @@ export default function TopBar() {
                                     width={100}
                                     height={100}
                                     className="w-8 h-8 border border-transparent rounded-full hover:border-white hover:bg-white cursor-pointer"
-                                    src={session.data?.user.image && session.data.user.image !== '' ? session.data.user.image : "/assets/user.webp"}
+                                    src={session.data?.user.image && session.data.user.image !== '' ? session.data.user.image : "/images/user.webp"}
                                     alt=""
                                 />
                             </button>
@@ -96,18 +95,16 @@ export default function TopBar() {
                                 </div>
                                 <div className="w-full bg-neutral-200 border-[0.5px] border-gray-100/20 mb-[1px]"></div>
                                 {options.map((option, index) => (
-                                    <>
+                                    <Fragment key={index}>
                                         {index === (options.length - 1) && < div className="w-full bg-neutral-200 border-[0.5px] border-gray-100/20 my-[1px]"></div >}
                                         <button
-                                            key={index}
                                             onClick={() => onOptionSelect(option)}
                                             className="flex items-center gap-2 w-full rounded px-2 py-2 dark:text-black text-black dark:hover:bg-neutral-200 hover:bg-[#141d2b] text-sm font-light overflow-x-hidden"
                                         >
                                             {option.icon}
                                             <span>{option.label}</span>
                                         </button>
-                                    </>
-
+                                    </Fragment>
                                 ))}
                             </div>
                         </div>

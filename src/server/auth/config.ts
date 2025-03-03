@@ -1,7 +1,6 @@
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials"
-import { api } from "@/trpc/server";
 import { env } from "@/env";
 import { createTRPCContext } from "../api/trpc";
 import { createCaller } from "../api/root";
@@ -42,11 +41,37 @@ export const authConfig = {
     signIn: "/auth/login",
     signOut: '/',
   },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id ?? "";
+        token.name = user.name;
+        token.email = user.email;
+        token.image = user.image;
+        token.token = user.token;
+        token.role = user.role;
+        token.imageUrl = user.imageUrl;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      const userSession = {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id,
+          imageUrl: token.imageUrl,
+          token: token.token,
+          role: token.role,
+        }
+      }
+      return userSession;
+    },
+  },
   session: {
     strategy: "jwt",
   },
   providers: [
-    // DiscordProvider,
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET
@@ -87,6 +112,7 @@ export const authConfig = {
             if (!response.user) {
               return null;
             }
+
             const user: User = {
               ...response.user,
               id: response.user.id.toString(),
@@ -106,13 +132,4 @@ export const authConfig = {
       },
     }),
   ],
-  callbacks: {
-    session: ({ session, token }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: token.sub,
-      },
-    }),
-  },
 } satisfies NextAuthConfig;
