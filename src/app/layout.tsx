@@ -9,6 +9,7 @@ import SessionProvider from "@/providers/SessionProvider";
 import { ThemeProvider } from "@/providers/ThemeContext";
 import { GridBackground } from "@/components/ui/grid-background";
 import { auth } from "@/server/auth";
+import { authConfig } from "@/server/auth/config";
 
 export const metadata: Metadata = {
   title: "WHS APP",
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const session = await auth()
+  const session = await auth();
   return (
     <html lang="en" className={`font-mont`}>
       <body>

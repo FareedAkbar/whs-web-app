@@ -67,22 +67,24 @@ export const authRouter = createTRPCRouter({
             }),
         )
         .mutation(async ({ ctx, input }) => {
+            console.log(input)
             try {
                 const user = {
-                    email: input.email,
-                    password: input.password,
                     name: `${input.fName} ${input.lName}`,
                     username: input.username,
+                    email: input.email,
+                    password: input.password,
+                    phoneNumber: '',
                 };
 
-                const response = await fetch(`${env.BASE_URL}/user/create`, {
+                const response = await fetch(`${env.BASE_URL}/user/register`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(user),
                 });
-
+                console.log(response)
                 if (!response.ok) {
                     const error = (await response.json()) as { error: string };
                     throw new TRPCError({
@@ -91,6 +93,8 @@ export const authRouter = createTRPCRouter({
                     });
                 }
                 const userData = await response.json() as unknown;
+
+                console.log(userData);
 
                 return {
                     status: true,
