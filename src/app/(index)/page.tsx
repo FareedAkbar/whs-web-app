@@ -24,7 +24,7 @@ export default function Home() {
                   Hazard Safety app for
                 </span>
                 <span className="text-red-700 text-5xl font-bold text-center">
-                  ORGANIZATIONS
+                  UOW PULSE
                 </span>
               </div>
               <p className="text-white text-start w-[80%]">
