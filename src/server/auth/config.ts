@@ -58,9 +58,7 @@ export const authConfig = {
             authType: "GOOGLE",
           });
 
-          console.log("Social login response:", response);
           if (response.status && response.user) {
-            // Instead of modifying account directly, we'll handle this user data in jwt callback
             return true;
           }
           if (response.status && response.user) {
@@ -91,9 +89,6 @@ export const authConfig = {
           providerImageUrl: (profile?.picture as string) ?? "",
           authType: "GOOGLE",
         });
-
-        console.log("Social login response in jwt:", response);
-
 
         if (response.status && response.user) {
           token.id = response.user.id;
