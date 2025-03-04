@@ -29,7 +29,6 @@ export default function Home() {
               </div>
               <p className="text-white text-start w-[80%]">
                 Your safety matters! Use this app to quickly report hazards and incidents, ensuring a safer workplace for everyone.
-                {JSON.stringify(session.data)}
               </p>
               <div className="flex flex-col items-start justify-start w-fit gap-4">
                 <Link className="text-white px-6 py-2 bg-red-700 rounded group w-full gap-2 flex" href={session.status === "authenticated" ? "/dashboard" : "/auth/login"}>
