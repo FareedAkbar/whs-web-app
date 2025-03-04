@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import ThemeToggle from "@/components/ThemeToggle";
 import { useOutsideClick } from "@/hooks/use-outside-click";
@@ -9,113 +9,160 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
 
-
 export default function TopBar() {
-    const session = useSession();
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const router = useRouter();
-    const optionsRef = useRef(null);
-    const options = [
-        { value: "Profile", label: "Profile", icon: <Image width={100} height={100} className="w-4 h-4 rounded-full cursor-pointer" src={session.data?.user.image && session.data.user.image !== '' ? session.data.user.image : "/images/user.webp"} alt="" /> },
-        { value: "settings", label: "Settings", icon: <SettingsIcon className="icon stroke-[1px] w-4 h-4" /> },
-        { value: "logout", label: "Logout", icon: <LogOutIcon className="icon stroke-[1px] w-4 h-4" /> },
-    ];
+  const session = useSession();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const router = useRouter();
+  const optionsRef = useRef(null);
+  console.log("ss", session);
+  const options = [
+    {
+      value: "Profile",
+      label: "Profile",
+      icon: (
+        <Image
+          width={100}
+          height={100}
+          className="h-4 w-4 cursor-pointer rounded-full"
+          src={
+            session.data?.user.image && session.data.user.image !== ""
+              ? session.data.user.image
+              : "/images/user.webp"
+          }
+          alt=""
+        />
+      ),
+    },
+    {
+      value: "settings",
+      label: "Settings",
+      icon: <SettingsIcon className="icon h-4 w-4 stroke-[1px]" />,
+    },
+    {
+      value: "logout",
+      label: "Logout",
+      icon: <LogOutIcon className="icon h-4 w-4 stroke-[1px]" />,
+    },
+  ];
 
-    useOutsideClick(optionsRef, () => {
-        setDropdownOpen(false)
+  useOutsideClick(optionsRef, () => {
+    setDropdownOpen(false);
+  });
+
+  const handleSignOut = async () => {
+    try {
+      await signOut({ callbackUrl: "/", redirect: true });
+      router.push("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onOptionSelect = async (option: {
+    value: string;
+    label: string;
+    icon: JSX.Element;
+  }) => {
+    if (option.value === "logout") await handleSignOut();
+    if (option.value === "settings") router.push("/team");
+    console.log("Selected:", option.value);
+  };
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setDropdownOpen(false);
+      }
+    }
+
+    // on scroll
+    window.addEventListener("scroll", () => {
+      setDropdownOpen(false);
     });
 
-    const handleSignOut = async () => {
-        try {
-            await signOut({ callbackUrl: '/', redirect: true });
-            router.push("/");
-        } catch (error) {
-            console.log(error);
-        }
-    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [dropdownOpen]);
 
-    const onOptionSelect = async (option: { value: string, label: string, icon: JSX.Element }) => {
-        if (option.value === "logout") await handleSignOut();
-        if (option.value === "settings") router.push("/team");
-        console.log("Selected:", option.value);
-    };
+  return (
+    <div className="absolute top-0 z-10 flex w-full items-center justify-between gap-4 bg-transparent p-4 backdrop-blur">
+      <div
+        className="font-nulshock flex cursor-pointer text-3xl"
+        onClick={() => router.push("/dashboard")}
+      >
+        <span className="text-white">WHS</span>
+        <span className="text-red-700">APP</span>
+      </div>
+      <div className="flex">
+        {session.data?.user.email ? (
+          <div className="flex items-center gap-4">
+            <Link
+              href={"/dashboard"}
+              className="text-sm font-medium text-white"
+            >
+              Dashboard
+            </Link>
+            <div className="relative flex items-center gap-2">
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                disabled={dropdownOpen}
+                className="flex items-center gap-2 rounded-full bg-transparent p-[1px]"
+              >
+                <Image
+                  width={100}
+                  height={100}
+                  className="h-8 w-8 cursor-pointer rounded-full border border-transparent hover:border-white hover:bg-white"
+                  src={
+                    session.data?.user.image && session.data.user.image !== ""
+                      ? session.data.user.image
+                      : "/images/user.webp"
+                  }
+                  alt=""
+                />
+              </button>
 
-    useEffect(() => {
-        function onKeyDown(event: KeyboardEvent) {
-            if (event.key === "Escape") {
-                setDropdownOpen(false);
-            }
-        }
-
-        // on scroll
-        window.addEventListener("scroll", () => {
-            setDropdownOpen(false);
-        });
-
-        window.addEventListener("keydown", onKeyDown);
-        return () => window.removeEventListener("keydown", onKeyDown);
-    }, [dropdownOpen]);
-
-    return (
-        <div className="flex items-center justify-between gap-4 bg-transparent w-full py-4">
-            <div className="flex font-nulshock text-3xl">
-                <span className="text-white">WHS</span>
-                <span className="text-red-700">APP</span>
-            </div>
-            <div className="flex">
-                {session.data?.user.email ? (
-                    <div className=" flex items-center gap-4">
-                        <Link href={"/dashboard"} className="text-white text-sm font-medium">
-                            Dashboard
-                        </Link>
-                        <div className="flex items-center gap-2 relative">
-                            <button
-                                onClick={() => setDropdownOpen(!dropdownOpen)}
-                                disabled={dropdownOpen}
-                                className="flex items-center gap-2 p-[1px] bg-transparent rounded-full"
-                            >
-                                <Image
-                                    width={100}
-                                    height={100}
-                                    className="w-8 h-8 border border-transparent rounded-full hover:border-white hover:bg-white cursor-pointer"
-                                    src={session.data?.user.image && session.data.user.image !== '' ? session.data.user.image : "/images/user.webp"}
-                                    alt=""
-                                />
-                            </button>
-
-                            <div
-                                ref={optionsRef}
-                                className={"absolute right-0 top-10 w-full min-w-56 shadow-lg border dark:border-[#F8EDED]/20 bg-white dark:bg-white rounded-md py-2 z-[9999] dark:text-black text-black p-2" + (dropdownOpen ? "" : " hidden")}
-                            >
-                                <div>
-                                    <div className="flex flex-col items-start p-2">
-                                        <p className="text-sm">{session.data?.user.name}</p>
-                                        <p className="text-xs text-neutral-400">{session.data?.user.email}</p>
-                                    </div>
-                                </div>
-                                <div className="w-full bg-neutral-200 border-[0.5px] border-gray-100/20 mb-[1px]"></div>
-                                {options.map((option, index) => (
-                                    <Fragment key={index}>
-                                        {index === (options.length - 1) && < div className="w-full bg-neutral-200 border-[0.5px] border-gray-100/20 my-[1px]"></div >}
-                                        <button
-                                            onClick={() => onOptionSelect(option)}
-                                            className="flex items-center gap-2 w-full rounded px-2 py-2 dark:text-black text-black dark:hover:bg-neutral-200 hover:bg-[#141d2b] text-sm font-light overflow-x-hidden"
-                                        >
-                                            {option.icon}
-                                            <span>{option.label}</span>
-                                        </button>
-                                    </Fragment>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <Link className="text-white px-4 py-1 bg-red-700 rounded" href="/auth/login">
-                        Login
-                    </Link>
-                )
+              <div
+                ref={optionsRef}
+                className={
+                  "absolute right-0 top-10 z-[9999] w-full min-w-56 rounded-md border bg-white p-2 py-2 text-black shadow-lg dark:border-[#F8EDED]/20 dark:bg-white dark:text-black" +
+                  (dropdownOpen ? "" : " hidden")
                 }
+              >
+                <div>
+                  <div className="flex flex-col items-start p-2">
+                    <p className="text-sm">{session.data?.user.name}</p>
+                    <p className="text-xs text-neutral-400">
+                      {session.data?.user.email}
+                    </p>
+                  </div>
+                </div>
+                <div className="mb-[1px] w-full border-[0.5px] border-gray-100/20 bg-neutral-200"></div>
+                {options.map((option, index) => (
+                  <Fragment key={index}>
+                    {index === options.length - 1 && (
+                      <div className="my-[1px] w-full border-[0.5px] border-gray-100/20 bg-neutral-200"></div>
+                    )}
+                    <button
+                      onClick={() => onOptionSelect(option)}
+                      className="flex w-full items-center gap-2 overflow-x-hidden rounded px-2 py-2 text-sm font-light text-black hover:bg-[#e9e8e8] dark:text-black dark:hover:bg-neutral-200"
+                    >
+                      {option.icon}
+                      <span>{option.label}</span>
+                    </button>
+                  </Fragment>
+                ))}
+              </div>
             </div>
-        </div >
-    );
+          </div>
+        ) : (
+          <Link
+            className="rounded bg-red-700 px-4 py-1 text-white"
+            href="/auth/login"
+          >
+            Login
+          </Link>
+        )}
+      </div>
+    </div>
+  );
 }
