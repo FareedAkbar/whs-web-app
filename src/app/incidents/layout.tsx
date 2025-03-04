@@ -16,10 +16,10 @@ export default function RootLayout({
   return (
     <div
       className="relative flex min-h-screen w-full items-center justify-center p-2 sm:p-0"
-      style={{
-        background: "url('/images/gradient.webp')",
-        backgroundSize: "cover",
-      }}
+      //   style={{
+      //     background: "url('/images/gradient.webp')",
+      //     backgroundSize: "cover",
+      //   }}
     >
       {children}
     </div>

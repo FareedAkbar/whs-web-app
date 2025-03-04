@@ -40,6 +40,49 @@ export const authRouter = createTRPCRouter({
                 console.error('Login error:', error);
                 return {
                     status: false,
+                    error: error instanceof Error ? error.message : 'An error occurred while logging in.',
+                };
+            }
+        }),
+
+    socialLogin: publicProcedure
+        .input(
+            z.object({
+                name: z.string(),
+                email: z.string().email(),
+                providerImageUrl: z.string(),
+                authType: z.string(),
+            }),
+        )
+        .query(async ({ ctx, input }) => {
+            try {
+                const response = await fetch(`${env.BASE_URL}/user/social`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(input),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json() as { message: string };
+                    console.error('Login error:', errorData);
+                    return {
+                        status: false,
+                        error: errorData.message,
+                    };
+                }
+
+                const userData = await response.json() as LoginResponseData;
+                return {
+                    status: true,
+                    user: userData.user,
+                    token: userData.token,
+                };
+            } catch (error) {
+                console.error('Login error:', error);
+                return {
+                    status: false,
                     error: 'An error occurred while logging in.',
                 };
             }

@@ -24,6 +24,10 @@ declare module "next-auth" {
     } & DefaultSession["user"];
   }
 
+  interface Account {
+    backendUser?: unknown;
+  }
+
   // interface User {
   //   // ...other properties
   //   // role: UserRole;
@@ -42,15 +46,59 @@ export const authConfig = {
     signOut: '/',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ account, profile }) {
+      if (account?.provider === "google") {
+        const context = await createTRPCContext({ headers: new Headers() });
+        const caller = createCaller(context);
+        if (Boolean(profile?.email_verified && profile?.email?.endsWith("@gmail.com"))) {
+          const response = await caller.auth.socialLogin({
+            name: profile?.name ?? "",
+            email: profile?.email ?? "",
+            providerImageUrl: (profile?.picture as string) ?? "",
+            authType: "GOOGLE",
+          });
+
+          if (response.status && response.user) {
+            return true;
+          }
+          if (response.status && response.user) {
+            account.backendUser = response.user;
+            return true;
+          }
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user, account, profile }) {
       if (user) {
         token.id = user.id ?? "";
         token.name = user.name;
         token.email = user.email;
-        token.image = user.image;
+        token.image = user.imageUrl;
         token.token = user.token;
         token.role = user.role;
         token.imageUrl = user.imageUrl;
+      }
+
+      if (account?.provider === "google" && profile) {
+        const context = await createTRPCContext({ headers: new Headers() });
+        const caller = createCaller(context);
+        const response = await caller.auth.socialLogin({
+          name: profile?.name ?? "",
+          email: profile?.email ?? "",
+          providerImageUrl: (profile?.picture as string) ?? "",
+          authType: "GOOGLE",
+        });
+
+        if (response.status && response.user) {
+          token.id = response.user.id;
+          token.name = response.user.name;
+          token.email = response.user.email;
+          token.image = response.user.imageUrl;
+          token.imageUrl = response.user.imageUrl;
+          token.token = response.token;
+          token.role = response.user.role;
+        }
       }
       return token;
     },
@@ -60,6 +108,7 @@ export const authConfig = {
         user: {
           ...session.user,
           id: token.id,
+          image: token.image,
           imageUrl: token.imageUrl,
           token: token.token,
           role: token.role,
@@ -74,7 +123,7 @@ export const authConfig = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
     Credentials({
       name: "Credentials",

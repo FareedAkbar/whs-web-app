@@ -1,22 +1,29 @@
+"use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, User, Settings, Mail } from "lucide-react"; // Using lucide-react icons
+import {
+  IconHome,
+  IconAlertTriangle,
+  IconUsers,
+  IconUser,
+} from "@tabler/icons-react"; // Importing Tabler icons
 
 const Sidebar = () => {
   const pathname = usePathname();
 
   const navItems = [
-    { name: "Home", icon: <Home size={20} />, path: "/" },
-    { name: "Profile", icon: <User size={20} />, path: "/profile" },
-    { name: "Settings", icon: <Settings size={20} />, path: "/settings" },
-    { name: "Messages", icon: <Mail size={20} />, path: "/messages" },
-    { name: "Dashboard", icon: <Home size={20} />, path: "/dashboard" },
-    { name: "Analytics", icon: <User size={20} />, path: "/analytics" },
-    { name: "Reports", icon: <Settings size={20} />, path: "/reports" },
-    { name: "Notifications", icon: <Mail size={20} />, path: "/notifications" },
-    { name: "Users", icon: <User size={20} />, path: "/users" },
-    { name: "Settings", icon: <Settings size={20} />, path: "/settings2" },
-    { name: "Support", icon: <Mail size={20} />, path: "/support" },
+    { name: "Home", icon: <IconHome size={20} />, path: "/" },
+    {
+      name: "Incidents",
+      icon: <IconAlertTriangle size={20} />,
+      path: "/incidents",
+    },
+    {
+      name: "Contractors",
+      icon: <IconUsers size={20} />,
+      path: "/contractors",
+    },
+    { name: "Users", icon: <IconUser size={20} />, path: "/users" },
   ];
 
   return (
