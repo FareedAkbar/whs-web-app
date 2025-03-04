@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import TopBar from "../_components/topbar";
 import Sidebar from "../_components/sidebar";
 
-export default function RootLayout({
+export default function IncidentLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -16,11 +16,13 @@ export default function RootLayout({
   return (
     <div
       className="relative flex min-h-screen w-full items-center justify-center p-2 sm:p-0"
-      //   style={{
-      //     background: "url('/images/gradient.webp')",
-      //     backgroundSize: "cover",
-      //   }}
+      style={{
+        background: "url('/images/themed-gradient.jpg')",
+        backgroundSize: "cover",
+      }}
     >
+      <TopBar />
+      <Sidebar />
       {children}
     </div>
   );

@@ -12,7 +12,7 @@ const Sidebar = () => {
   const pathname = usePathname();
 
   const navItems = [
-    { name: "Home", icon: <IconHome size={20} />, path: "/" },
+    { name: "Home", icon: <IconHome size={20} />, path: "/dashboard" },
     {
       name: "Incidents",
       icon: <IconAlertTriangle size={20} />,
@@ -27,7 +27,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="absolute left-0 flex h-[80vh] w-64 flex-col bg-white p-4 shadow-md">
+    <div className="absolute left-10 top-28 flex max-h-[80vh] w-64 flex-col rounded-r-lg bg-white p-4 shadow-md">
       <nav className="custom-scrollbar flex h-full flex-col gap-2 overflow-y-auto">
         {navItems.map((item, index) => (
           <Link key={index} href={item.path}>

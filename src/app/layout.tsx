@@ -29,8 +29,6 @@ export default async function RootLayout({
         <ThemeProvider initialTheme="dark">
           <TRPCReactProvider>
             <SessionProvider session={session}>
-              <TopBar />
-              <Sidebar />
               <NextTopLoader color="#1A1536" showSpinner={false} />
               <ToastContainer
                 position="top-right"
