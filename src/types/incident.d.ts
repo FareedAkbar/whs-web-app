@@ -25,6 +25,23 @@
     createdAt: string;
     updatedAt: string;
   }
+  interface IncidentData {
+    incidentReport: IncidentReport;
+    incident: Incident;
+    generalHazard: GeneralHazard;
+    incidentAssignee: IncidentAssignee;
+    media:MediaItem[]
+  }
+  interface IncidentAssignee {
+    id: string;
+    incidentReportId: string;
+    assignedBy: string;
+    assignedTo: string;
+    createdAt: string;
+    updatedAt: string;
+    assignedToData:User;
+    assignedByData:User;
+  }
   
   // Define the type for the general hazard
    interface GeneralHazard {
@@ -36,13 +53,6 @@
   }
   
   // Define the type for each item in the data array
-   interface IncidentData {
-    incidentReport: IncidentReport;
-    incident: Incident;
-    generalHazard: GeneralHazard;
-    media:MediaItem[]
-  }
-  
   // Define the type for the API response
    interface NewIncidentReport  {
     incidentTitle: string;
@@ -61,6 +71,11 @@
     data: IncidentData[];
   }
  interface SingleIncidentApiResponse {
+    status: string;
+    message: string;
+    data: IncidentData;
+  }
+  interface AssignIncidentApiResponse {
     status: string;
     message: string;
     data: IncidentData;

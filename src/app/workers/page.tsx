@@ -10,19 +10,9 @@ import {
   ModalFooter,
 } from "@/components/ui/animated-modal"; // Adjust the import path as necessary
 
-interface worker {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  services: string[];
-  status: string;
-  company?: string; // Optional field for company name
-}
-
 export default function workersList() {
   const { data: workers, isLoading } = api.workers.getWorkers.useQuery();
-  const [selectedWorker, setSelectedWorker] = useState<worker | null>(null);
+  const [selectedWorker, setSelectedWorker] = useState<User | null>(null);
 
   const handleAccept = (workerId: string) => {
     // API call to accept request (Replace with actual mutation)
@@ -37,48 +27,41 @@ export default function workersList() {
   };
 
   if (isLoading) {
-    return <p className="text-center text-gray-600">Loading workers...</p>;
+    return (
+      <div className="relative flex min-h-screen w-full items-center justify-center">
+        <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-red-500"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="ml-80 mt-20 flex w-full flex-col gap-6">
-      <h1 className="mb-6 text-3xl font-bold text-gray-900">workers</h1>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {workers?.data?.map((worker) => (
-          <div
-            key={worker.id}
-            className="cursor-pointer rounded-lg border border-gray-200 bg-white p-5 shadow-lg transition-all hover:shadow-xl"
-            onClick={() => setSelectedWorker(worker)}
-          >
-            <h2 className="text-lg font-semibold text-gray-800">
-              {worker.name}
-            </h2>
-            {/* <p className="text-sm text-gray-600">{worker.company}</p> */}
-            <div className="mt-2 flex flex-wrap gap-1">
-              {worker.services.map((service, index) => (
-                <span
-                  key={index}
-                  className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800"
-                >
-                  {service}
-                </span>
-              ))}
+    <div className="container ml-80 mt-20 flex w-full flex-col gap-6">
+      <h1 className="mb-6 text-3xl font-bold text-gray-900">Workers</h1>
+      {workers?.data?.map((employee: User) => (
+        <div
+          key={employee.id}
+          className="cursor-pointer rounded-lg border border-gray-200 bg-white p-5 shadow-lg transition-all hover:shadow-xl"
+          // onClick={() => setSelectedEmployee(employee)}
+        >
+          <div className="flex items-center gap-4">
+            <img
+              src={employee.imageUrl ?? "https://placehold.co/150x150"}
+              alt={employee.name}
+              className="h-12 w-12 rounded-full object-cover"
+            />
+            <div className="flex flex-col items-start">
+              <h2 className="text-lg font-semibold text-gray-800">
+                {employee.name}
+              </h2>
+              <p className="text-sm text-gray-600">{employee.email}</p>
+              <p className="text-sm text-gray-500">
+                Role: {employee.role ?? "None"}
+              </p>
             </div>
-            <p
-              className={`mt-2 rounded-md px-2 py-1 text-sm font-semibold ${
-                worker.status === "PENDING"
-                  ? "bg-yellow-200 text-yellow-800"
-                  : worker.status === "APPROVED"
-                    ? "bg-green-200 text-green-800"
-                    : "bg-red-200 text-red-800"
-              }`}
-            >
-              {worker.status}
-            </p>
           </div>
-        ))}
-      </div>
-      {workers?.data?.map((worker) => (
+        </div>
+      ))}
+      {/* {workers?.data?.map((worker) => (
         <Modal key={worker.id}>
           <ModalTrigger>
             <div
@@ -86,11 +69,24 @@ export default function workersList() {
               className="cursor-pointer rounded-lg border border-gray-200 bg-white p-5 shadow-lg transition-all hover:shadow-xl"
               onClick={() => setSelectedWorker(worker)}
             >
-              <h2 className="text-lg font-semibold text-gray-800">
-                {worker.name}
-              </h2>
-              {/* <p className="text-sm text-gray-600">{worker.company}</p> */}
-              <div className="mt-2 flex flex-wrap gap-1">
+              <div className="flex items-center gap-4">
+                <img
+                  src={worker.imageUrl ?? "https://placehold.co/150x150"}
+                  alt={worker.name}
+                  className="h-12 w-12 rounded-full object-cover"
+                />
+                <div className="flex flex-col items-start">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    {worker.name}
+                  </h2>
+                  <p className="text-sm text-gray-600">{worker.email}</p>
+                  <p className="text-sm text-gray-500">
+                    Requested Role: {worker.role ?? "None"}
+                  </p>
+                </div>
+              </div>
+
+              {/* <div className="mt-2 flex flex-wrap gap-1">
                 {worker.services.map((service, index) => (
                   <span
                     key={index}
@@ -110,8 +106,8 @@ export default function workersList() {
                 }`}
               >
                 {worker.status}
-              </p>
-            </div>
+              </p> */}
+      {/* </div>
           </ModalTrigger>
           <ModalBody>
             <ModalContent>
@@ -124,12 +120,12 @@ export default function workersList() {
                     Email: {selectedWorker?.email}
                   </p>
                   <p className="text-sm text-gray-600">
-                    Phone: {selectedWorker?.phone}
-                  </p>
-                  <p className="text-sm text-gray-600">
+                    Phone: {selectedWorker?.phoneNumber}
+                  </p> */}
+      {/* <p className="text-sm text-gray-600">
                     Company: {selectedWorker?.company}
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-1">
+                  </p> */}
+      {/* <div className="mt-3 flex flex-wrap gap-1">
                     {selectedWorker?.services.map((service, index) => (
                       <span
                         key={index}
@@ -149,10 +145,10 @@ export default function workersList() {
                     }`}
                   >
                     {selectedWorker?.status}
-                  </p>
+                  </p> */}
 
-                  {/* Accept/Reject Buttons (only for PENDING requests) */}
-                  {selectedWorker?.status === "PENDING" && (
+      {/* Accept/Reject Buttons (only for PENDING requests) */}
+      {/* {selectedWorker?.isVerifiedByAdmin  && (
                     <div className="mt-6 flex justify-end gap-2">
                       <button
                         className="rounded-md border px-4 py-2 text-gray-700 hover:bg-gray-100"
@@ -173,10 +169,10 @@ export default function workersList() {
                         Reject
                       </button>
                     </div>
-                  )}
+                  )} */}
 
-                  {/* Close Button (for approved/rejected requests) */}
-                  {selectedWorker?.status !== "PENDING" && (
+      {/* Close Button (for approved/rejected requests) */}
+      {/* {selectedWorker?.status !== "PENDING" && (
                     <div className="mt-6 flex justify-end">
                       <button
                         className="rounded-md border px-4 py-2 text-gray-700 hover:bg-gray-100"
@@ -185,13 +181,13 @@ export default function workersList() {
                         Close
                       </button>
                     </div>
-                  )}
-                </div>
+                  )} */}
+      {/* </div>
               </div>
             </ModalContent>
           </ModalBody>
         </Modal>
-      ))}
+      ))} */}
       {/* Modal for worker Details */}
     </div>
   );

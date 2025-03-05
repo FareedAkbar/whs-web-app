@@ -14,8 +14,9 @@ export const workerRouter = createTRPCRouter({
                         message: 'Unauthorized'
                     });
                 }
-        const response = await fetch(`${env.BASE_URL}/worker`, {
-            method: 'GET',
+                console.log("resppppp",`${env.BASE_URL}/admin/all-users?workers=true`)
+                const response = await fetch(`${env.BASE_URL}/admin/all-users?workers=true`, {
+                    method: 'GET',
             headers: {
                 'authorization': `Bearer ${userToken}`,
                 'Content-Type': 'application/json',
@@ -32,10 +33,11 @@ export const workerRouter = createTRPCRouter({
             };
         }
 
-        const workersData = await response.json() as WorkerApiResponse;
+        const workersData = await response.json() as UsersResponseData;
+        console.log('workersData', workersData);
         return {
             status: true,
-            data: workersData.data,
+            data: workersData.users,
         };
     } catch (error) {
         console.error('worker error:', error);

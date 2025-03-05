@@ -9,5 +9,5 @@ interface Worker {
 interface WorkerApiResponse {
     status: string;
     message: string;
-    data: Worker[];
+    users: Worker[];
   }

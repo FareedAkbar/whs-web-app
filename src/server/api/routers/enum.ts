@@ -2,9 +2,9 @@ import { TRPCError } from '@trpc/server';
 import {createTRPCRouter, publicProcedure} from '../trpc';
 import { env } from '@/env';
 
-export const employeeRouter = createTRPCRouter({
+export const enumRouter = createTRPCRouter({
 
-    getEmployees: publicProcedure
+    getEnums: publicProcedure
         .query( async ({ ctx, input }) => {
             try {
                 const userToken =  ctx.session?.user.token;
@@ -14,8 +14,8 @@ export const employeeRouter = createTRPCRouter({
                         message: 'Unauthorized'
                     });
                 }
-        const response = await fetch(`${env.BASE_URL}/admin/all-users?employees=true`, {
-            method: 'GET',
+                const response = await fetch(`${env.BASE_URL}/incident/enumeration`, {
+                    method: 'GET',
             headers: {
                 'authorization': `Bearer ${userToken}`,
                 'Content-Type': 'application/json',
@@ -25,20 +25,21 @@ export const employeeRouter = createTRPCRouter({
       console.log('response', response);
         if (!response.ok) {
             const errorData = await response.json() as { message: string };
-            console.error('employees getting error:', errorData);
+            console.error('enums getting error:', errorData);
             return {
                 status: false,
                 error: errorData.message,
             };
         }
 
-        const employeesData = await response.json() as UsersResponseData;
+        const enumsData = await response.json() as EnumerationsResponse;
+        console.log('enumsData', enumsData);
         return {
             status: true,
-            data: employeesData.users,
+            data: enumsData.data,
         };
     } catch (error) {
-        console.error('employee error:', error);
+        console.error('enum error:', error);
         return {
             status: false,
             error: error instanceof Error ? error.message : 'An error occurred while logging in.',

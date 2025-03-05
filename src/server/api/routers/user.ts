@@ -60,7 +60,7 @@ export const userRouter = createTRPCRouter({
                         message: 'Unauthorized'
                     });
                 }
-        const response = await fetch(`${env.BASE_URL}/user/update-user`, {
+        const response = await fetch(`${env.BASE_URL}/admin/update-user`, {
             method: 'PUT',
             headers: {
                 'authorization': `Bearer ${userToken}`,
