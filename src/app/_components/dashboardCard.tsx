@@ -20,14 +20,14 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
       onClick={onClick}
     >
       {/* Icon Wrapper */}
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary">
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/80">
         <span className="text-2xl text-white">{icon}</span>
       </div>
 
       {/* Title */}
       <div className="flex flex-col items-start justify-center">
         <p className="text-lg font-medium text-primary">{title}</p>
-        <p className="text-lg font-medium text-primary">{value}</p>
+        <p className="text-lg font-medium">{value}</p>
       </div>
     </div>
   );
