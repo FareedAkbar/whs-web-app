@@ -85,12 +85,12 @@ export default function TopBar() {
   }, [dropdownOpen]);
 
   return (
-    <div className="absolute top-0 z-10 flex w-full items-center justify-between gap-4 bg-transparent p-4 backdrop-blur">
+    <div className="absolute top-0 z-10 flex w-full items-center justify-between gap-4 bg-transparent p-4 backdrop-blur-sm">
       <div
         className="font-nulshock flex cursor-pointer text-3xl"
         onClick={() => router.push("/dashboard")}
       >
-        <span className="text-white">WHS</span>
+        <span className="text-black">WHS</span>
         <span className="text-red-700">APP</span>
       </div>
       <div className="flex">
@@ -98,7 +98,7 @@ export default function TopBar() {
           <div className="flex items-center gap-4">
             <Link
               href={"/dashboard"}
-              className="text-sm font-medium text-white"
+              className="text-sm font-medium text-black"
             >
               Dashboard
             </Link>

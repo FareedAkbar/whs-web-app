@@ -12,6 +12,7 @@ import { auth } from "@/server/auth";
 import { authConfig } from "@/server/auth/config";
 import TopBar from "./_components/topbar";
 import Sidebar from "./_components/sidebar";
+import { ModalProvider } from "@/components/ui/animated-modal";
 
 export const metadata: Metadata = {
   title: "WHS APP",
@@ -29,21 +30,25 @@ export default async function RootLayout({
         <ThemeProvider initialTheme="dark">
           <TRPCReactProvider>
             <SessionProvider session={session}>
-              <NextTopLoader color="#1A1536" showSpinner={false} />
-              <ToastContainer
-                position="top-right"
-                autoClose={2000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                progressClassName={"bg-blue-600"}
-                closeOnClick
-                theme="dark"
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-              />
-              <div className="h-full w-screen overflow-hidden">{children}</div>
+              <ModalProvider>
+                <NextTopLoader color="#1A1536" showSpinner={false} />
+                <ToastContainer
+                  position="top-right"
+                  autoClose={2000}
+                  hideProgressBar={false}
+                  newestOnTop={false}
+                  progressClassName={"bg-blue-600"}
+                  closeOnClick
+                  theme="dark"
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                />
+                <div className="h-full w-screen overflow-hidden">
+                  {children}
+                </div>
+              </ModalProvider>
             </SessionProvider>
           </TRPCReactProvider>
         </ThemeProvider>

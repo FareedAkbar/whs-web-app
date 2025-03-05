@@ -2,9 +2,9 @@ import { TRPCError } from '@trpc/server';
 import {createTRPCRouter, publicProcedure} from '../trpc';
 import { env } from '@/env';
 
-export const contractorRouter = createTRPCRouter({
+export const workerRouter = createTRPCRouter({
 
-    getContractors: publicProcedure
+    getWorkers: publicProcedure
         .query( async ({ ctx, input }) => {
             try {
                 const userToken =  ctx.session?.user.token;
@@ -14,7 +14,7 @@ export const contractorRouter = createTRPCRouter({
                         message: 'Unauthorized'
                     });
                 }
-        const response = await fetch(`${env.BASE_URL}/contractor`, {
+        const response = await fetch(`${env.BASE_URL}/worker`, {
             method: 'GET',
             headers: {
                 'authorization': `Bearer ${userToken}`,
@@ -25,20 +25,20 @@ export const contractorRouter = createTRPCRouter({
       console.log('response', response);
         if (!response.ok) {
             const errorData = await response.json() as { message: string };
-            console.error('contractors getting error:', errorData);
+            console.error('workers getting error:', errorData);
             return {
                 status: false,
                 error: errorData.message,
             };
         }
 
-        const contractorsData = await response.json() as ContractorApiResponse;
+        const workersData = await response.json() as WorkerApiResponse;
         return {
             status: true,
-            data: contractorsData.data,
+            data: workersData.data,
         };
     } catch (error) {
-        console.error('contractor error:', error);
+        console.error('worker error:', error);
         return {
             status: false,
             error: error instanceof Error ? error.message : 'An error occurred while logging in.',

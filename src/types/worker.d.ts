@@ -1,4 +1,4 @@
-interface Contractor {
+interface Worker {
     id: string;
     name: string;
     email: string;
@@ -6,8 +6,8 @@ interface Contractor {
     services: string[];
     status:string;
 }
-interface ContractorApiResponse {
+interface WorkerApiResponse {
     status: string;
     message: string;
-    data: Contractor[];
+    data: Worker[];
   }

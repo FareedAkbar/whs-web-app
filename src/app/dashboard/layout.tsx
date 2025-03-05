@@ -17,7 +17,7 @@ export default function RootLayout({
     <div
       className="items- relative flex min-h-screen w-full justify-center p-2 sm:p-0"
       style={{
-        background: "url('/images/themed-gradient.jpg')",
+        background: "url('/images/whs-web-bg.png')",
         backgroundSize: "cover",
       }}
     >

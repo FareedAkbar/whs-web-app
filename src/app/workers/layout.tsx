@@ -8,14 +8,14 @@ import { useEffect, useState } from "react";
 import TopBar from "../_components/topbar";
 import Sidebar from "../_components/sidebar";
 
-export default function IncidentLayout({
+export default function ContractorLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <div
-      className="items- relative flex min-h-screen w-full p-2 sm:p-0"
+      className="relative flex min-h-screen w-full items-center justify-center p-2 sm:p-0"
       style={{
         background: "url('/images/whs-web-bg.png')",
         backgroundSize: "cover",

@@ -55,8 +55,8 @@ export const ModalTrigger = ({
   return (
     <button
       className={cn(
-        "px-4 py-2 rounded-md text-black dark:text-white text-center relative overflow-hidden",
-        className
+        "relative overflow-hidden rounded-md px-4 py-2 text-center text-black dark:text-white",
+        className,
       )}
       onClick={() => setOpen(true)}
     >
@@ -101,15 +101,15 @@ export const ModalBody = ({
             opacity: 0,
             backdropFilter: "blur(0px)",
           }}
-          className="fixed [perspective:800px] [transform-style:preserve-3d] inset-0 h-full w-full  flex items-center justify-center z-50"
+          className="fixed inset-0 z-50 flex h-full w-full items-center justify-center [perspective:800px] [transform-style:preserve-3d]"
         >
           <Overlay />
 
           <motion.div
             ref={modalRef}
             className={cn(
-              "min-h-[50%] max-h-[90%] md:max-w-[40%] bg-white dark:bg-neutral-950 border border-transparent dark:border-neutral-800 md:rounded-2xl relative z-50 flex flex-col flex-1 overflow-hidden",
-              className
+              "relative z-50 flex max-h-[90%] min-h-[50%] flex-1 flex-col overflow-hidden border border-transparent bg-white md:max-w-[40%] md:rounded-2xl dark:border-neutral-800 dark:bg-neutral-950",
+              className,
             )}
             initial={{
               opacity: 0,
@@ -151,7 +151,7 @@ export const ModalContent = ({
   className?: string;
 }) => {
   return (
-    <div className={cn("flex flex-col flex-1 p-8 md:p-10", className)}>
+    <div className={cn("flex flex-1 flex-col p-8 md:p-10", className)}>
       {children}
     </div>
   );
@@ -167,8 +167,8 @@ export const ModalFooter = ({
   return (
     <div
       className={cn(
-        "flex justify-end p-4 bg-gray-100 dark:bg-neutral-900",
-        className
+        "flex justify-end bg-gray-100 p-4 dark:bg-neutral-900",
+        className,
       )}
     >
       {children}
@@ -190,7 +190,7 @@ const Overlay = ({ className }: { className?: string }) => {
         opacity: 0,
         backdropFilter: "blur(0px)",
       }}
-      className={`fixed inset-0 h-full w-full bg-black bg-opacity-50 z-50 ${className}`}
+      className={`fixed inset-0 z-50 h-full w-full bg-black bg-opacity-50 ${className}`}
     ></motion.div>
   );
 };
@@ -200,7 +200,7 @@ const CloseIcon = () => {
   return (
     <button
       onClick={() => setOpen(false)}
-      className="absolute top-4 right-4 group"
+      className="group absolute right-4 top-4"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -212,7 +212,7 @@ const CloseIcon = () => {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="text-black dark:text-white h-4 w-4 group-hover:scale-125 group-hover:rotate-3 transition duration-200"
+        className="h-4 w-4 text-black transition duration-200 group-hover:rotate-3 group-hover:scale-125 dark:text-white"
       >
         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
         <path d="M18 6l-12 12" />
@@ -226,7 +226,7 @@ const CloseIcon = () => {
 // Add it in a separate file, I've added here for simplicity
 export const useOutsideClick = (
   ref: React.RefObject<HTMLDivElement>,
-  callback: Function
+  callback: Function,
 ) => {
   useEffect(() => {
     const listener = (event: any) => {

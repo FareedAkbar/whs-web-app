@@ -5,7 +5,8 @@ interface User {
     mediaId: string;
     imageUrl: string;
     token: string;
-    role: string;
+    role?: string;
+    isVerifiedByAdmin: boolean;
 }
 
 // Type for the login response

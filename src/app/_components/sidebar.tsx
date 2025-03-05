@@ -6,6 +6,7 @@ import {
   IconAlertTriangle,
   IconUsers,
   IconUser,
+  IconTable,
 } from "@tabler/icons-react"; // Importing Tabler icons
 
 const Sidebar = () => {
@@ -19,11 +20,12 @@ const Sidebar = () => {
       path: "/incidents",
     },
     {
-      name: "Contractors",
+      name: "Workers",
       icon: <IconUsers size={20} />,
-      path: "/contractors",
+      path: "/workers",
     },
-    { name: "Users", icon: <IconUser size={20} />, path: "/users" },
+    { name: "Employees", icon: <IconTable size={20} />, path: "/employees" }, // Updated Employees icon
+    { name: "Users", icon: <IconUser size={20} />, path: "/users" }, // Added Users item
   ];
 
   return (

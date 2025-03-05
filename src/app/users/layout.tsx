@@ -15,9 +15,9 @@ export default function ContractorLayout({
 }) {
   return (
     <div
-      className="relative flex min-h-screen w-full items-center justify-center p-2 sm:p-0"
+      className="relative flex min-h-screen w-full p-2 sm:p-0"
       style={{
-        background: "url('/images/themed-gradient.jpg')",
+        background: "url('/images/whs-web-bg.png')",
         backgroundSize: "cover",
       }}
     >
