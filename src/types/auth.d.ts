@@ -6,6 +6,9 @@ interface UserInterface {
     imageUrl: string;
     token: string;
     role: string;
+    isVerifiedByAdmin?: boolean;
+    phoneNumber?: string;
+    isVerified?: boolean;
 }
 
 

@@ -168,6 +168,7 @@ export const authConfig = {
               name: response.user.name,
               email: response.user.email,
               imageUrl: response.user.imageUrl,
+              providerImageUrl: response.user.imageUrl,
               role: response.user.role,
               token: response.token,
             };
