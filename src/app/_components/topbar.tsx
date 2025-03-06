@@ -6,7 +6,7 @@ import { LogOutIcon, SettingsIcon } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
 
 export default function TopBar() {
@@ -67,7 +67,7 @@ export default function TopBar() {
     if (option.value === "settings") router.push("/team");
     console.log("Selected:", option.value);
   };
-
+  const path = usePathname();
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -85,13 +85,14 @@ export default function TopBar() {
   }, [dropdownOpen]);
 
   return (
-    <div className="absolute top-0 z-10 flex w-full items-center justify-between gap-4 bg-transparent p-4 backdrop-blur-sm">
+    <div className="flex w-full items-center justify-between gap-4 bg-white p-4">
       <div
-        className="font-nulshock flex cursor-pointer text-3xl"
-        onClick={() => router.push("/dashboard")}
+        className="flex cursor-pointer text-2xl"
+        // onClick={() => router.push("/dashboard")}
       >
-        <span className="text-black">WHS</span>
-        <span className="text-red-700">APP</span>
+        <span className="pl-6 font-semibold capitalize">
+          {path.split("/")[2]}
+        </span>
       </div>
       <div className="flex">
         {session.data?.user.email ? (
@@ -130,7 +131,9 @@ export default function TopBar() {
               >
                 <div>
                   <div className="flex flex-col items-start p-2">
-                    <p className="text-sm">{session.data?.user.name}</p>
+                    <p className="text-sm capitalize">
+                      {session.data?.user.name}
+                    </p>
                     <p className="text-xs text-neutral-400">
                       {session.data?.user.email}
                     </p>

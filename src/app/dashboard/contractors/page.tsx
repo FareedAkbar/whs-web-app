@@ -28,39 +28,44 @@ export default function workersList() {
 
   if (isLoading) {
     return (
-      <div className="relative flex min-h-screen w-full items-center justify-center">
+      <div className="relative flex h-[90vh] w-[80vw] items-center justify-center">
         <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-red-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="container ml-80 mt-20 flex w-full flex-col gap-6">
-      <h1 className="mb-6 text-3xl font-bold text-gray-900">Workers</h1>
-      {workers?.data?.map((employee: User) => (
-        <div
-          key={employee.id}
-          className="cursor-pointer rounded-lg border border-gray-200 bg-white p-5 shadow-lg transition-all hover:shadow-xl"
-          // onClick={() => setSelectedEmployee(employee)}
-        >
-          <div className="flex items-center gap-4">
-            <img
-              src={employee.imageUrl ?? "https://placehold.co/150x150"}
-              alt={employee.name}
-              className="h-12 w-12 rounded-full object-cover"
-            />
-            <div className="flex flex-col items-start">
-              <h2 className="text-lg font-semibold text-gray-800">
-                {employee.name}
-              </h2>
-              <p className="text-sm text-gray-600">{employee.email}</p>
-              <p className="text-sm text-gray-500">
-                Role: {employee.role ?? "None"}
-              </p>
+    <div className="flex overflow-hidden px-8">
+      <div className="custom-scrollbar flex max-h-[70vh] w-full flex-col gap-3 overflow-y-auto">
+        {workers?.data?.map((employee: User) => (
+          <div
+            key={employee.id}
+            className="cursor-pointer rounded-lg border border-gray-200 bg-white p-5 shadow-lg transition-all hover:shadow-xl"
+            // onClick={() => setSelectedEmployee(employee)}
+          >
+            <div className="flex items-center gap-4">
+              <img
+                src={
+                  employee.providerImageUrl !== ""
+                    ? employee.providerImageUrl
+                    : "https://placehold.co/150x150"
+                }
+                alt={employee.name}
+                className="h-12 w-12 rounded-full object-cover"
+              />
+              <div className="flex flex-col items-start">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  {employee.name}
+                </h2>
+                <p className="text-sm text-gray-600">{employee.email}</p>
+                <p className="text-sm text-gray-500">
+                  Role: {employee.role === "WORKER" ? "Contractor" : "None"}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
       {/* {workers?.data?.map((worker) => (
         <Modal key={worker.id}>
           <ModalTrigger>

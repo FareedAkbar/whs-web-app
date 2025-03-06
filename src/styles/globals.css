@@ -54,7 +54,7 @@ html {
       width: 8px;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background-color: #8c8d91; /* Scrollbar thumb color */
+      background-color: #c3c3c5; /* Scrollbar thumb color */
       border-radius: 4px; /* Rounded corners */
     }
     .custom-scrollbar::-webkit-scrollbar-track {

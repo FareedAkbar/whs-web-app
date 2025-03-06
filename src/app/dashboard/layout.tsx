@@ -15,15 +15,17 @@ export default function RootLayout({
 }) {
   return (
     <div
-      className="items- relative flex min-h-screen w-full justify-center p-2 sm:p-0"
+      className="items- justify- relative flex min-h-screen w-full p-2 sm:p-0"
       style={{
         background: "url('/images/whs-web-bg.png')",
         backgroundSize: "cover",
       }}
     >
-      <TopBar />
       <Sidebar />
-      {children}
+      <div className="flex w-full flex-col">
+        <TopBar />
+        {children}
+      </div>
     </div>
   );
 }

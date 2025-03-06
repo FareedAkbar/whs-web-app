@@ -15,7 +15,7 @@ interface User {
     name: string;
     email: string;
     mediaId: string;
-    imageUrl: string;
+    providerImageUrl: string;
     token: string;
     role?: string;
     isVerifiedByAdmin: boolean;

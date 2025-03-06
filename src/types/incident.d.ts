@@ -29,7 +29,7 @@
     incidentReport: IncidentReport;
     incident: Incident;
     generalHazard: GeneralHazard;
-    incidentAssignee: IncidentAssignee;
+    incidentAssignee: IncidentAssignee[];
     media:MediaItem[]
   }
   interface IncidentAssignee {
@@ -41,6 +41,9 @@
     updatedAt: string;
     assignedToData:User;
     assignedByData:User;
+    acceptanceStatus:boolean;
+    acceptedAt:string;
+    acceptanceExpiry:string;
   }
   
   // Define the type for the general hazard

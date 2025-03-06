@@ -12,4 +12,5 @@
     size: string;
     createdByUserId: string;
     createdDateTime: string;
+    status: string;
   };

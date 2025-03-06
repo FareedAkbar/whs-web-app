@@ -31,7 +31,7 @@ export default async function RootLayout({
           <TRPCReactProvider>
             <SessionProvider session={session}>
               <ModalProvider>
-                <NextTopLoader color="#1A1536" showSpinner={false} />
+                <NextTopLoader color="#cc0000" showSpinner={false} />
                 <ToastContainer
                   position="top-right"
                   autoClose={2000}

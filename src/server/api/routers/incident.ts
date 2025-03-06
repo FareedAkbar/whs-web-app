@@ -107,7 +107,7 @@ export const incidentRouter = createTRPCRouter({
                 });
             }
     const response = await fetch(`${env.BASE_URL}/incident/status`, {
-        method: 'POST',
+        method: 'PUT',
         headers: {
             'authorization': `Bearer ${userToken}`,
             'Content-Type': 'application/json',
