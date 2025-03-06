@@ -9,7 +9,9 @@ export const incidentRouter = createTRPCRouter({
     getIncidents: publicProcedure
         .query( async ({ ctx, input }) => {
             try {
+
                 const userToken =  ctx.session?.user.token;
+                console.log('userToken', userToken);
                 if(!userToken){
                     throw new TRPCError({
                         code: 'UNAUTHORIZED',

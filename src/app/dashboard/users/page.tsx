@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { api } from "@/trpc/react";
 import {
   Modal,
@@ -25,6 +25,9 @@ const UserPage = () => {
   const updateUserRole = api.users.updateUser.useMutation();
   const { setOpen } = useModal();
   const [filter, setFilter] = useState("all"); // New filter state
+  useEffect(() => {
+    setSelectedRole(selectedUser?.role ?? "");
+  }, [selectedUser]);
 
   const handleAssignRole = async () => {
     if (!selectedUser) return;
@@ -68,8 +71,8 @@ const UserPage = () => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-6 overflow-hidden px-8">
-      <div className="mb-4 flex items-center justify-end">
+    <div className="flex w-full flex-col overflow-hidden px-8">
+      <div className="flex items-center justify-end">
         <select
           className="my-2 rounded-md border border-gray-300 p-2 text-sm shadow-sm"
           value={filter}
@@ -110,7 +113,11 @@ const UserPage = () => {
                   <p className="text-sm text-gray-600">{user.email}</p>
                   <p className="text-sm text-gray-500">
                     Role:{" "}
-                    <span className="font-medium">{user.role ?? "None"}</span>
+                    <span className="font-medium">
+                      {user.role == "WORKER"
+                        ? "CONTRACTOR"
+                        : (user.role ?? "None")}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -149,13 +156,7 @@ const UserPage = () => {
                   className="text-green-600"
                   size={20}
                 />
-              ) : (
-                <IconRosetteDiscountCheckOff
-                  className="text-red-600"
-                  size={20}
-                  title="Not Verified"
-                />
-              )}
+              ) : null}
             </h2>
             <p className="text-sm text-gray-600">{selectedUser?.email}</p>
           </div>
@@ -183,7 +184,7 @@ const UserPage = () => {
             disabled={!selectedUser?.isVerified}
           >
             <option value="EMPLOYEE">EMPLOYEE</option>
-            <option value="WORKER">WORKER</option>
+            <option value="WORKER">CONTRACTOR</option>
           </select>
         </ModalContent>
 

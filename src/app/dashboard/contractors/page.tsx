@@ -59,7 +59,12 @@ export default function workersList() {
                 </h2>
                 <p className="text-sm text-gray-600">{employee.email}</p>
                 <p className="text-sm text-gray-500">
-                  Role: {employee.role === "WORKER" ? "Contractor" : "None"}
+                  Role:{" "}
+                  <span className="font-medium">
+                    {employee.role == "WORKER"
+                      ? "CONTRACTOR"
+                      : (employee.role ?? "None")}
+                  </span>
                 </p>
               </div>
             </div>

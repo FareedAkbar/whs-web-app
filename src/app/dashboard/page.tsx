@@ -111,7 +111,7 @@ const Dashboard = () => {
     );
   }
   return (
-    <div className="mt-16 grid h-fit w-full grid-cols-1 gap-6 p-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid h-fit w-full grid-cols-1 gap-6 p-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
       {dashboardItems.map((item, index) => (
         <DashboardCard
           key={index}

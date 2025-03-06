@@ -2,6 +2,7 @@
 
 import ThemeToggle from "@/components/ThemeToggle";
 import { useOutsideClick } from "@/hooks/use-outside-click";
+import { IconHelp, IconUserCircle } from "@tabler/icons-react";
 import { LogOutIcon, SettingsIcon } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
@@ -14,7 +15,6 @@ export default function TopBar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
   const optionsRef = useRef(null);
-  console.log("ss", session);
   const options = [
     {
       value: "Profile",
@@ -85,23 +85,20 @@ export default function TopBar() {
   }, [dropdownOpen]);
 
   return (
-    <div className="flex w-full items-center justify-between gap-4 bg-white p-4">
+    <div className="flex w-full items-center justify-between gap-4 bg-white px-6 py-5">
       <div
         className="flex cursor-pointer text-2xl"
         // onClick={() => router.push("/dashboard")}
       >
         <span className="pl-6 font-semibold capitalize">
-          {path.split("/")[2]}
+          {path.split("/")[2] ?? path.split("/")[1]}
         </span>
       </div>
       <div className="flex">
         {session.data?.user.email ? (
           <div className="flex items-center gap-4">
-            <Link
-              href={"/dashboard"}
-              className="text-sm font-medium text-black"
-            >
-              Dashboard
+            <Link href={"/dashboard"} className="rounded-full bg-[#F2F2F2] p-3">
+              <IconHelp size={20} />
             </Link>
             <div className="relative flex items-center gap-2">
               <button
@@ -109,23 +106,23 @@ export default function TopBar() {
                 disabled={dropdownOpen}
                 className="flex items-center gap-2 rounded-full bg-transparent p-[1px]"
               >
-                <Image
-                  width={100}
-                  height={100}
-                  className="h-8 w-8 cursor-pointer rounded-full border border-transparent hover:border-white hover:bg-white"
-                  src={
-                    session.data?.user.image && session.data.user.image !== ""
-                      ? session.data.user.image
-                      : "/images/user.webp"
-                  }
-                  alt=""
-                />
+                {session.data?.user.image && session.data.user.image !== "" ? (
+                  <Image
+                    width={100}
+                    height={100}
+                    className="h-12 w-12 cursor-pointer rounded-full border border-transparent hover:border-white hover:bg-white"
+                    src={session.data.user.image}
+                    alt=""
+                  />
+                ) : (
+                  <IconUserCircle size={48} />
+                )}
               </button>
 
               <div
                 ref={optionsRef}
                 className={
-                  "absolute right-0 top-10 z-[9999] w-full min-w-56 rounded-md border bg-white p-2 py-2 text-black shadow-lg dark:border-[#F8EDED]/20 dark:bg-white dark:text-black" +
+                  "absolute right-0 top-10 z-[9999] w-full min-w-56 rounded-md border bg-white p-2 py-2 text-black shadow-lg transition-all duration-300 dark:border-[#F8EDED]/20 dark:bg-white dark:text-black" +
                   (dropdownOpen ? "" : " hidden")
                 }
               >

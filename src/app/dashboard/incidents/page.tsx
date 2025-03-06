@@ -1,14 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  AlertTriangle,
-  Ban,
-  Check,
-  CheckCircle,
-  Clock,
-  XCircle,
-} from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { api } from "@/trpc/react";
 import {
   Modal,
@@ -19,6 +12,7 @@ import {
   useModal,
 } from "@/components/ui/animated-modal";
 import { toast } from "react-toastify";
+import Image from "next/image";
 
 export default function IncidentsList() {
   const {
@@ -56,6 +50,7 @@ export default function IncidentsList() {
     (item) =>
       statusFilter === "ALL" || item.incidentReport.status === statusFilter,
   );
+
   const handleDone = async () => {
     if (!selectedIncident) return;
 
@@ -73,6 +68,7 @@ export default function IncidentsList() {
           refetch();
           setOpen(false);
           setDecision(null);
+          setComment("");
         } catch (error) {
           toast.dismiss();
           toast.error("Failed to update status");
@@ -96,6 +92,7 @@ export default function IncidentsList() {
           refetch();
           setOpen(false);
           setDecision(null);
+          setSelectedContractor("");
         } catch (error) {
           toast.dismiss();
           toast.error("Failed to assign Contractor");
@@ -158,15 +155,14 @@ export default function IncidentsList() {
           >
             <div className="flex items-center justify-between">
               <div className="flex gap-3">
-                <img
-                  src={
-                    item.media[0]?.url !== ""
-                      ? item.media[0]?.url
-                      : "https://placehold.co/150x150"
-                  }
+                <Image
+                  src={item.media[0]?.url ?? "https://placehold.co/150x150"}
                   alt="Incident"
                   className="h-16 w-16 rounded-full object-cover shadow"
+                  width={64}
+                  height={64}
                 />
+
                 <div>
                   <h2 className="font-semibold">{item.incident.title}</h2>
 
@@ -206,13 +202,19 @@ export default function IncidentsList() {
                     alt={item.incidentAssignee.assignedToData.name}
                     className="h-10 w-10 rounded-full border border-gray-300 object-cover"
                   /> */}
-                <div className="flex flex-col items-start">
+                <div className="flex items-center justify-center">
                   <span className="text-sm font-medium capitalize text-gray-800">
                     {item.incidentAssignee?.[0]?.assignedToData.name}
                   </span>
-                  {/* <span className="text-xs text-gray-600">
-                      {item.incidentAssignee?.[0]?.assignedToData.email}
-                    </span> */}
+                  <span className="text-xs text-gray-600">
+                    (
+                    {item.incidentAssignee?.[0]?.acceptanceStatus === true
+                      ? "Accepted"
+                      : item.incidentAssignee?.[0]?.acceptanceStatus === false
+                        ? "Rejected"
+                        : "Pending"}
+                    )
+                  </span>
                 </div>
               </div>
             ) : (
@@ -226,7 +228,7 @@ export default function IncidentsList() {
       <ModalBody>
         <ModalContent className="custom-scrollbar overflow-y-auto">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-xl font-semibold capitalize">
               {selectedIncident?.incident.title}
             </h2>
             <div className="flex flex-col items-center gap-4">
@@ -271,6 +273,15 @@ export default function IncidentsList() {
                     Assigned to:{" "}
                   </span>
                   {selectedIncident?.incidentAssignee?.[0]?.assignedToData.name}
+                  (
+                  {selectedIncident?.incidentAssignee?.[0]?.acceptanceStatus ===
+                  true
+                    ? "Accepted"
+                    : selectedIncident?.incidentAssignee?.[0]
+                          ?.acceptanceStatus === false
+                      ? "Rejected"
+                      : "Pending"}
+                  )
                 </p>
               ) : (
                 <p className="text-sm font-medium">No Contractor assigned.</p>
@@ -289,12 +300,14 @@ export default function IncidentsList() {
                       </p>
                       <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                         {images?.map((image, index) => (
-                          <img
+                          <Image
                             key={image.id || index}
                             src={image.url}
                             alt={`Incident Image ${index + 1}`}
                             className="h-28 w-full cursor-pointer rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105"
                             onClick={() => window.open(image.url, "_blank")}
+                            width={150}
+                            height={150}
                           />
                         ))}
                       </div>
@@ -321,23 +334,25 @@ export default function IncidentsList() {
               </div>
             )}
           {(decision === "accept" ||
-            selectedIncident?.incidentAssignee?.every(
-              (assignee) => assignee.acceptanceStatus === false,
-            )) && (
+            ((selectedIncident?.incidentAssignee?.length ?? 0) > 0 &&
+              selectedIncident?.incidentAssignee?.every(
+                (assignee) => assignee.acceptanceStatus === false,
+              ))) && (
             <>
               <p className="mt-4 text-sm font-medium text-gray-700">
-                {selectedIncident?.incidentAssignee?.every(
+                {(selectedIncident?.incidentAssignee?.length ?? 0) > 0 &&
+                selectedIncident?.incidentAssignee?.every(
                   (assignee) => assignee.acceptanceStatus === false,
                 )
-                  ? "Assign Contractor"
-                  : "Reassign Contractor"}
+                  ? "Reassign Contractor"
+                  : "Assign Contractor"}
               </p>
               <select
                 className="mt-2 w-full rounded border p-2"
                 onChange={(e) => setSelectedContractor(e.target.value)}
                 value={selectedContractor}
               >
-                <option value="">Select option </option>
+                <option value="">Select option</option>
                 {workers?.data?.map((Contractor) => (
                   <option
                     key={Contractor.id}
@@ -350,6 +365,7 @@ export default function IncidentsList() {
               </select>
             </>
           )}
+
           {decision === "reject" && (
             <textarea
               className="mt-2 w-full rounded border p-2"
@@ -360,7 +376,8 @@ export default function IncidentsList() {
             />
           )}
         </ModalContent>
-        {(decision === "accept" && selectedContractor) ||
+        {decision === "accept" ||
+        selectedContractor ||
         (decision === "reject" && comment) ? (
           <ModalFooter>
             <div className="flex gap-4">
