@@ -155,7 +155,7 @@ export default function IncidentsList() {
           >
             <div className="flex items-center justify-between">
               <div className="flex gap-3">
-                <Image
+                <img
                   src={item.media[0]?.url ?? "https://placehold.co/150x150"}
                   alt="Incident"
                   className="h-16 w-16 rounded-full object-cover shadow"
@@ -300,7 +300,7 @@ export default function IncidentsList() {
                       </p>
                       <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                         {images?.map((image, index) => (
-                          <Image
+                          <img
                             key={image.id || index}
                             src={image.url}
                             alt={`Incident Image ${index + 1}`}
