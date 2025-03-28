@@ -33,6 +33,8 @@ export default function Login() {
     toast.loading("Logging in...");
     const response = await signIn("credentials", { ...data, redirect: false });
     if (response?.status === 200) {
+      console.log("resppp", response);
+
       toast.dismiss();
       toast.success("Successfully Logged in!");
       router.push("/dashboard");

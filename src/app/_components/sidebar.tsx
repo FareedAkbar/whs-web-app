@@ -45,6 +45,11 @@ const Sidebar = () => {
       path: "/dashboard/employees",
     },
     { name: "Users", icon: <IconUser size={20} />, path: "/dashboard/users" },
+    {
+      name: "Profile",
+      icon: <IconUserCircle size={20} />,
+      path: "/dashboard/profile",
+    },
   ];
   return (
     <div

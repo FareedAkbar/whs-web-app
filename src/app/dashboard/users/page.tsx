@@ -93,6 +93,7 @@ const UserPage = () => {
               setSelectedRole(user.role ?? "");
               setOpen(true);
             }}
+            key={user.id}
           >
             <div className="flex items-center justify-between">
               {/* User Details */}
