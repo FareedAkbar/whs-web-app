@@ -93,6 +93,65 @@ export const incidentRouter = createTRPCRouter({
     };
 }
     }),
+    reportIncident: publicProcedure
+    .input(z.object({
+        incidentTitle: z.string(),
+        generalHazardDescription: z.string(),
+        incidentDescription: z.string(),
+        incidentReportDescription: z.string(),
+        coordinates: z.string(),
+        incidentType: z.string(),
+        hazardType: z.string(),
+        status: z.string(),
+        severity: z.string(),
+        media: z.array(z.string()),
+    }))
+    .mutation(async ({ ctx, input }) => {
+        try {
+            const userToken = ctx.session?.user.token;
+            if (!userToken) {
+                throw new TRPCError({
+                    code: 'UNAUTHORIZED',
+                    message: 'Unauthorized',
+                });
+            }
+
+            const response = await fetch(`${env.BASE_URL}/incident`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${userToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(input),
+            });
+
+            console.log("Incident API Response:", response);
+
+            if (!response.ok) {
+                const errorData = await response.json() as { message: string };
+                console.error("Incident report error:", errorData);
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: errorData.message || "Failed to report incident",
+                });
+            }
+
+            const responseData = await response.json() as IncidentApiResponse;
+            console.log("Incident Reported Successfully:", responseData);
+
+            return {
+                status: true,
+                data: responseData.data,
+            };
+        } catch (error) {
+            console.error("Incident Report Error:", error);
+            return {
+                status: false,
+                error: error instanceof Error ? error.message : "An error occurred while reporting the incident.",
+            };
+        }
+    })
+,
     updateStatus: publicProcedure
     .input(z.object({
         incidentReportId: z.string(),

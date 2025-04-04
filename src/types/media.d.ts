@@ -14,3 +14,12 @@
     createdDateTime: string;
     status: string;
   };
+  interface FileUrl {
+    baseUrl: string;
+    file: MediaItem;
+  }
+  interface UploadMediaApiResponse {
+    status?: string;
+    message: string;
+    fileUrls: FileUrl[] // Use correct type here
+  }

@@ -11,11 +11,13 @@ import {
   IconClipboardList,
   IconClipboardX,
   IconUser,
+  IconAlertCircleFilled,
 } from "@tabler/icons-react";
 
 import { useRouter } from "next/navigation"; // or "next/router" for older versions
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
+import Button from "@/components/ui/Button";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -105,22 +107,40 @@ const Dashboard = () => {
   ];
   if (isLoading) {
     return (
-      <div className="relative flex h-[90vh] w-[80vw] items-center justify-center">
+      <div className="relative flex h-full w-full items-center justify-center">
         <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-red-500"></div>
       </div>
     );
   }
   return (
-    <div className="grid h-fit w-full grid-cols-1 gap-6 p-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
-      {dashboardItems.map((item, index) => (
-        <DashboardCard
-          key={index}
-          icon={item.icon}
-          title={item.title}
-          onClick={item.onClick}
-          value={item.value}
+    <div className="flex flex-col justify-between p-6">
+      {/* Dashboard cards */}
+      <div className="grid h-fit flex-grow grid-cols-1 gap-6 py-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
+        {dashboardItems.map((item, index) => (
+          <DashboardCard
+            key={index}
+            icon={item.icon}
+            title={item.title}
+            onClick={item.onClick}
+            value={item.value}
+          />
+        ))}
+      </div>
+
+      {/* Bottom buttons aligned at the end */}
+      <div className="flex w-full justify-between gap-4 pt-6">
+        <Button
+          title="WHS Inspection Checklist"
+          onClick={() => router.push("/dashboard/hazard-form")}
+          icon={<IconClipboardList size={18} />}
+          variant="secondary"
         />
-      ))}
+        <Button
+          title="Report an Incident"
+          onClick={() => router.push("/dashboard/hazard-form")}
+          icon={<IconAlertCircle size={18} />}
+        />
+      </div>
     </div>
   );
 };
