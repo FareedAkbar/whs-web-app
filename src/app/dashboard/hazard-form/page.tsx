@@ -8,12 +8,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { api } from "@/trpc/react";
 import { toast } from "react-toastify";
 import {
-  IconMapPin,
-  IconPhoto,
-  IconCamera,
-  IconCircleCheck,
   IconX,
-  IconExclamationMark,
   IconAlertTriangleFilled,
   IconCircleCheckFilled,
   IconUpload,
@@ -22,6 +17,7 @@ import {
 import dynamic from "next/dynamic";
 import Button from "@/components/ui/Button";
 import Map from "@/components/Map";
+import { useSession } from "next-auth/react";
 
 const severityMapping: Record<string, string> = {
   EXTREME: "#DC3545",
@@ -48,12 +44,12 @@ const HazardForm = () => {
     longitude: 150.644,
   });
 
-  const [images, setImages] = useState<{ id: string }[]>([]);
+  const [images, setImages] = useState<{ id: string; url: string }[]>([]);
   const [selectedSeverity, setSelectedSeverity] = useState<string | null>(null);
   const uploadMedia = api.media.uploadMedia.useMutation();
   const router = useRouter();
   const reportIncident = api.incidents.reportIncident.useMutation();
-
+  const session = useSession();
   const onSubmit = async (data: any) => {
     if (!data || !location) {
       toast.error("Missing required data: location or images");
@@ -83,38 +79,49 @@ const HazardForm = () => {
     }
   };
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
     if (e.target.files) {
-      const newImages = Array.from(e.target.files).map((file) => ({
-        id: file.name,
-        file: file,
-      }));
-      setImages((prev) => [...prev, ...newImages]);
+      const files = Array.from(e.target.files);
+      console.log("Selected files:", files);
 
-      // Prepare file URLs (for example, using FileReader or uploading directly)
-      const imageUrls = newImages.map((img) => URL.createObjectURL(img.file));
-      await uploadMedia.mutateAsync(
-        {
-          media: imageUrls.map((url) => ({ url })),
-        },
-        {
-          onSuccess: (data) => {
-            const newImages =
-              data?.data?.map((img) => ({
-                id: img.file.id,
-                url: img.file.url,
-              })) || []; // Fallback to an empty array if `data.data` is undefined
+      const formData = new FormData();
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
 
-            setImages([...newImages, ...images]);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/media`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${session?.data?.user.token}`,
+            },
+            body: formData,
           },
+        );
 
-          onError: (error) => {
-            console.error("Error uploading images:", error);
-            toast.error("Failed to upload images");
-          },
-        },
-      );
+        const result: UploadMediaApiResponse = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || "Failed to upload files");
+        }
+
+        const uploadedImages =
+          result?.fileUrls?.map((img: any) => ({
+            id: img.file.id,
+            url: img.file.url,
+          })) || [];
+
+        setImages((prev) => [...prev, ...uploadedImages]);
+        toast.success("Images uploaded successfully!");
+      } catch (error) {
+        console.error("Upload failed:", error);
+        toast.error("Image upload failed.");
+      }
     }
   };
+
   return (
     <div className="flex flex-col p-6">
       <div className="rounded-lg bg-white p-6 shadow">
@@ -237,51 +244,19 @@ const HazardForm = () => {
                   shouldValidate: true,
                 });
               }}
-              className="w-full rounded-lg border border-gray-300 p-3"
+              className="z-10 w-full rounded-lg border border-gray-300 p-3"
               placeholderText="Select date"
+              calendarClassName="z-50"
             />
           </div>
 
           {/* Location */}
-          <div>
-            {/* <label className="block mb-2 text-sm font-medium text-gray-700">
-              Location (GPS)
-            </label>
-            <div className="flex items-center gap-2">
-              <IconMapPin className="text-gray-600" />
-              <button
-                type="button"
-                onClick={() => {
-                  if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition((position) => {
-                      setLocation({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                      });
-                    });
-                  } else {
-                    toast.error(
-                      "Geolocation is not supported by this browser.",
-                    );
-                  }
-                }}
-                className="rounded bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
-              >
-                Get My Location
-              </button>
-            </div>
-            {location && (
-              <p className="mt-1 text-sm text-gray-600">
-                Location: {location.latitude}, {location.longitude}
-              </p>
-            )} */}
-            <div className="mt-4 h-60 overflow-hidden rounded-md border">
-              <Map
-                height={240} // or parse from h-60
-                coordinates={location}
-                onLocationSelect={(coords) => setLocation(coords)}
-              />
-            </div>
+          <div className="relative z-0 mt-4 h-60 overflow-hidden rounded-md border">
+            <Map
+              height={240}
+              coordinates={location}
+              onLocationSelect={(coords) => setLocation(coords)}
+            />
           </div>
 
           {/* Image Upload */}
@@ -303,7 +278,7 @@ const HazardForm = () => {
               {images.map((img, idx) => (
                 <div
                   key={idx}
-                  className="relative h-24 w-24 rounded-2xl bg-gray-100 p-1 shadow-lg"
+                  className="relative h-24 w-24 overflow-visible rounded-2xl bg-gray-100 p-1 shadow-lg"
                 >
                   <IconX
                     size={16}
@@ -312,9 +287,17 @@ const HazardForm = () => {
                       setImages((prev) => prev.filter((_, i) => i !== idx))
                     }
                   />
-                  <div className="flex h-full w-full items-center justify-center text-xs text-gray-700">
-                    {img.id}
-                  </div>
+                  {img.url ? (
+                    <img
+                      src={img.url}
+                      alt={`uploaded-${idx}`}
+                      className="h-full w-full rounded-xl object-contain"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs text-gray-700">
+                      {img.id}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
