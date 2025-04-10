@@ -1,4 +1,4 @@
-interface User {
+interface UserInterface {
     id: string;
     name: string;
     email: string;
@@ -6,12 +6,16 @@ interface User {
     imageUrl: string;
     token: string;
     role: string;
+    isVerifiedByAdmin?: boolean;
+    phoneNumber?: string;
+    isVerified?: boolean;
 }
+
 
 // Type for the login response
 interface LoginResponseData {
     status: boolean;
     message: string;
-    user: User;
+    user: UserInterface;
     token: string;
 }

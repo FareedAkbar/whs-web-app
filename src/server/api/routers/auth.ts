@@ -40,7 +40,7 @@ export const authRouter = createTRPCRouter({
                 console.error('Login error:', error);
                 return {
                     status: false,
-                    error: 'An error occurred while logging in.',
+                    error: error instanceof Error ? error.message : 'An error occurred while logging in.',
                 };
             }
         }),

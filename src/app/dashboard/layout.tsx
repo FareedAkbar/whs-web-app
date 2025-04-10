@@ -1,17 +1,31 @@
-'use client';
+"use client";
 
 import "@/styles/globals.css";
 import { ArrowLeft } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import TopBar from "../_components/topbar";
+import Sidebar from "../_components/sidebar";
 
-export default function RootLayout({ children }: {
-    children: React.ReactNode;
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
 }) {
-    return (
-        <div className="relative min-h-screen flex justify-center items-center w-full sm:p-0 p-2" style={{ background: "url('/images/gradient.webp')", backgroundSize: "cover" }}>
-            {children}
-        </div>
-    );
+  return (
+    <div
+      className="items- justify- relative flex min-h-screen w-full p-2 sm:p-0"
+      style={{
+        background: "url('/images/whs-web-bg.png')",
+        backgroundSize: "cover",
+      }}
+    >
+      <Sidebar />
+      <div className="flex w-full flex-col">
+        <TopBar />
+        {children}
+      </div>
+    </div>
+  );
 }
