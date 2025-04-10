@@ -12,19 +12,19 @@ import {
 
 export default function workersList() {
   const { data: workers, isLoading } = api.workers.getWorkers.useQuery();
-  const [selectedWorker, setSelectedWorker] = useState<User | null>(null);
+  // const [selectedWorker, setSelectedWorker] = useState<User | null>(null);
 
-  const handleAccept = (workerId: string) => {
-    // API call to accept request (Replace with actual mutation)
-    // api.workers.acceptRequest.mutate({ workerId });
-    setSelectedWorker(null);
-  };
+  // const handleAccept = (workerId: string) => {
+  //   // API call to accept request (Replace with actual mutation)
+  //   // api.workers.acceptRequest.mutate({ workerId });
+  //   setSelectedWorker(null);
+  // };
 
-  const handleReject = (workerId: string) => {
-    // API call to reject request (Replace with actual mutation)
-    // api.workers.rejectRequest.mutate({ workerId });
-    setSelectedWorker(null);
-  };
+  // const handleReject = (workerId: string) => {
+  //   // API call to reject request (Replace with actual mutation)
+  //   // api.workers.rejectRequest.mutate({ workerId });
+  //   setSelectedWorker(null);
+  // };
 
   if (isLoading) {
     return (

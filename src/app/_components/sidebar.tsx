@@ -94,7 +94,7 @@ const Sidebar = () => {
           <div>
             <p className="text-xs uppercase text-gray-400">Welcome</p>
             <p className="text-sm font-medium capitalize text-gray-700">
-              {session.data?.user?.name || "User"}
+              {session.data?.user?.name ?? "User"}
             </p>
           </div>
         </div>

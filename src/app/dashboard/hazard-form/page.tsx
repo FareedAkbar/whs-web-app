@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -33,7 +33,7 @@ const HazardForm = () => {
     setValue,
     watch,
     formState: { errors },
-  } = useForm();
+  } = useForm<NewIncidentReport>();
 
   const [date, setDate] = useState<Date | null>(null);
   const [location, setLocation] = useState<{
@@ -46,11 +46,11 @@ const HazardForm = () => {
 
   const [images, setImages] = useState<{ id: string; url: string }[]>([]);
   const [selectedSeverity, setSelectedSeverity] = useState<string | null>(null);
-  const uploadMedia = api.media.uploadMedia.useMutation();
+  // const uploadMedia = api.media.uploadMedia.useMutation();
   const router = useRouter();
   const reportIncident = api.incidents.reportIncident.useMutation();
   const session = useSession();
-  const onSubmit = async (data: any) => {
+  const onSubmit: SubmitHandler<NewIncidentReport> = async (data) => {
     if (!data || !location) {
       toast.error("Missing required data: location or images");
       return;
@@ -59,14 +59,14 @@ const HazardForm = () => {
     const incidentData: NewIncidentReport = {
       incidentTitle: data.incidentTitle ?? "",
       generalHazardDescription: data.generalHazardDescription ?? "",
-      incidentDescription: data.description ?? "",
-      incidentReportDescription: data.description ?? "",
+      incidentDescription: data.incidentDescription ?? "",
+      // incidentReportDescription: data.description ?? "",
       coordinates: `${location.latitude}, ${location.longitude}`,
       incidentType: data.incidentType ?? "",
       hazardType: data.hazardType ?? "",
       status: "INITIATED",
       severity: selectedSeverity ?? "LOW",
-      media: images.map((image) => image.id).filter(Boolean) as string[],
+      media: images.map((image) => image.id).filter(Boolean),
     };
 
     try {
@@ -101,14 +101,14 @@ const HazardForm = () => {
           },
         );
 
-        const result: UploadMediaApiResponse = await response.json();
+        const result = (await response.json()) as UploadMediaApiResponse;
 
         if (!response.ok) {
           throw new Error(result.message || "Failed to upload files");
         }
 
         const uploadedImages =
-          result?.fileUrls?.map((img: any) => ({
+          result?.fileUrls?.map((img: FileUrl) => ({
             id: img.file.id,
             url: img.file.url,
           })) || [];
@@ -129,17 +129,19 @@ const HazardForm = () => {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label className="block pb-1 text-sm font-medium text-gray-700">
-                Full Name
+                Incident title
               </label>
               <input
-                {...register("name", { required: "Name is required" })}
+                {...register("incidentTitle", {
+                  required: "Incident title is required",
+                })}
                 className="w-full rounded-lg border border-gray-300 p-3"
                 type="text"
-                placeholder="Enter your name"
+                placeholder="Enter incident title"
               />
-              {errors.name && (
+              {errors.incidentTitle && (
                 <p className="text-sm text-red-500">
-                  {errors.name.message as string}
+                  {errors?.incidentTitle?.message ?? ""}
                 </p>
               )}
             </div>
@@ -162,7 +164,7 @@ const HazardForm = () => {
               </select>
               {errors.hazardType && (
                 <p className="text-sm text-red-500">
-                  {errors.hazardType.message as string}
+                  {errors?.hazardType?.message ?? ""}
                 </p>
               )}
             </div>
@@ -174,15 +176,15 @@ const HazardForm = () => {
               Description
             </label>
             <textarea
-              {...register("description", {
-                required: "Description is required",
+              {...register("incidentDescription", {
+                required: "Incident Description is required",
               })}
               className="w-full rounded-lg border border-gray-300 p-3"
               placeholder="Describe the hazard"
             />
-            {errors.description && (
+            {errors.incidentDescription && (
               <p className="text-sm text-red-500">
-                {errors.description.message as string}
+                {errors.incidentDescription?.message ?? ""}
               </p>
             )}
           </div>
@@ -232,7 +234,7 @@ const HazardForm = () => {
           </div>
 
           {/* Date */}
-          <div>
+          {/* <div>
             <label className="block pb-1 text-sm font-medium text-gray-700">
               Date of Incident
             </label>
@@ -248,7 +250,7 @@ const HazardForm = () => {
               placeholderText="Select date"
               calendarClassName="z-50"
             />
-          </div>
+          </div> */}
 
           {/* Location */}
           <div className="relative z-0 mt-4 h-60 overflow-hidden rounded-md border">

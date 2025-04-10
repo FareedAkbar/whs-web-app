@@ -41,11 +41,11 @@ const UserPage = () => {
         isVerifiedByAdmin: true,
       },
       {
-        onSuccess: () => {
+        async onSuccess() {
           toast.dismiss();
           setSelectedUser(null);
           toast.success("User role updated successfully");
-          refetch();
+          await refetch();
         },
         onError: (error) => {
           toast.dismiss();

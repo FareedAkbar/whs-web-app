@@ -65,7 +65,7 @@ export default function IncidentsList() {
           });
           toast.dismiss();
           toast.success("Incident cancelled successfully");
-          refetch();
+          await refetch();
           setOpen(false);
           setDecision(null);
           setComment("");
@@ -89,7 +89,7 @@ export default function IncidentsList() {
           });
           toast.dismiss();
           toast.success("Contractor assigned successfully");
-          refetch();
+          await refetch();
           setOpen(false);
           setDecision(null);
           setSelectedContractor("");
@@ -100,7 +100,7 @@ export default function IncidentsList() {
       }
 
       setSelectedIncident(null);
-      refetch();
+      await refetch();
     } catch (error) {
       toast.dismiss();
       console.error("Failed to update incident:", error);
@@ -125,7 +125,7 @@ export default function IncidentsList() {
   const groupedImages = statusOrder.map((status) => ({
     status,
     images:
-      selectedIncident?.media?.filter((image) => image.status === status) || [], // Ensure it's always an array
+      selectedIncident?.media?.filter((image) => image.status === status) ?? [], // Ensure it's always an array
   }));
   return (
     <div className="flex w-full flex-col overflow-hidden px-8">

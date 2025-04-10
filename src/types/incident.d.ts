@@ -67,7 +67,7 @@
     status: string;
     severity: string;
     media: string[]; // Array of media file paths
-    incidentReportDescription: string;
+    incidentReportDescription?: string;
   };
    interface IncidentApiResponse {
     status: string;

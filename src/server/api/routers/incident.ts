@@ -98,7 +98,7 @@ export const incidentRouter = createTRPCRouter({
         incidentTitle: z.string(),
         generalHazardDescription: z.string(),
         incidentDescription: z.string(),
-        incidentReportDescription: z.string(),
+        incidentReportDescription: z.string().optional(),
         coordinates: z.string(),
         incidentType: z.string(),
         hazardType: z.string(),

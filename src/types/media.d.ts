@@ -23,3 +23,8 @@
     message: string;
     fileUrls: FileUrl[] // Use correct type here
   }
+  interface  GetMediaResponse {
+    status: boolean;
+    message: string;
+    data: MediaItem[];
+  };
