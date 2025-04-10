@@ -128,7 +128,7 @@ const Dashboard = () => {
       </div>
 
       {/* Bottom buttons aligned at the end */}
-      <div className="flex w-full justify-between gap-4 pt-6">
+      {/* <div className="flex w-full justify-between gap-4 pt-6">
         <Button
           title="WHS Inspection Checklist"
           onClick={() => router.push("/dashboard/hazard-form")}
@@ -140,7 +140,7 @@ const Dashboard = () => {
           onClick={() => router.push("/dashboard/hazard-form")}
           icon={<IconAlertCircle size={18} />}
         />
-      </div>
+      </div> */}
     </div>
   );
 };
