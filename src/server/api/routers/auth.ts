@@ -11,7 +11,7 @@ export const authRouter = createTRPCRouter({
                 password: z.string(),
             }),
         )
-        .query(async ({ ctx, input }) => {
+        .mutation(async ({ ctx, input }) => {
             try {
                 const response = await fetch(`${env.BASE_URL}/user/login`, {
                     method: 'POST',
@@ -87,7 +87,7 @@ export const authRouter = createTRPCRouter({
                 };
             }
         }),
-
+    
     verifyOtp: publicProcedure
         .input(
             z.object({

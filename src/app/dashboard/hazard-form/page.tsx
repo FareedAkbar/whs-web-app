@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import DatePicker from "react-datepicker";
@@ -18,13 +18,7 @@ import dynamic from "next/dynamic";
 import Button from "@/components/ui/Button";
 import Map from "@/components/Map";
 import { useSession } from "next-auth/react";
-
-const severityMapping: Record<string, string> = {
-  EXTREME: "#DC3545",
-  HIGH: "#FD7E14",
-  MEDIUM: "#FFC107",
-  LOW: "#28A745",
-};
+import { severityMapping } from "@/constants/severity";
 
 const HazardForm = () => {
   const {
@@ -49,6 +43,7 @@ const HazardForm = () => {
   // const uploadMedia = api.media.uploadMedia.useMutation();
   const router = useRouter();
   const reportIncident = api.incidents.reportIncident.useMutation();
+  const { data: enums } = api.enums.getEnums.useQuery();
   const session = useSession();
   const onSubmit: SubmitHandler<NewIncidentReport> = async (data) => {
     if (!data || !location) {
@@ -68,9 +63,20 @@ const HazardForm = () => {
       severity: selectedSeverity ?? "LOW",
       media: images.map((image) => image.id).filter(Boolean),
     };
+    console.log("Incident Data:", incidentData);
 
+    // await reportIncident.mutateAsync(incidentData,{
+    //   onSuccess: () => {
+    //     toast.success("Incident reported successfully!");
+    //     router.push("/home");
+    //   },
+    //   onError: (error) => {
+    //     console.error("Error reporting incident:", error);
+    //     toast.error("Failed to report incident");
+    //   },
+    // })
     try {
-      await reportIncident.mutateAsync(incidentData);
+      // await reportIncident.mutateAsync(incidentData);
       toast.success("Incident reported successfully!");
       router.push("/home");
     } catch (error) {
@@ -78,6 +84,7 @@ const HazardForm = () => {
       toast.error("Failed to report incident");
     }
   };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     if (e.target.files) {
@@ -89,36 +96,36 @@ const HazardForm = () => {
         formData.append("files", file);
       });
 
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/media`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${session?.data?.user.token}`,
-            },
-            body: formData,
-          },
-        );
+      // try {
+      //   const response = await fetch(
+      //     `${process.env.NEXT_PUBLIC_BASE_URL}/media`,
+      //     {
+      //       method: "POST",
+      //       headers: {
+      //         Authorization: `Bearer ${session?.data?.user.token}`,
+      //       },
+      //       body: formData,
+      //     },
+      //   );
 
-        const result = (await response.json()) as UploadMediaApiResponse;
+      //   const result = (await response.json()) as UploadMediaApiResponse;
 
-        if (!response.ok) {
-          throw new Error(result.message || "Failed to upload files");
-        }
+      //   if (!response.ok) {
+      //     throw new Error(result.message || "Failed to upload files");
+      //   }
 
-        const uploadedImages =
-          result?.fileUrls?.map((img: FileUrl) => ({
-            id: img.file.id,
-            url: img.file.url,
-          })) || [];
+      //   const uploadedImages =
+      //     result?.fileUrls?.map((img: FileUrl) => ({
+      //       id: img.file.id,
+      //       url: img.file.url,
+      //     })) || [];
 
-        setImages((prev) => [...prev, ...uploadedImages]);
-        toast.success("Images uploaded successfully!");
-      } catch (error) {
-        console.error("Upload failed:", error);
-        toast.error("Image upload failed.");
-      }
+      //   setImages((prev) => [...prev, ...uploadedImages]);
+      //   toast.success("Images uploaded successfully!");
+      // } catch (error) {
+      //   console.error("Upload failed:", error);
+      //   toast.error("Image upload failed.");
+      // }
     }
   };
 
@@ -126,7 +133,7 @@ const HazardForm = () => {
     <div className="flex flex-col p-6">
       <div className="rounded-lg bg-white p-6 shadow">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
               <label className="block pb-1 text-sm font-medium text-gray-700">
                 Incident title
@@ -157,10 +164,11 @@ const HazardForm = () => {
                 className="w-full rounded-lg border border-gray-300 p-3"
               >
                 <option value="">Select a hazard type</option>
-                <option value="Fire">Fire</option>
-                <option value="Chemical">Chemical</option>
-                <option value="Electrical">Electrical</option>
-                <option value="Structural">Structural</option>
+                {enums?.data?.GeneralHazardTypes.map((hazard) => (
+                  <option key={hazard} value={hazard}>
+                    {hazard}
+                  </option>
+                ))}
               </select>
               {errors.hazardType && (
                 <p className="text-sm text-red-500">
@@ -168,25 +176,67 @@ const HazardForm = () => {
                 </p>
               )}
             </div>
+            <div>
+              <label className="pb-1 text-sm font-medium text-gray-700">
+                Incident Type
+              </label>
+              <select
+                {...register("incidentType", {
+                  required: "Incident type is required",
+                })}
+                className="w-full rounded-lg border border-gray-300 p-3"
+              >
+                <option value="">Select an incident type</option>
+                {enums?.data?.IncidentTypes.map((incident) => (
+                  <option key={incident} value={incident}>
+                    {incident}
+                  </option>
+                ))}
+              </select>
+              {errors.incidentType && (
+                <p className="text-sm text-red-500">
+                  {errors?.incidentType?.message ?? ""}
+                </p>
+              )}
+            </div>
           </div>
-
-          {/* Description */}
-          <div>
-            <label className="block pb-1 text-sm font-medium text-gray-700">
-              Description
-            </label>
-            <textarea
-              {...register("incidentDescription", {
-                required: "Incident Description is required",
-              })}
-              className="w-full rounded-lg border border-gray-300 p-3"
-              placeholder="Describe the hazard"
-            />
-            {errors.incidentDescription && (
-              <p className="text-sm text-red-500">
-                {errors.incidentDescription?.message ?? ""}
-              </p>
-            )}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Description */}
+            <div>
+              <label className="block pb-1 text-sm font-medium text-gray-700">
+                Incident Description
+              </label>
+              <textarea
+                {...register("incidentDescription", {
+                  required: "Incident Description is required",
+                })}
+                className="w-full rounded-lg border border-gray-300 p-3"
+                placeholder="Describe the incident"
+              />
+              {errors.incidentDescription && (
+                <p className="text-sm text-red-500">
+                  {errors.incidentDescription?.message ?? ""}
+                </p>
+              )}
+            </div>
+            {/* Description */}
+            <div>
+              <label className="block pb-1 text-sm font-medium text-gray-700">
+                General Hazard Description
+              </label>
+              <textarea
+                {...register("generalHazardDescription", {
+                  required: "Incident Description is required",
+                })}
+                className="w-full rounded-lg border border-gray-300 p-3"
+                placeholder="Describe the hazard"
+              />
+              {errors.generalHazardDescription && (
+                <p className="text-sm text-red-500">
+                  {errors.generalHazardDescription?.message ?? ""}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Severity */}

@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { IconBrandGoogle } from "@tabler/icons-react";
+import { api } from "@/trpc/react";
 
 const inputs = z.object({
   email: z.string().email(),
@@ -28,19 +29,32 @@ export default function Login() {
   } = useForm<InputType>({
     resolver: zodResolver(inputs),
   });
+  const loginUser = api.auth.login.useMutation();
 
   const onSubmit = async (data: InputType) => {
     toast.loading("Logging in...");
-    const response = await signIn("credentials", { ...data, redirect: false });
-    if (response?.status === 200) {
-      console.log("resppp", response);
 
+    try {
+      // Attempt NextAuth sign-in first
+      const response = await signIn("credentials", {
+        ...data,
+        redirect: false,
+      });
+
+      if (response?.status === 200) {
+        // Optional: Log backend login
+        await loginUser.mutateAsync(data);
+
+        toast.dismiss();
+        toast.success("Successfully Logged in!");
+        router.push("/dashboard");
+      } else {
+        toast.dismiss();
+        toast.error("Invalid Credentials");
+      }
+    } catch (error: any) {
       toast.dismiss();
-      toast.success("Successfully Logged in!");
-      router.push("/dashboard");
-    } else {
-      toast.dismiss();
-      toast.error("Invalid Credentials");
+      toast.error(error.message ?? "Something went wrong");
     }
   };
 

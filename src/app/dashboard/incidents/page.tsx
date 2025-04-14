@@ -23,10 +23,11 @@ export default function IncidentsList() {
   const { data: workers } = api.workers.getWorkers.useQuery();
   const assignIncidentToWorker = api.incidents.assignIncident.useMutation();
   const updateIncidentStatus = api.incidents.updateStatus.useMutation();
-
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedIncident, setSelectedIncident] = useState<IncidentData | null>(
     null,
   );
+
   const [selectedContractor, setSelectedContractor] = useState("");
   const [comment, setComment] = useState("");
   const { setOpen } = useModal();
@@ -38,7 +39,6 @@ export default function IncidentsList() {
     MEDIUM: "bg-yellow-500",
     LOW: "bg-green-500",
   };
-
   const statusMapping = {
     INITIATED: "bg-blue-100 text-blue-600",
     IN_PROGRESS: "bg-yellow-100 text-yellow-600",
@@ -48,7 +48,11 @@ export default function IncidentsList() {
   };
   const filteredIncidents = incidents?.data?.filter(
     (item) =>
-      statusFilter === "ALL" || item.incidentReport.status === statusFilter,
+      statusFilter === "ALL" ||
+      (item.incidentReport.status === statusFilter &&
+        item.incidentReport.description
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())),
   );
 
   const handleDone = async () => {
@@ -129,7 +133,13 @@ export default function IncidentsList() {
   }));
   return (
     <div className="flex w-full flex-col overflow-hidden px-8">
-      <div className="mb-4 flex items-center justify-end">
+      <div className="mb-4 flex items-center justify-between">
+        <input
+          type="text"
+          placeholder="Search incidents..."
+          className="my-2 rounded-md border border-gray-300 p-2 text-sm shadow-sm"
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}

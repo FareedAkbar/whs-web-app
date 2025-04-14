@@ -19,7 +19,6 @@ const ProfileScreen = () => {
   const { data: session } = useSession();
 
   const user = session?.user;
-  console.log("user", user);
   if (!user) {
     return (
       <div className="relative flex h-[90vh] w-[80vw] items-center justify-center">

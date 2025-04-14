@@ -21,10 +21,14 @@ export default function RootLayout({
         backgroundSize: "cover",
       }}
     >
-      <Sidebar />
-      <div className="flex w-full flex-col">
-        <TopBar />
-        {children}
+      <div className="flex h-screen w-screen flex-col">
+        <div className="relative flex h-full w-full overflow-hidden">
+          <Sidebar />
+          <div className="flex-1 overflow-auto">
+            <TopBar />
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );

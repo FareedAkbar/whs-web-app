@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   IconHome,
   IconAlertTriangle,
@@ -15,14 +15,14 @@ import {
   IconUserCircle,
   IconUserFilled,
 } from "@tabler/icons-react";
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { signOut, useSession } from "next-auth/react";
+import { use, useEffect, useState } from "react";
 
 const Sidebar = () => {
   const pathname = usePathname();
   const session = useSession();
   const [isOpen, setIsOpen] = useState(true);
-
+  const router = useRouter();
   useEffect(() => {
     void session.update();
   }, []);
@@ -128,7 +128,13 @@ const Sidebar = () => {
 
       {/* Logout Button */}
       <div className="absolute bottom-10 w-3/4">
-        <button className="flex w-full items-center gap-3 rounded-md bg-white p-3 text-red-600 shadow-md hover:bg-[#F8F5F5]">
+        <button
+          className="flex w-full items-center gap-3 rounded-md bg-white p-3 text-red-600 shadow-md hover:bg-[#F8F5F5]"
+          onClick={() => {
+            signOut({ callbackUrl: "/auth/login" });
+            // router.push("/auth/login");
+          }}
+        >
           <IconLogout size={20} />
           {isOpen && <span className="font-medium">Logout</span>}
         </button>
