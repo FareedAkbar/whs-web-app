@@ -96,28 +96,58 @@ export const authRouter = createTRPCRouter({
             }),
         )
         .query(async ({ ctx, input }) => {
-            //
+            
+            try {
+                const response = await fetch(`${env.BASE_URL}/user/verify-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(input),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json() as { message: string };
+                    console.error('Login error:', errorData);
+                    return {
+                        status: false,
+                        error: errorData.message,
+                    };
+                }
+
+                const userData = await response.json() as LoginResponseData;
+                return {
+                    status: true,
+                    user: userData.user,
+                    token: userData.token,
+                };
+            } catch (error) {
+                console.error('Login error:', error);
+                return {
+                    status: false,
+                    error: 'An error occurred while logging in.',
+                };
+            }
         }),
 
     register: publicProcedure
         .input(
             z.object({
-                username: z.string(),
-                fName: z.string(),
-                lName: z.string(),
+                name: z.string(),
                 email: z.string().email(),
                 password: z.string(),
+                phone: z.string(),
+                role: z.string(),
             }),
         )
         .mutation(async ({ ctx, input }) => {
             console.log(input)
             try {
                 const user = {
-                    name: `${input.fName} ${input.lName}`,
-                    username: input.username,
+                    name: input.name,
                     email: input.email,
                     password: input.password,
-                    phoneNumber: '',
+                    phoneNumber: input.phone,
                 };
 
                 const response = await fetch(`${env.BASE_URL}/user/register`, {
