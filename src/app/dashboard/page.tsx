@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@/trpc/react";
-import DashboardCard from "../_components/dashboardCard";
+import AdminDashboardCard from "../_components/adminDashboardCard";
 
 import {
   IconUsers,
@@ -16,17 +16,24 @@ import {
 
 import { useRouter } from "next/navigation"; // or "next/router" for older versions
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
+import { hasPermission } from "@/lib/auth";
+import { CirclePlus, HelpCircle, Settings2 } from "lucide-react";
+import WorkerDashboardCard from "../_components/workerDashboardCard";
 
 const Dashboard = () => {
   const router = useRouter();
   const { data: counters, isLoading } = api.dashboard.getCounters.useQuery();
+  const { data: workerCounters } = api.dashboard.getWorkerCounters.useQuery();
   const session = useSession();
+  const user = JSON.parse(localStorage.getItem("user") as string);
   useEffect(() => {
     void session.update();
   }, []);
-  const dashboardItems = [
+  console.log("user", user);
+
+  const adminDashboardItems = [
     {
       title: "Users List",
       icon: <IconUsers size={32} />,
@@ -105,6 +112,36 @@ const Dashboard = () => {
         ),
     },
   ];
+  const workerDashboardItems = [
+    {
+      icon: <CirclePlus size={20} />,
+      label: "Reports",
+      count: workerCounters?.data?.completedReports ?? 0,
+      totalCount:
+        user.role === "WORKER"
+          ? workerCounters?.data?.reportsAssigned
+          : workerCounters?.data?.reportsReported,
+      action: () => {},
+      isActive: true,
+    },
+    {
+      icon: <Settings2 size={20} />,
+      label: "Inspections",
+      count: 0,
+      totalCount: 0,
+      action: () => {},
+      isActive: true,
+    },
+    {
+      icon: <HelpCircle size={20} />,
+      label: "Tasks",
+      count: 0,
+      totalCount: 0,
+      action: () => {},
+      isActive: true,
+    },
+  ];
+
   if (isLoading) {
     return (
       <div className="relative flex h-full w-full items-center justify-center">
@@ -116,15 +153,41 @@ const Dashboard = () => {
     <div className="flex flex-col justify-between p-6">
       {/* Dashboard cards */}
       <div className="grid h-fit flex-grow grid-cols-1 gap-6 py-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
-        {dashboardItems.map((item, index) => (
-          <DashboardCard
-            key={index}
-            icon={item.icon}
-            title={item.title}
-            onClick={item.onClick}
-            value={item.value}
-          />
-        ))}
+        {user &&
+          hasPermission(user, "view:homeCards") &&
+          adminDashboardItems.map((item, index) => (
+            <AdminDashboardCard
+              key={index}
+              icon={item.icon}
+              title={item.title}
+              onClick={item.onClick}
+              value={item.value}
+            />
+          ))}
+        {/* If you want to show default dashboard items, uncomment below */}
+        {user &&
+          hasPermission(user, "view:homeCounters") &&
+          workerDashboardItems.map((item, index) => (
+            <WorkerDashboardCard
+              key={index}
+              title={item.label}
+              onClick={item.action}
+              percentage={
+                item.totalCount
+                  ? Math.round((item?.count / item.totalCount) * 100)
+                  : 0
+              }
+            />
+          ))}
+        {/* {dashboardItems.map((item, index) => (
+      <AdminDashboardCard
+        key={index}
+        icon={item.icon}
+        title={item.title}
+        onClick={item.onClick}
+        value={item.value}
+      />
+    ))} */}
       </div>
 
       {/* Bottom buttons aligned at the end */}

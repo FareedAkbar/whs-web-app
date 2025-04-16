@@ -1,0 +1,68 @@
+"use client";
+import React from "react";
+
+interface WorkerDashboardCardProps {
+  title: string;
+  onClick: () => void;
+  percentage: number; // value from 0 to 100
+}
+
+const WorkerDashboardCard: React.FC<WorkerDashboardCardProps> = ({
+  title,
+  onClick,
+  percentage,
+}) => {
+  const radius = 28;
+  const stroke = 4;
+  const normalizedRadius = radius - stroke * 0.5;
+  const circumference = normalizedRadius * 2 * Math.PI;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div
+      className="flex cursor-pointer flex-row items-center justify-between gap-3 rounded-[20px] border border-[#ECE6E6] bg-white p-6 shadow-lg transition-all duration-300 hover:scale-105"
+      onClick={onClick}
+    >
+      {/* Title and Value */}
+      <div className="flex flex-col items-start gap-4">
+        <p className="font-medium text-gray-500">{title}</p>
+        <p className="text-2xl font-bold">{percentage}%</p>
+      </div>
+
+      {/* Circular Progress */}
+      <div className="relative h-16 w-16">
+        <svg
+          height="100%"
+          width="100%"
+          viewBox={`0 0 ${radius * 2} ${radius * 2}`}
+        >
+          <circle
+            stroke="#e5e7eb"
+            fill="transparent"
+            strokeWidth={stroke}
+            r={normalizedRadius}
+            cx={radius}
+            cy={radius}
+          />
+          <circle
+            stroke="#007bff" // or use your Tailwind class via style if needed
+            fill="transparent"
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            r={normalizedRadius}
+            cx={radius}
+            cy={radius}
+            transform={`rotate(-90 ${radius} ${radius})`}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-primary">
+          {percentage}%
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default WorkerDashboardCard;

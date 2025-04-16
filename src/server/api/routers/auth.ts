@@ -54,7 +54,7 @@ export const authRouter = createTRPCRouter({
                 authType: z.string(),
             }),
         )
-        .query(async ({ ctx, input }) => {
+        .mutation(async ({ ctx, input }) => {
             try {
                 const response = await fetch(`${env.BASE_URL}/user/social`, {
                     method: 'POST',

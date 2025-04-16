@@ -26,6 +26,7 @@ const HazardForm = () => {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<NewIncidentReport>();
 
@@ -64,21 +65,25 @@ const HazardForm = () => {
       media: images.map((image) => image.id).filter(Boolean),
     };
     console.log("Incident Data:", incidentData);
-
-    // await reportIncident.mutateAsync(incidentData,{
-    //   onSuccess: () => {
-    //     toast.success("Incident reported successfully!");
-    //     router.push("/home");
-    //   },
-    //   onError: (error) => {
-    //     console.error("Error reporting incident:", error);
-    //     toast.error("Failed to report incident");
-    //   },
-    // })
     try {
+      await reportIncident.mutateAsync(incidentData, {
+        onSuccess: () => {
+          toast.success("Incident reported successfully!");
+          router.push("/dashboard/incidents");
+          reset({
+            incidentTitle: "",
+            generalHazardDescription: "",
+            incidentDescription: "",
+            incidentReportDescription: "",
+          });
+        },
+        onError: (error) => {
+          console.error("Error reporting incident:", error);
+          toast.error("Failed to report incident");
+        },
+      });
+
       // await reportIncident.mutateAsync(incidentData);
-      toast.success("Incident reported successfully!");
-      router.push("/home");
     } catch (error) {
       console.error("Error reporting incident:", error);
       toast.error("Failed to report incident");
@@ -96,36 +101,36 @@ const HazardForm = () => {
         formData.append("files", file);
       });
 
-      // try {
-      //   const response = await fetch(
-      //     `${process.env.NEXT_PUBLIC_BASE_URL}/media`,
-      //     {
-      //       method: "POST",
-      //       headers: {
-      //         Authorization: `Bearer ${session?.data?.user.token}`,
-      //       },
-      //       body: formData,
-      //     },
-      //   );
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/media`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${session?.data?.user.token}`,
+            },
+            body: formData,
+          },
+        );
 
-      //   const result = (await response.json()) as UploadMediaApiResponse;
+        const result = (await response.json()) as UploadMediaApiResponse;
 
-      //   if (!response.ok) {
-      //     throw new Error(result.message || "Failed to upload files");
-      //   }
+        if (!response.ok) {
+          throw new Error(result.message || "Failed to upload files");
+        }
 
-      //   const uploadedImages =
-      //     result?.fileUrls?.map((img: FileUrl) => ({
-      //       id: img.file.id,
-      //       url: img.file.url,
-      //     })) || [];
+        const uploadedImages =
+          result?.fileUrls?.map((img: FileUrl) => ({
+            id: img.file.id,
+            url: img.file.url,
+          })) || [];
 
-      //   setImages((prev) => [...prev, ...uploadedImages]);
-      //   toast.success("Images uploaded successfully!");
-      // } catch (error) {
-      //   console.error("Upload failed:", error);
-      //   toast.error("Image upload failed.");
-      // }
+        setImages((prev) => [...prev, ...uploadedImages]);
+        toast.success("Images uploaded successfully!");
+      } catch (error) {
+        console.error("Upload failed:", error);
+        toast.error("Image upload failed.");
+      }
     }
   };
 

@@ -1,14 +1,14 @@
 "use client";
 import React from "react";
 
-interface DashboardCardProps {
+interface AdminDashboardCardProps {
   icon: React.ReactNode;
   title: string;
   onClick: () => void;
   value?: number;
 }
 
-const DashboardCard: React.FC<DashboardCardProps> = ({
+const AdminDashboardCard: React.FC<AdminDashboardCardProps> = ({
   icon,
   title,
   onClick,
@@ -32,4 +32,4 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
   );
 };
 
-export default DashboardCard;
+export default AdminDashboardCard;

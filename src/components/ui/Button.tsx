@@ -27,8 +27,8 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const iconWrapper = {
-    primary: "bg-white text-primary p-0.5 rounded-full",
-    secondary: "bg-[#F2F2F2] text-primary p-0.5 rounded-full",
+    primary: "bg-white text-primary p-1 rounded-full",
+    secondary: "bg-[#F2F2F2] text-primary p-1 rounded-full",
   };
 
   return (

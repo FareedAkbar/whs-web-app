@@ -17,6 +17,8 @@ import Dropdown from "@/components/ui/Dropdown";
 import { Select } from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
 import { set } from "zod";
+import { useSession } from "next-auth/react";
+import { severityMapping } from "@/constants/severity";
 
 export default function IncidentsList() {
   const {
@@ -38,13 +40,13 @@ export default function IncidentsList() {
   const [comment, setComment] = useState("");
   const { setOpen } = useModal();
   const [decision, setDecision] = useState<"accept" | "reject" | null>(null);
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const severityMapping = {
-    EXTREME: "bg-red-500",
-    HIGH: "bg-orange-500",
-    MEDIUM: "bg-yellow-500",
-    LOW: "bg-green-500",
-  };
+
+  // const severityMapping = {
+  //   EXTREME: "bg-red-500",
+  //   HIGH: "bg-orange-500",
+  //   MEDIUM: "bg-yellow-500",
+  //   LOW: "bg-green-500",
+  // };
   const statusMapping = {
     INITIATED: "bg-blue-100 text-blue-600",
     IN_PROGRESS: "bg-yellow-100 text-yellow-600",
@@ -60,6 +62,9 @@ export default function IncidentsList() {
   const [status, setStatus] = useState<string[]>([]);
   const [assignedTo, setAssignedTo] = useState("");
   const [taskType, setTaskType] = useState("");
+  const session = useSession();
+
+  console.log("user", session.data?.user);
   useEffect(() => {
     if (incidents?.data) {
       setFilteredIncidents(incidents.data);
@@ -79,21 +84,11 @@ export default function IncidentsList() {
     setStatus([]);
     setAssignedTo("");
     setTaskType("");
-    handleFilter();
     setIsFilterOpen(false);
     setSearchTerm("");
+    setFilteredIncidents(incidents?.data || []);
   };
   const handleFilter = () => {
-    const filters = {
-      dateFrom,
-      dateTo,
-      priority,
-      status,
-      assignedTo,
-      taskType,
-    };
-    console.log("filters", filters);
-
     setFilteredIncidents(
       incidents?.data?.filter((item) => {
         return (
@@ -120,14 +115,6 @@ export default function IncidentsList() {
     setIsFilterOpen(false);
   };
 
-  // const filteredIncidents = incidents?.data?.filter(
-  //   (item) =>
-  //     statusFilter === "ALL" ||
-  //     (item.incidentReport.status === statusFilter &&
-  //       item.incidentReport.description
-  //         .toLowerCase()
-  //         .includes(searchTerm.toLowerCase())),
-  // );
   useEffect(() => {
     handleFilter();
   }, [searchTerm]);
@@ -228,9 +215,10 @@ export default function IncidentsList() {
           setIsOpen={setIsFilterOpen}
         >
           <div className="flex flex-col gap-3 text-sm text-gray-700">
+            <p className="border-b pb-2 font-bold">Filter</p>
             {/* Date Range */}
             <div>
-              <label className="font-medium">Date Range</label>
+              <label className="text-sm font-medium">Date Range</label>
               <div className="mt-1 flex gap-2">
                 <input
                   type="date"
@@ -249,7 +237,7 @@ export default function IncidentsList() {
 
             {/* Priority Checkboxes */}
             <div>
-              <label className="font-medium">Priority</label>
+              <label className="text-sm font-medium">Priority</label>
               <div className="mt-1 flex flex-wrap gap-2">
                 {["LOW", "MEDIUM", "HIGH", "EXTREME"].map((p) => (
                   <label
@@ -272,7 +260,7 @@ export default function IncidentsList() {
 
             {/* Status Checkboxes */}
             <div>
-              <label className="font-medium">Status</label>
+              <label className="text-sm font-medium">Status</label>
               <div className="mt-1 flex flex-wrap gap-2">
                 {Object.keys(statusMapping).map((statusName) => (
                   <label
@@ -299,19 +287,21 @@ export default function IncidentsList() {
             </div>
 
             {/* Assigned Person */}
-            <div>
-              <Select
-                options={
-                  workers?.data?.map((worker) => ({
-                    label: worker.name,
-                    value: worker.id,
-                  })) ?? []
-                }
-                value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value)}
-                label="Assigned To"
-              />
-            </div>
+            {session.data?.user?.role == "ADMIN" && (
+              <div>
+                <Select
+                  options={
+                    workers?.data?.map((worker) => ({
+                      label: worker.name,
+                      value: worker.id,
+                    })) ?? []
+                  }
+                  value={assignedTo}
+                  onChange={(e) => setAssignedTo(e.target.value)}
+                  label="Assigned To"
+                />
+              </div>
+            )}
 
             {/* Task Type */}
             {/* <div>
@@ -342,29 +332,11 @@ export default function IncidentsList() {
               onClick={handleClearFilter}
               variant="secondary"
             />
-            {/* <button
-              onClick={handleFilter}
-              className="mt-3 w-full rounded bg-blue-600 py-2 text-white transition hover:bg-blue-700"
-            >
-              Apply Filters
-            </button> */}
           </div>
         </Dropdown>
         <div className="rounded-r-md bg-primary p-[15px]">
           <Search className="" size={16} color="white" />
         </div>
-        {/* <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="my-2 rounded-md border border-gray-300 p-2 text-sm shadow-sm"
-        >
-          <option value="ALL">ALL</option>
-          {Object.keys(statusMapping).map((status) => (
-            <option key={status} value={status}>
-              {status.replace("_", " ")}
-            </option>
-          ))}
-        </select> */}
       </div>
       <div className="custom-scrollbar grid max-h-[70vh] grid-cols-1 gap-4 overflow-y-auto md:grid-cols-2">
         {filteredIncidents.length > 0 &&
@@ -379,16 +351,31 @@ export default function IncidentsList() {
             >
               <div className="flex items-center justify-between">
                 <div className="flex gap-3">
-                  <img
+                  <AlertTriangle
+                    size={18}
+                    color={`${severityMapping[item?.incidentReport?.priority] || "#000"}`}
+                    className="rounded-xl p-3"
+                  />
+
+                  {/* <img
                     src={item.media[0]?.url ?? "https://placehold.co/150x150"}
                     alt="Incident"
                     className="h-16 w-16 rounded-full object-cover shadow"
                     width={64}
                     height={64}
-                  />
+                  /> */}
 
                   <div>
-                    <h2 className="font-semibold">{item.incident.title}</h2>
+                    <h2
+                      className="font-semibold capitalize"
+                      style={{
+                        color:
+                          severityMapping[item?.incidentReport?.priority] ||
+                          "#000",
+                      }}
+                    >
+                      {item.incident.title}
+                    </h2>
 
                     <p className="text-sm text-gray-600">
                       {item.incident.description}
@@ -401,7 +388,7 @@ export default function IncidentsList() {
                   >
                     {item.incidentReport.status}
                   </span>
-                  <div
+                  {/* <div
                     className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium text-white ${
                       severityMapping[
                         item?.incidentReport
@@ -411,7 +398,7 @@ export default function IncidentsList() {
                   >
                     <AlertTriangle size={18} />
                     <span>{item?.incidentReport?.priority}</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
