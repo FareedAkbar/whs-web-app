@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, ChevronDown, Filter, Search } from "lucide-react";
 import { api } from "@/trpc/react";
 import {
   Modal,
@@ -13,6 +13,10 @@ import {
 } from "@/components/ui/animated-modal";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import Dropdown from "@/components/ui/Dropdown";
+import { Select } from "@/components/ui/Select";
+import Button from "@/components/ui/Button";
+import { set } from "zod";
 
 export default function IncidentsList() {
   const {
@@ -27,7 +31,9 @@ export default function IncidentsList() {
   const [selectedIncident, setSelectedIncident] = useState<IncidentData | null>(
     null,
   );
-
+  const [filteredIncidents, setFilteredIncidents] = useState<IncidentData[]>(
+    incidents?.data || [],
+  );
   const [selectedContractor, setSelectedContractor] = useState("");
   const [comment, setComment] = useState("");
   const { setOpen } = useModal();
@@ -46,15 +52,85 @@ export default function IncidentsList() {
     CANCELLED: "bg-red-100 text-red-600",
     ASSIGNED: "bg-purple-100 text-purple-600", // Explicitly define the class
   };
-  const filteredIncidents = incidents?.data?.filter(
-    (item) =>
-      statusFilter === "ALL" ||
-      (item.incidentReport.status === statusFilter &&
-        item.incidentReport.description
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())),
-  );
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  const [priority, setPriority] = useState<string[]>([]);
+  const [status, setStatus] = useState<string[]>([]);
+  const [assignedTo, setAssignedTo] = useState("");
+  const [taskType, setTaskType] = useState("");
+  useEffect(() => {
+    if (incidents?.data) {
+      setFilteredIncidents(incidents.data);
+    }
+  }, [incidents?.data]);
+  const toggleArrayValue = (val: string, setFn: any, state: string[]) => {
+    if (state.includes(val)) {
+      setFn(state.filter((v) => v !== val));
+    } else {
+      setFn([...state, val]);
+    }
+  };
+  const handleClearFilter = () => {
+    setDateFrom("");
+    setDateTo("");
+    setPriority([]);
+    setStatus([]);
+    setAssignedTo("");
+    setTaskType("");
+    handleFilter();
+    setIsFilterOpen(false);
+    setSearchTerm("");
+  };
+  const handleFilter = () => {
+    const filters = {
+      dateFrom,
+      dateTo,
+      priority,
+      status,
+      assignedTo,
+      taskType,
+    };
+    console.log("filters", filters);
+
+    setFilteredIncidents(
+      incidents?.data?.filter((item) => {
+        return (
+          (!dateFrom || item.incidentReport.createdAt >= dateFrom) &&
+          (!dateTo || item.incidentReport.createdAt <= dateTo) &&
+          (!priority.length ||
+            priority.includes(item.incidentReport.priority)) &&
+          (!status.length || status.includes(item.incidentReport.status)) &&
+          (!assignedTo ||
+            item.incidentAssignee.some(
+              (assignee) => assignee.assignedTo === assignedTo,
+            )) &&
+          // (!taskType || item.incidentReport.taskType === taskType) &&
+          (!searchTerm ||
+            item.incidentReport.description
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            item.incidentReport.title
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()))
+        );
+      }) || [],
+    );
+    setIsFilterOpen(false);
+  };
+
+  // const filteredIncidents = incidents?.data?.filter(
+  //   (item) =>
+  //     statusFilter === "ALL" ||
+  //     (item.incidentReport.status === statusFilter &&
+  //       item.incidentReport.description
+  //         .toLowerCase()
+  //         .includes(searchTerm.toLowerCase())),
+  // );
+  useEffect(() => {
+    handleFilter();
+  }, [searchTerm]);
   const handleDone = async () => {
     if (!selectedIncident) return;
 
@@ -132,15 +208,152 @@ export default function IncidentsList() {
       selectedIncident?.media?.filter((image) => image.status === status) ?? [], // Ensure it's always an array
   }));
   return (
-    <div className="flex w-full flex-col overflow-hidden px-8">
-      <div className="mb-4 flex items-center justify-between">
+    <div className="flex w-full flex-col px-8">
+      <div className="mb-4 flex h-full items-center justify-between">
         <input
           type="text"
           placeholder="Search incidents..."
-          className="my-2 rounded-md border border-gray-300 p-2 text-sm shadow-sm"
+          className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <select
+        <Dropdown
+          button={
+            <button className="flex w-full flex-row items-center border border-gray-300 bg-[#F9F9F9] px-4 py-3 text-sm">
+              Filters
+              <ChevronDown className="ml-2 inline" size={16} />
+            </button>
+          }
+          className="absolute right-0 z-50"
+          isOpen={isFilterOpen}
+          setIsOpen={setIsFilterOpen}
+        >
+          <div className="flex flex-col gap-3 text-sm text-gray-700">
+            {/* Date Range */}
+            <div>
+              <label className="font-medium">Date Range</label>
+              <div className="mt-1 flex gap-2">
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="w-1/2 rounded border border-gray-300 px-2 py-1"
+                />
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="w-1/2 rounded border border-gray-300 px-2 py-1"
+                />
+              </div>
+            </div>
+
+            {/* Priority Checkboxes */}
+            <div>
+              <label className="font-medium">Priority</label>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {["LOW", "MEDIUM", "HIGH", "EXTREME"].map((p) => (
+                  <label
+                    key={p}
+                    className="flex items-center gap-1 text-sm capitalize"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={priority.includes(p)}
+                      onChange={() =>
+                        toggleArrayValue(p, setPriority, priority)
+                      }
+                      className="accent-primary"
+                    />
+                    {p.toLowerCase()}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Status Checkboxes */}
+            <div>
+              <label className="font-medium">Status</label>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {Object.keys(statusMapping).map((statusName) => (
+                  <label
+                    key={statusName}
+                    className="flex items-center gap-1 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={status.includes(statusName)}
+                      onChange={() =>
+                        toggleArrayValue(statusName, setStatus, status)
+                      }
+                      className="accent-primary"
+                    />
+                    <span
+                      // className={`rounded-full px-2 py-0.5 text-xs ${statusMapping[statusName as keyof typeof statusMapping]}`}
+                      className={`capitalize`}
+                    >
+                      {statusName.replace("_", " ").toLowerCase()}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Assigned Person */}
+            <div>
+              <Select
+                options={
+                  workers?.data?.map((worker) => ({
+                    label: worker.name,
+                    value: worker.id,
+                  })) ?? []
+                }
+                value={assignedTo}
+                onChange={(e) => setAssignedTo(e.target.value)}
+                label="Assigned To"
+              />
+            </div>
+
+            {/* Task Type */}
+            {/* <div>
+              <label className="font-medium">Task Type</label>
+              <select
+                value={taskType}
+                onChange={(e) => setTaskType(e.target.value)}
+                className="w-full border border-gray-300 px-2 py-1 rounded mt-1"
+              >
+                <option value="">Select</option>
+                {taskTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div> */}
+
+            {/* Filter Button */}
+            <Button
+              // className="mt-3 w-full rounded bg-blue-600 py-2 text-white transition hover:bg-blue-700"
+              onClick={handleFilter}
+              title="Apply Filters"
+              icon={<Filter size={16} />}
+            />
+            <Button
+              title="Clear Filters"
+              onClick={handleClearFilter}
+              variant="secondary"
+            />
+            {/* <button
+              onClick={handleFilter}
+              className="mt-3 w-full rounded bg-blue-600 py-2 text-white transition hover:bg-blue-700"
+            >
+              Apply Filters
+            </button> */}
+          </div>
+        </Dropdown>
+        <div className="rounded-r-md bg-primary p-[15px]">
+          <Search className="" size={16} color="white" />
+        </div>
+        {/* <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="my-2 rounded-md border border-gray-300 p-2 text-sm shadow-sm"
@@ -151,60 +364,61 @@ export default function IncidentsList() {
               {status.replace("_", " ")}
             </option>
           ))}
-        </select>
+        </select> */}
       </div>
       <div className="custom-scrollbar grid max-h-[70vh] grid-cols-1 gap-4 overflow-y-auto md:grid-cols-2">
-        {filteredIncidents?.map((item) => (
-          <div
-            key={item.incidentReport.id}
-            className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg"
-            onClick={() => {
-              setSelectedIncident(item);
-              setOpen(true);
-            }}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex gap-3">
-                <img
-                  src={item.media[0]?.url ?? "https://placehold.co/150x150"}
-                  alt="Incident"
-                  className="h-16 w-16 rounded-full object-cover shadow"
-                  width={64}
-                  height={64}
-                />
+        {filteredIncidents.length > 0 &&
+          filteredIncidents?.map((item) => (
+            <div
+              key={item.incidentReport.id}
+              className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg"
+              onClick={() => {
+                setSelectedIncident(item);
+                setOpen(true);
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex gap-3">
+                  <img
+                    src={item.media[0]?.url ?? "https://placehold.co/150x150"}
+                    alt="Incident"
+                    className="h-16 w-16 rounded-full object-cover shadow"
+                    width={64}
+                    height={64}
+                  />
 
-                <div>
-                  <h2 className="font-semibold">{item.incident.title}</h2>
+                  <div>
+                    <h2 className="font-semibold">{item.incident.title}</h2>
 
-                  <p className="text-sm text-gray-600">
-                    {item.incident.description}
-                  </p>
+                    <p className="text-sm text-gray-600">
+                      {item.incident.description}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center gap-4">
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.incidentReport.status as keyof typeof statusMapping]}`}
+                  >
+                    {item.incidentReport.status}
+                  </span>
+                  <div
+                    className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium text-white ${
+                      severityMapping[
+                        item?.incidentReport
+                          ?.priority as keyof typeof severityMapping
+                      ] || "bg-gray-400"
+                    }`}
+                  >
+                    <AlertTriangle size={18} />
+                    <span>{item?.incidentReport?.priority}</span>
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-col items-center gap-4">
-                <span
-                  className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.incidentReport.status as keyof typeof statusMapping]}`}
-                >
-                  {item.incidentReport.status}
-                </span>
-                <div
-                  className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium text-white ${
-                    severityMapping[
-                      item?.incidentReport
-                        ?.priority as keyof typeof severityMapping
-                    ] || "bg-gray-400"
-                  }`}
-                >
-                  <AlertTriangle size={18} />
-                  <span>{item?.incidentReport?.priority}</span>
-                </div>
-              </div>
-            </div>
 
-            {item.incidentAssignee?.[0]?.assignedToData ? (
-              <div className="mt-3 flex items-center gap-3 border-t pt-3">
-                <p>Assigned to:</p>
-                {/* <img
+              {item.incidentAssignee?.[0]?.assignedToData ? (
+                <div className="mt-3 flex items-center gap-3 border-t pt-3">
+                  <p>Assigned to:</p>
+                  {/* <img
                     src={
                       item.incidentAssignee?.[0]?.assignedToData.imageUrl ||
                       "https://placehold.co/150x150"
@@ -212,28 +426,33 @@ export default function IncidentsList() {
                     alt={item.incidentAssignee.assignedToData.name}
                     className="h-10 w-10 rounded-full border border-gray-300 object-cover"
                   /> */}
-                <div className="flex items-center justify-center">
-                  <span className="text-sm font-medium capitalize text-gray-800">
-                    {item.incidentAssignee?.[0]?.assignedToData.name}
-                  </span>
-                  <span className="text-xs text-gray-600">
-                    (
-                    {item.incidentAssignee?.[0]?.acceptanceStatus === true
-                      ? "Accepted"
-                      : item.incidentAssignee?.[0]?.acceptanceStatus === false
-                        ? "Rejected"
-                        : "Pending"}
-                    )
-                  </span>
+                  <div className="flex items-center justify-center">
+                    <span className="text-sm font-medium capitalize text-gray-800">
+                      {item.incidentAssignee?.[0]?.assignedToData.name}
+                    </span>
+                    <span className="text-xs text-gray-600">
+                      (
+                      {item.incidentAssignee?.[0]?.acceptanceStatus === true
+                        ? "Accepted"
+                        : item.incidentAssignee?.[0]?.acceptanceStatus === false
+                          ? "Rejected"
+                          : "Pending"}
+                      )
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="mt-3 flex items-center gap-3 border-t pt-3">
-                <p className="text-sm">Not assigned yet</p>
-              </div>
-            )}
+              ) : (
+                <div className="mt-3 flex items-center gap-3 border-t pt-3">
+                  <p className="text-sm">Not assigned yet</p>
+                </div>
+              )}
+            </div>
+          ))}
+        {filteredIncidents.length === 0 && (
+          <div className="flex h-full w-full items-center justify-center text-gray-500">
+            No incidents found
           </div>
-        ))}
+        )}
       </div>
       <ModalBody>
         <ModalContent className="custom-scrollbar overflow-y-auto">
