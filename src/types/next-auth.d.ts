@@ -9,7 +9,7 @@ declare module "next-auth" {
             token: string;
             image: string;
             imageUrl: string;
-            role: string;
+            role: "ADMIN" | "WORKER" | "EMPLOYEE" | "UNDEFINED";
         } & DefaultSession['user'];
     }
 
@@ -18,7 +18,7 @@ declare module "next-auth" {
         token: string;
         image: string;
         imageUrl: string;
-        role: string;
+            role: "ADMIN" | "WORKER" | "EMPLOYEE" | "UNDEFINED";
     }
 }
 
@@ -29,6 +29,6 @@ declare module "next-auth/jwt" {
         token: string;
         image: string;
         imageUrl: string;
-        role: string;
+            role: "ADMIN" | "WORKER" | "EMPLOYEE" | "UNDEFINED";
     }
 }

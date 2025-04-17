@@ -17,6 +17,7 @@ import {
 } from "@tabler/icons-react";
 import { signOut, useSession } from "next-auth/react";
 import { use, useEffect, useState } from "react";
+import { hasPermission } from "@/lib/auth";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -26,31 +27,50 @@ const Sidebar = () => {
   useEffect(() => {
     void session.update();
   }, []);
+  const user = session.data?.user;
+  const navItems = [];
 
-  const navItems = [
-    { name: "Home", icon: <IconHomeFilled size={20} />, path: "/dashboard" },
-    {
-      name: "Incidents",
-      icon: <IconAlertTriangle size={20} />,
-      path: "/dashboard/incidents",
-    },
-    {
-      name: "Contractors",
-      icon: <IconUsers size={20} />,
-      path: "/dashboard/contractors",
-    },
-    {
-      name: "Employees",
-      icon: <IconTable size={20} />,
-      path: "/dashboard/employees",
-    },
-    { name: "Users", icon: <IconUser size={20} />, path: "/dashboard/users" },
-    {
+  if (user) {
+    const role = user.role;
+
+    // Always show Home and Incidents
+    navItems.push(
+      { name: "Home", icon: <IconHomeFilled size={20} />, path: "/dashboard" },
+      {
+        name: "Incidents",
+        icon: <IconAlertTriangle size={20} />,
+        path: "/dashboard/incidents",
+      },
+    );
+
+    // Admin sees everything
+    if (role === "ADMIN") {
+      navItems.push(
+        {
+          name: "Contractors",
+          icon: <IconUsers size={20} />,
+          path: "/dashboard/contractors",
+        },
+        {
+          name: "Employees",
+          icon: <IconTable size={20} />,
+          path: "/dashboard/employees",
+        },
+        {
+          name: "Users",
+          icon: <IconUser size={20} />,
+          path: "/dashboard/users",
+        },
+      );
+    }
+
+    // Always show profile
+    navItems.push({
       name: "Profile",
       icon: <IconUserCircle size={20} />,
       path: "/dashboard/profile",
-    },
-  ];
+    });
+  }
   return (
     <div
       className={`relative h-screen border-r bg-white transition-all ${isOpen ? "w-64 p-4" : "w-16 p-2"}`}

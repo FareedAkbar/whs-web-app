@@ -6,7 +6,7 @@ type Permission = (typeof ROLES)[Role][number]
 const ROLES = {
   ADMIN: [
     "view:incidents",
-    "create:incidents",
+    // "create:incidents",
     "update:incidents",
     "delete:incidents",
     "assign:incidents",
@@ -15,20 +15,24 @@ const ROLES = {
     "view:homeCards",
     // "view:homeCounters",
     "view:contractors",
+    "assign:contractors",
+    "cancel:incidents",
+    // "accept/reject:incidents"
   ],
-  WORKER: ["view:incidents", "update:incidents", "view:homeCounters"],
-  EMPLOYEE: ["view:incidents", "create:incidents","view:homeCounters",""],
+  WORKER: ["view:incidents", "update:incidents", "view:homeCounters", "accept/reject:incidents", "start:incident", "complete:incident","change:role"
+  ],
+  EMPLOYEE: ["view:incidents", "create:incidents","view:homeCounters","fill:checklist","change:role"],
   UNDEFINED: [],
 } as const
 
-export function hasPermission(user: User, permission: Permission) {
+export function hasPermission(role: Role, permission: Permission) {
    
     
-    if (!user || !user.role) {
-        console.warn("User or roles are undefined:", user);
+    if (!role) {
+        console.warn("User or roles are undefined:", role);
         return false;
       }
     
-      return (ROLES[user.role] as readonly Permission[]).includes(permission)
+      return (ROLES[role] as readonly Permission[]).includes(permission)
       
 }

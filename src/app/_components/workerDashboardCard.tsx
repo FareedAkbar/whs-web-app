@@ -5,12 +5,14 @@ interface WorkerDashboardCardProps {
   title: string;
   onClick: () => void;
   percentage: number; // value from 0 to 100
+  total?: number; // optional, if you want to show total value
 }
 
 const WorkerDashboardCard: React.FC<WorkerDashboardCardProps> = ({
   title,
   onClick,
   percentage,
+  total,
 }) => {
   const radius = 28;
   const stroke = 4;
@@ -26,7 +28,7 @@ const WorkerDashboardCard: React.FC<WorkerDashboardCardProps> = ({
       {/* Title and Value */}
       <div className="flex flex-col items-start gap-4">
         <p className="font-medium text-gray-500">{title}</p>
-        <p className="text-2xl font-bold">{percentage}%</p>
+        <p className="text-2xl font-bold">{total}</p>
       </div>
 
       {/* Circular Progress */}
@@ -37,7 +39,7 @@ const WorkerDashboardCard: React.FC<WorkerDashboardCardProps> = ({
           viewBox={`0 0 ${radius * 2} ${radius * 2}`}
         >
           <circle
-            stroke="#e5e7eb"
+            stroke="#E5707040"
             fill="transparent"
             strokeWidth={stroke}
             r={normalizedRadius}
@@ -45,7 +47,7 @@ const WorkerDashboardCard: React.FC<WorkerDashboardCardProps> = ({
             cy={radius}
           />
           <circle
-            stroke="#007bff" // or use your Tailwind class via style if needed
+            stroke="#EC1C29" // or use your Tailwind class via style if needed
             fill="transparent"
             strokeWidth={stroke}
             strokeLinecap="round"
@@ -57,7 +59,7 @@ const WorkerDashboardCard: React.FC<WorkerDashboardCardProps> = ({
             transform={`rotate(-90 ${radius} ${radius})`}
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-primary">
+        <div className="absolute inset-0 flex items-center justify-center text-sm font-semibold">
           {percentage}%
         </div>
       </div>

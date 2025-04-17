@@ -13,12 +13,60 @@ import {
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
+import { api } from "@/trpc/react";
+import Button from "@/components/ui/Button";
+import { hasPermission } from "@/lib/auth";
 
 const ProfileScreen = () => {
-  const router = useRouter();
-  const { data: session } = useSession();
+  const updateUserRole = api.users.updateUser.useMutation();
 
-  const user = session?.user;
+  const router = useRouter();
+  const session = useSession();
+  const [isChangingRole, setIsChangingRole] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string>(
+    session?.data?.user?.role ?? "EMPLOYEE",
+  );
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleChangeRole = async () => {
+    if (selectedRole === user?.role) {
+      toast.info("This is already the current role.");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await updateUserRole.mutateAsync(
+        {
+          id: user?.id!,
+          role: selectedRole,
+          isVerifiedByAdmin: true,
+        },
+        {
+          async onSuccess() {
+            toast.dismiss();
+            setSelectedRole(selectedRole);
+            router.refresh?.(); // or `router.push(router.asPath)` to refresh data
+            toast.success("User role updated successfully");
+
+            setIsChangingRole(false);
+          },
+          onError: (error) => {
+            toast.dismiss();
+            console.error("Failed to update user role:", error);
+            toast.error(error.message ?? "Something went wrong");
+          },
+        },
+      );
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message ?? "Failed to update user role");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+  const user = session?.data?.user;
   if (!user) {
     return (
       <div className="relative flex h-[90vh] w-[80vw] items-center justify-center">
@@ -60,35 +108,76 @@ const ProfileScreen = () => {
       </div> */}
 
       {/* Name & Role */}
-      <div className="-mt-8 flex items-center gap-4 pl-5">
-        {/* Profile Image / Icon */}
-        <div className="relative flex items-end justify-end overflow-visible">
-          <Image
-            // src={user?.providerImageUrl??"/images/profile-icon.png"}
-            src={"/images/profile-icon.png"}
-            alt="Profile"
-            width={120}
-            height={120}
-            // className="object-cover"
-          />
+      <div className="flex flex-row justify-between">
+        <div className="-mt-8 flex items-center gap-4 pl-5">
+          {/* Profile Image / Icon */}
+          <div className="relative flex items-end justify-end overflow-visible">
+            <Image
+              // src={user?.providerImageUrl??"/images/profile-icon.png"}
+              src={"/images/profile-icon.png"}
+              alt="Profile"
+              width={120}
+              height={120}
+              // className="object-cover"
+            />
 
-          {/* Edit Icon */}
-          <div className="absolute bottom-0 right-0 translate-x-[25%] translate-y-[25%] transform rounded-full bg-primary p-1.5 shadow-md">
-            <IconEdit size={20} className="text-white" />
+            {/* Edit Icon */}
+            <div className="absolute bottom-0 right-0 translate-x-[25%] translate-y-[25%] transform rounded-full bg-primary p-1.5 shadow-md">
+              <IconEdit size={20} className="text-white" />
+            </div>
+          </div>
+
+          {/* Name & Role */}
+          <div>
+            <h1 className="mt-1 text-xl font-bold capitalize">{user?.name}</h1>
+            <p className="capitalize text-gray-500">
+              {user?.role !== "UNDEFINED"
+                ? user?.role === "WORKER"
+                  ? "CONTRACTOR"
+                  : user?.role
+                : ""}
+            </p>
           </div>
         </div>
+        {user && hasPermission(user.role, "change:role") && (
+          <div className="pt-5">
+            {!isChangingRole ? (
+              <Button
+                title="Change Role"
+                onClick={() => setIsChangingRole(true)}
+              />
+            ) : (
+              <div className="flex flex-col gap-2">
+                <select
+                  className="rounded border border-gray-300 px-3 py-2 text-sm shadow focus:border-primary focus:outline-none"
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                >
+                  <option value="UNDEFINED" disabled>
+                    Select Role
+                  </option>
+                  <option value="WORKER">WORKER</option>
+                  <option value="EMPLOYEE">EMPLOYEE</option>
+                </select>
 
-        {/* Name & Role */}
-        <div>
-          <h1 className="mt-1 text-xl font-bold capitalize">{user?.name}</h1>
-          <p className="capitalize text-gray-500">
-            {user?.role !== "UNDEFINED"
-              ? user?.role === "WORKER"
-                ? "CONTRACTOR"
-                : user?.role
-              : ""}
-          </p>
-        </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    disabled={isUpdating}
+                    title={isUpdating ? "Updating..." : "Update Role"}
+                    onClick={handleChangeRole}
+                  />
+
+                  <Button
+                    title="Cancel"
+                    variant="secondary"
+                    onClick={() => setIsChangingRole(false)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Basic Information */}

@@ -19,7 +19,13 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 import { hasPermission } from "@/lib/auth";
-import { CirclePlus, HelpCircle, Settings2 } from "lucide-react";
+import {
+  CheckCircle,
+  CirclePlus,
+  ClipboardList,
+  HelpCircle,
+  Settings2,
+} from "lucide-react";
 import WorkerDashboardCard from "../_components/workerDashboardCard";
 
 const Dashboard = () => {
@@ -27,11 +33,11 @@ const Dashboard = () => {
   const { data: counters, isLoading } = api.dashboard.getCounters.useQuery();
   const { data: workerCounters } = api.dashboard.getWorkerCounters.useQuery();
   const session = useSession();
-  const user = JSON.parse(localStorage.getItem("user") as string);
+  const user = session.data?.user;
+
   useEffect(() => {
     void session.update();
   }, []);
-  console.log("user", user);
 
   const adminDashboardItems = [
     {
@@ -116,27 +122,27 @@ const Dashboard = () => {
     {
       icon: <CirclePlus size={20} />,
       label: "Reports",
-      count: workerCounters?.data?.completedReports ?? 0,
+      count: workerCounters?.data?.reportsReported ?? 0,
       totalCount:
-        user.role === "WORKER"
+        user?.role === "WORKER"
           ? workerCounters?.data?.reportsAssigned
-          : workerCounters?.data?.reportsReported,
+          : workerCounters?.data?.reportsAssigned,
       action: () => {},
       isActive: true,
     },
     {
-      icon: <Settings2 size={20} />,
-      label: "Inspections",
-      count: 0,
-      totalCount: 0,
+      icon: <ClipboardList size={20} />, // Icon for "Assigned Inspections"
+      label: "Assigned Inspections",
+      count: workerCounters?.data?.reportsAssigned ?? 0,
+      totalCount: workerCounters?.data?.reportsAssigned,
       action: () => {},
       isActive: true,
     },
     {
-      icon: <HelpCircle size={20} />,
-      label: "Tasks",
-      count: 0,
-      totalCount: 0,
+      icon: <CheckCircle size={20} />, // Icon for "Completed Tasks"
+      label: "Completed Tasks",
+      count: workerCounters?.data?.completedReports ?? 0,
+      totalCount: workerCounters?.data?.reportsAssigned,
       action: () => {},
       isActive: true,
     },
@@ -154,7 +160,7 @@ const Dashboard = () => {
       {/* Dashboard cards */}
       <div className="grid h-fit flex-grow grid-cols-1 gap-6 py-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
         {user &&
-          hasPermission(user, "view:homeCards") &&
+          hasPermission(user.role, "view:homeCards") &&
           adminDashboardItems.map((item, index) => (
             <AdminDashboardCard
               key={index}
@@ -166,7 +172,7 @@ const Dashboard = () => {
           ))}
         {/* If you want to show default dashboard items, uncomment below */}
         {user &&
-          hasPermission(user, "view:homeCounters") &&
+          hasPermission(user.role, "view:homeCounters") &&
           workerDashboardItems.map((item, index) => (
             <WorkerDashboardCard
               key={index}
@@ -177,6 +183,7 @@ const Dashboard = () => {
                   ? Math.round((item?.count / item.totalCount) * 100)
                   : 0
               }
+              total={item.totalCount}
             />
           ))}
         {/* {dashboardItems.map((item, index) => (
@@ -192,17 +199,21 @@ const Dashboard = () => {
 
       {/* Bottom buttons aligned at the end */}
       <div className="flex w-full justify-between gap-4 pt-6">
-        <Button
-          title="WHS Inspection Checklist"
-          onClick={() => router.push("/dashboard/hazard-form")}
-          icon={<IconClipboardList size={18} />}
-          variant="secondary"
-        />
-        <Button
-          title="Report an Incident"
-          onClick={() => router.push("/dashboard/hazard-form")}
-          icon={<IconAlertCircle size={18} />}
-        />
+        {user && hasPermission(user.role, "fill:checklist") && (
+          <Button
+            title="WHS Inspection Checklist"
+            onClick={() => router.push("/dashboard/hazard-form")}
+            icon={<IconClipboardList size={18} />}
+            variant="secondary"
+          />
+        )}
+        {user && hasPermission(user.role, "create:incidents") && (
+          <Button
+            title="Report an Incident"
+            onClick={() => router.push("/dashboard/hazard-form")}
+            icon={<IconAlertCircle size={18} />}
+          />
+        )}
       </div>
     </div>
   );
