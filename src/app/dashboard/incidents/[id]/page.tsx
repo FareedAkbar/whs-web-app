@@ -26,10 +26,13 @@ export default function IncidentDetailScreen() {
   const router = useRouter();
   //   const incidentId = params.id as string;
   const { id } = params as { id: string };
-  const { data: incidentData, isLoading } =
-    api.incidents.getIncidentById.useQuery({
-      incidentReportId: id,
-    });
+  const {
+    data: incidentData,
+    isLoading,
+    refetch,
+  } = api.incidents.getIncidentById.useQuery({
+    incidentReportId: id,
+  });
   const { data: workers } = api.workers.getWorkers.useQuery();
   const assignIncidentToWorker = api.incidents.assignIncident.useMutation();
   const updateIncidentStatus = api.incidents.updateStatus.useMutation();
@@ -39,9 +42,9 @@ export default function IncidentDetailScreen() {
   const [comment, setComment] = useState("");
   const [decision, setDecision] = useState<"accept" | "reject" | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"accept" | "reject" | "assign">(
-    "accept",
-  );
+  const [modalMode, setModalMode] = useState<
+    "accept" | "reject" | "assign" | "cancel" | ""
+  >("accept");
   const user = session.data?.user;
 
   const statusMapping = {
@@ -51,7 +54,11 @@ export default function IncidentDetailScreen() {
     CANCELLED: "bg-red-100 text-red-600",
     ASSIGNED: "bg-purple-100 text-purple-600",
   };
-
+  const assignees = Array.isArray(incident?.incidentAssignee)
+    ? incident?.incidentAssignee
+    : incident?.incidentAssignee
+      ? [incident.incidentAssignee]
+      : [];
   const statusOrder = [
     "INITIATED",
     "ASSIGNED",
@@ -64,11 +71,12 @@ export default function IncidentDetailScreen() {
     await incidentAcceptance.mutateAsync(
       {
         incidentReportId: incident.incidentReport.id,
-        status: flag,
+        acceptanceStatus: flag,
       },
       {
         onSuccess: () => {
           toast.success(`Report has been ${flag ? "Accepted" : "Rejected"}`);
+          refetch();
           //   setDecision(null);
         },
         onError: (error) => {
@@ -89,6 +97,7 @@ export default function IncidentDetailScreen() {
       {
         onSuccess: () => {
           toast.success("Incident has been started");
+          refetch();
         },
         onError: (error) => {
           toast.error(error.message ?? "Something went wrong");
@@ -108,6 +117,7 @@ export default function IncidentDetailScreen() {
       {
         onSuccess: () => {
           toast.success("Incident has been completed");
+          refetch();
         },
         onError: (error) => {
           toast.error(error.message ?? "Something went wrong");
@@ -123,32 +133,39 @@ export default function IncidentDetailScreen() {
   const handleDone = async () => {
     if (!incident) return;
 
+    const assignees = Array.isArray(incident?.incidentAssignee)
+      ? incident.incidentAssignee
+      : incident?.incidentAssignee
+        ? [incident.incidentAssignee]
+        : [];
+
     try {
-      if (modalMode == "reject") {
+      if (modalMode === "cancel") {
         await updateIncidentStatus.mutateAsync({
           incidentReportId: incident.incidentReport.id,
           status: "CANCELLED",
           comments: comment,
         });
         toast.success("Incident cancelled successfully");
-        router.push("/incidents");
+        refetch();
       } else if (
         modalMode === "assign" ||
-        ((incident?.incidentAssignee?.length ?? 0) > 0 &&
-          incident?.incidentAssignee?.every(
-            (assignee) => assignee.acceptanceStatus === false,
-          ))
+        (assignees.length > 0 &&
+          assignees.every((assignee) => assignee.acceptanceStatus === false))
       ) {
         await assignIncidentToWorker.mutateAsync({
           incidentReportId: incident.incidentReport.id,
           assignedTo: selectedContractor,
         });
         toast.success("Contractor assigned successfully");
-        router.push("/incidents");
+        refetch();
       }
     } catch (error) {
       toast.error("Failed to update incident");
       console.error(error);
+    } finally {
+      setOpen(false);
+      setModalMode("");
     }
   };
 
@@ -190,42 +207,46 @@ export default function IncidentDetailScreen() {
                 ]
               }`}
             >
-              {incident.incidentReport.status}
+              {incident.incidentReport.status.replace("_", " ")}
             </span>
           </div>
           <div className="flex flex-row items-center gap-4">
-            {user && hasPermission(user.role, "assign:contractors") && (
-              <>
-                {incident.incidentAssignee?.length === 0 ? (
-                  // Show "Assign Contractor" if no one is assigned
-                  <Button
-                    title="Assign Contractor"
-                    icon={<UserPlus size={16} />}
-                    onClick={() => {
-                      setModalOpen(true);
-                      setModalMode("assign");
-                      setOpen(true);
-                    }}
-                  />
-                ) : // ) : incident.incidentAssignee.every(
-                //     (assignee) => assignee.acceptanceStatus === false,
-                //   ) ? (
-                //   // Show "Reassign Contractor" if all rejected
-                //   <div>
-                //     <p className="text-primary">Rejected</p>
-                //     <Button
-                //       title="Reassign Contractor"
-                //       icon={<UserPlus size={16} />}
-                //       onClick={() => {
-                //         setModalOpen(true);
-                //         setModalMode("accept");
-                //         setOpen(true);
-                //       }}
-                //     />
-                //   </div>
-                null}
-              </>
-            )}
+            {user &&
+              hasPermission(user.role, "assign:contractors") &&
+              incident.incidentReport.status !== "COMPLETED" &&
+              incident.incidentReport.status !== "CANCELLED" && (
+                <>
+                  {assignees.length === 0 ||
+                  incident.incidentAssignee == null ? (
+                    // Show "Assign Contractor" if no one is assigned
+                    <Button
+                      title="Assign Contractor"
+                      icon={<UserPlus size={16} />}
+                      onClick={() => {
+                        setModalOpen(true);
+                        setModalMode("assign");
+                        setOpen(true);
+                      }}
+                    />
+                  ) : assignees.every(
+                      (assignee) => assignee.acceptanceStatus === false,
+                    ) ? (
+                    // Show "Reassign Contractor" if all rejected
+                    <div className="flex items-center gap-4">
+                      <p className="font-semibold text-primary">Rejected!</p>
+                      <Button
+                        title="Reassign Contractor"
+                        icon={<UserPlus size={16} />}
+                        onClick={() => {
+                          setModalOpen(true);
+                          setModalMode("assign");
+                          setOpen(true);
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                </>
+              )}
 
             {user &&
               hasPermission(user.role, "cancel:incidents") &&
@@ -235,7 +256,7 @@ export default function IncidentDetailScreen() {
                   //   icon={<UserPlus size={16} />}
                   onClick={() => {
                     setModalOpen(true);
-                    setModalMode("reject");
+                    setModalMode("cancel");
                     setOpen(true);
                   }}
                   variant="secondary"
@@ -261,13 +282,12 @@ export default function IncidentDetailScreen() {
             )}
 
             <div className="mt-4">
-              {incident.incidentAssignee &&
-              incident.incidentAssignee.length > 0 ? (
+              {incident.incidentAssignee && assignees.length > 0 ? (
                 <div className="mt-3 space-y-2">
                   <p className="text-sm font-semibold text-red-500">
                     Assigned Contractor(s):
                   </p>
-                  {incident.incidentAssignee.map((assignee, index) =>
+                  {assignees.map((assignee, index) =>
                     assignee.assignedToData ? (
                       <p
                         key={index}
@@ -300,37 +320,58 @@ export default function IncidentDetailScreen() {
                       <p className="text-sm font-medium capitalize text-gray-700">
                         {status.toLocaleLowerCase().replace("_", " ")} images
                       </p>
-                      <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                        {images?.map((image, index) => (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {images && images.length > 0 ? (
+                          images.map((image, index) => (
+                            <img
+                              key={image.id || index}
+                              src={image.url || "/images/n-img.jpg"}
+                              alt={`Incident Image ${index + 1}`}
+                              className="h-20 w-20 cursor-pointer rounded-lg object-contain shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
+                              onClick={() =>
+                                image.url && window.open(image.url, "_blank")
+                              }
+                              width={1000}
+                              height={1000}
+                            />
+                          ))
+                        ) : (
                           <img
-                            key={image.id || index}
-                            src={image.url}
-                            alt={`Incident Image ${index + 1}`}
-                            className="h-28 w-full cursor-pointer rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105"
-                            onClick={() => window.open(image.url, "_blank")}
-                            width={150}
-                            height={150}
+                            src="/images/no-img.jpg"
+                            alt="No Image Available"
+                            className="h-20 w-20 rounded-lg object-contain shadow-md sm:h-28 sm:w-28"
+                            width={1000}
+                            height={1000}
                           />
-                        ))}
+                        )}
                       </div>
                     </div>
                   ),
               )}
             </div>
           ) : null}
-          {user && hasPermission(user.role, "start:incident") && (
-            <Button title="Mark as Start" onClick={() => handleStart()} />
-          )}
-          {user && hasPermission(user.role, "complete:incident") && (
-            <Button
-              title="Mark as Completed"
-              onClick={() => handleComplete()}
-            />
-          )}
+          <div className="flex items-center gap-4">
+            {user &&
+              hasPermission(user.role, "start:incident") &&
+              incident.incidentReport.status === "ASSIGNED" &&
+              assignees?.[0]?.acceptanceStatus == true && (
+                <Button title="Mark as Start" onClick={() => handleStart()} />
+              )}
+            {user &&
+              hasPermission(user.role, "complete:incident") &&
+              incident.incidentReport.status === "IN_PROGRESS" &&
+              assignees?.[0]?.acceptanceStatus == true && (
+                <Button
+                  title="Mark as Completed"
+                  onClick={() => handleComplete()}
+                />
+              )}
+          </div>
 
           {user &&
             hasPermission(user.role, "accept/reject:incidents") &&
-            incident.incidentReport.status === "INITIATED" &&
+            incident.incidentReport.status === "ASSIGNED" &&
+            assignees?.[0]?.acceptanceStatus == null &&
             !decision && (
               <div className="mt-6 flex items-center gap-4">
                 <button
@@ -354,14 +395,14 @@ export default function IncidentDetailScreen() {
               </div>
             )}
 
-          {modalOpen && modalMode === "assign" && (
+          {(modalMode === "assign" || modalMode === "cancel") && (
             <ModalBody>
               <div className="mt-4">
                 {modalMode === "assign" ? (
                   <>
                     <p className="text-sm font-medium text-gray-700">
-                      {(incident.incidentAssignee?.length ?? 0) > 0 &&
-                      incident.incidentAssignee?.every(
+                      {(assignees.length ?? 0) > 0 &&
+                      assignees.every(
                         (assignee) => assignee.acceptanceStatus === false,
                       )
                         ? "Reassign Contractor"
@@ -405,13 +446,6 @@ export default function IncidentDetailScreen() {
                     }
                     disabled={!selectedContractor && !comment}
                   />
-
-                  <button
-                    onClick={handleDone}
-                    className="rounded-md bg-red-500 px-4 py-2 font-semibold text-white"
-                  >
-                    Confirm
-                  </button>
                 </div>
               </div>
             </ModalBody>

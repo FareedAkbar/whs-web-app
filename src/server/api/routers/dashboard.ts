@@ -4,8 +4,8 @@ import { env } from '@/env';
 
 export const dashboardRouter = createTRPCRouter({
 
-    getCounters: publicProcedure
-        .query( async ({ ctx, input }) => {
+    getAdminCounters: publicProcedure
+        .mutation( async ({ ctx, input }) => {
             try {
                 const userToken =  ctx.session?.user.token;
                 if(!userToken){
@@ -48,7 +48,7 @@ export const dashboardRouter = createTRPCRouter({
         }),
     
     getWorkerCounters: publicProcedure
-        .query( async ({ ctx, input }) => {
+        .mutation( async ({ ctx, input }) => {
             try {
                 const userToken =  ctx.session?.user.token;
                 if(!userToken){
@@ -86,5 +86,45 @@ export const dashboardRouter = createTRPCRouter({
             error: error instanceof Error ? error.message : 'An error occurred while getting counters.',
         };
     }
-        })
+        }),
+        getEmployeeCounters: publicProcedure
+        .mutation( async ({ ctx, input }) => {
+            try {
+                const userToken =  ctx.session?.user.token;
+                if(!userToken){
+                    throw new TRPCError({
+                        code: 'UNAUTHORIZED',
+                        message: 'Unauthorized'
+                    });
+                }
+                const response = await fetch(`${env.BASE_URL}/user/employee-counts`, {
+                    method: 'GET',
+            headers: {
+                'authorization': `Bearer ${userToken}`,
+                'Content-Type': 'application/json',            },
+            
+        });
+      console.log('response', response);
+        if (!response.ok) {
+            const errorData = await response.json() as { message: string };
+            console.error('enums getting error:', errorData);
+            return {
+                status: false,
+                error: errorData.message,
+            };
+        }
+
+        const counts = await response.json() as workerDashboardApiResponse;
+        return {
+            status: true,
+            data: counts.data,
+        };
+    } catch (error) {
+        console.error('enum error:', error);
+        return {
+            status: false,
+            error: error instanceof Error ? error.message : 'An error occurred while getting counters.',
+        };
+    }
+        }),
     })

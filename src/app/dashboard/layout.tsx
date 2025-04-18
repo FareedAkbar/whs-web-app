@@ -14,13 +14,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const session = useSession();
-  if (session.status === "loading") {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center">
-        Loading...
-      </div>
-    );
-  } else if (session.status === "unauthenticated") {
+  // if (session.status === "loading") {
+  //   return (
+  //     <div className="flex h-screen w-screen items-center justify-center">
+  //       Loading...
+  //     </div>
+  //   );
+  // } else
+  if (session.status === "unauthenticated") {
     return (
       <div className="flex h-screen w-screen items-center justify-center">
         <div className="flex flex-col items-center justify-center">
@@ -40,7 +41,7 @@ export default function RootLayout({
 
   return (
     <div
-      className="items- justify- n relative flex w-full p-2 sm:p-0"
+      className="items- justify- relative flex min-h-screen w-full p-2 sm:p-0"
       style={{
         background: "url('/images/whs-web-bg.png')",
         backgroundSize: "cover",

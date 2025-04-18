@@ -47,13 +47,12 @@ const Button: React.FC<ButtonProps> = ({
         className,
       )}
     >
-      {(icon || loading) && (
+      {loading && (
+        <div className="h-4 w-4 animate-spin rounded-full border-t border-white bg-transparent" />
+      )}
+      {icon && !loading && (
         <span className={iconWrapper[variant]}>
-          {loading ? (
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-          ) : (
-            <span className="flex items-center justify-center">{icon}</span>
-          )}
+          <span className="flex items-center justify-center">{icon}</span>
         </span>
       )}
 

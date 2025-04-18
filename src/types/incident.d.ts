@@ -29,7 +29,7 @@
     incidentReport: IncidentReport;
     incident: Incident;
     generalHazard: GeneralHazard;
-    incidentAssignee: IncidentAssignee[];
+    incidentAssignee: IncidentAssignee[]|IncidentAssignee;
     media:MediaItem[]
   }
   interface IncidentAssignee {

@@ -85,9 +85,10 @@ export default function IncidentsList() {
             priority.includes(item.incidentReport.priority)) &&
           (!status.length || status.includes(item.incidentReport.status)) &&
           (!assignedTo ||
-            item.incidentAssignee.some(
-              (assignee) => assignee.assignedTo === assignedTo,
-            )) &&
+            (Array.isArray(item.incidentAssignee) &&
+              item.incidentAssignee.some(
+                (assignee) => assignee.assignedTo === assignedTo,
+              ))) &&
           // (!taskType || item.incidentReport.taskType === taskType) &&
           (!searchTerm ||
             item.incidentReport.description
@@ -309,7 +310,7 @@ export default function IncidentsList() {
                   <span
                     className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.incidentReport.status as keyof typeof statusMapping]}`}
                   >
-                    {item.incidentReport.status}
+                    {item.incidentReport.status.replace("_", " ")}
                   </span>
                   {/* <div
                     className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium text-white ${

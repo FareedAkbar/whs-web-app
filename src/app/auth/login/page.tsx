@@ -42,17 +42,9 @@ export default function Login() {
         ...data,
         redirect: false,
       });
-      toast.dismiss();
-      toast.success("Successfully Logged in!");
-      router.push("/dashboard");
-      if (response?.status === 200) {
-        // Optional: Log backend login
-        // const resp = await loginUser.mutateAsync(data);
-        // console.log("resp", resp);
-        // if (resp.status) {
-        //   localStorage.setItem("user", JSON.stringify(resp.user));
-        // }
-        // localStorage.setItem("user", JSON.stringify(resp.user));
+      const session = await getSession();
+
+      if (session !== null && response?.ok && !response.error) {
         toast.dismiss();
         toast.success("Successfully Logged in!");
         router.push("/dashboard");

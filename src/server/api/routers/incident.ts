@@ -242,7 +242,7 @@ export const incidentRouter = createTRPCRouter({
     incidentAcceptance: publicProcedure
     .input(z.object({
         incidentReportId: z.string(),
-        status: z.boolean(),
+        acceptanceStatus: z.boolean(),
         // comments:z.string().optional(),
     }))
     .mutation( async ({ ctx, input }) => {

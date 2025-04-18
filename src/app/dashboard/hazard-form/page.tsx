@@ -94,7 +94,6 @@ const HazardForm = () => {
     e.preventDefault();
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      console.log("Selected files:", files);
 
       const formData = new FormData();
       files.forEach((file) => {
