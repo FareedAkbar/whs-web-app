@@ -4,6 +4,12 @@ interface UsersResponseData {
     users: User[];
     token: string;
 }
+interface UserResponseData {
+    status: boolean;
+    message: string;
+    user: User;
+    token: string;
+}
 interface UpdateUserResponseData {
     status: boolean;
     message: string;

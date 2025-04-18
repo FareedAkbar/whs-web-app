@@ -71,7 +71,7 @@ export default function Register() {
   };
 
   return (
-    <div className="font-geist font-geist container w-full rounded-2xl bg-white p-4 text-black shadow-2xl backdrop-blur-xl sm:m-0 sm:w-[450px] md:p-8 dark:bg-white/30 dark:text-black">
+    <div className="font-geist font-geist container w-full rounded-2xl bg-white/80 p-4 text-black shadow-2xl backdrop-blur-xl sm:m-0 sm:w-[450px] md:p-8">
       <div className="flex text-3xl">
         <span className="font-bold text-primary">Sign Up</span>
       </div>

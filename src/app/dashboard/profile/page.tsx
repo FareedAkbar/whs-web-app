@@ -19,8 +19,12 @@ import Button from "@/components/ui/Button";
 import { hasPermission } from "@/lib/auth";
 
 const ProfileScreen = () => {
+  const { data, isLoading, refetch } = api.users.getUser.useQuery();
   const updateUserRole = api.users.updateUser.useMutation();
+  // const user = session?.data?.user;
+  console.log("user data", data);
 
+  const user = data?.data;
   const router = useRouter();
   const session = useSession();
   const [isChangingRole, setIsChangingRole] = useState(false);
@@ -28,6 +32,7 @@ const ProfileScreen = () => {
     session?.data?.user?.role ?? "EMPLOYEE",
   );
   const [isUpdating, setIsUpdating] = useState(false);
+  console.log("user", user);
 
   const handleChangeRole = async () => {
     if (selectedRole === user?.role) {
@@ -41,7 +46,7 @@ const ProfileScreen = () => {
         {
           id: user?.id!,
           role: selectedRole,
-          isVerifiedByAdmin: true,
+          isVerifiedByAdmin: false,
         },
         {
           async onSuccess() {
@@ -49,7 +54,8 @@ const ProfileScreen = () => {
             setSelectedRole(selectedRole);
             router.refresh?.(); // or `router.push(router.asPath)` to refresh data
             toast.success("User role updated successfully");
-
+            refetch();
+            session.update?.({ user: { role: selectedRole } });
             setIsChangingRole(false);
           },
           onError: (error) => {
@@ -66,8 +72,9 @@ const ProfileScreen = () => {
       setIsUpdating(false);
     }
   };
-  const user = session?.data?.user;
-  if (!user) {
+  console.log("session", session);
+
+  if (isLoading) {
     return (
       <div className="relative flex h-[90vh] w-[80vw] items-center justify-center">
         <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-red-500"></div>
@@ -156,7 +163,7 @@ const ProfileScreen = () => {
                   <option value="UNDEFINED" disabled>
                     Select Role
                   </option>
-                  <option value="WORKER">WORKER</option>
+                  <option value="WORKER">CONTRACTOR</option>
                   <option value="EMPLOYEE">EMPLOYEE</option>
                 </select>
 
@@ -188,7 +195,7 @@ const ProfileScreen = () => {
         {/* {user?.phoneNumber && ( */}
         <div className="mb-2 flex items-center gap-2">
           <IconPhoneFilled size={16} className="text-primary" />
-          <span className="text-gray-700">0412345678</span>
+          <span className="text-gray-700">{user?.phoneNumber}</span>
         </div>
         {/* )} */}
         <div className="mb-2 flex items-center gap-2">

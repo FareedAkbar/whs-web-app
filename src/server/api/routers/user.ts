@@ -46,6 +46,49 @@ export const userRouter = createTRPCRouter({
         };
     }
         }),
+    getUser: publicProcedure
+        .query( async ({ ctx, input }) => {
+            try {
+                const userToken =  ctx.session?.user.token;
+                if(!userToken){
+                    throw new TRPCError({
+                        code: 'UNAUTHORIZED',
+                        message: 'Unauthorized'
+                    });
+                }
+        const response = await fetch(`${env.BASE_URL}/user/refresh`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': `Bearer ${userToken}`,
+            },
+            
+        });
+      console.log('response', response);
+        if (!response.ok) {
+            const errorData = await response.json() as { message: string };
+            console.error('users getting error:', errorData);
+            return {
+                status: false,
+                error: errorData.message,
+            };
+        }
+
+        const usersData = await response.json() as UserResponseData;
+        console.log('usersData', usersData);
+        
+        return {
+            status: true,
+            data: usersData.user,
+        };
+    } catch (error) {
+        console.error('user error:', error);
+        return {
+            status: false,
+            error: error instanceof Error ? error.message : 'An error occurred while logging in.',
+        };
+    }
+        }),
     updateUser: publicProcedure
     .input(z.object({
         id: z.string(),
@@ -60,7 +103,7 @@ export const userRouter = createTRPCRouter({
                         message: 'Unauthorized'
                     });
                 }
-        const response = await fetch(`${env.BASE_URL}/admin/update-user`, {
+        const response = await fetch(`${env.BASE_URL}/user/update`, {
             method: 'PUT',
             headers: {
                 'authorization': `Bearer ${userToken}`,
