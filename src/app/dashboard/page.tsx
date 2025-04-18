@@ -107,8 +107,8 @@ const Dashboard = () => {
     {
       icon: <CirclePlus size={20} />,
       label: "Reports",
-      count: counters?.reportsReported ?? 0,
-      totalCount: counters?.reportsAssigned ?? 0,
+      count: counters?.completedReports ?? 0,
+      totalCount: counters?.reportsReported ?? 0,
       action: () => {},
     },
     {
