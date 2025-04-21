@@ -19,6 +19,7 @@ declare module "next-auth" {
       imageUrl: string;
       token: string;
       role: string;
+      isVerifiedByAdmin?: boolean;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
@@ -69,7 +70,7 @@ export const authConfig = {
       }
       return true;
     },
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account, profile,trigger,session }) {
       if (user) {
         token.id = user.id ?? "";
         token.name = user.name;
@@ -78,6 +79,7 @@ export const authConfig = {
         token.token = user.token;
         token.role = user.role;
         token.imageUrl = user.imageUrl;
+        token.isVerifiedByAdmin = user.isVerifiedByAdmin
       }
 
       if (account?.provider === "google" && profile) {
@@ -98,11 +100,17 @@ export const authConfig = {
           token.imageUrl = response.user.imageUrl;
           token.token = response.token;
           token.role = response.user.role;
+          token.isVerifiedByAdmin = response.user.isVerifiedByAdmin
         }
+        // if (trigger === "update" && session?.role) {
+        //   // Note, that `session` can be any arbitrary object, remember to validate it!
+        //   token.role = session.role
+        // }
       }
+
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token,trigger, newSession }) {
       const userSession = {
         ...session,
         user: {
@@ -112,10 +120,23 @@ export const authConfig = {
           imageUrl: token.imageUrl,
           token: token.token,
           role: token.role,
+          isVerifiedByAdmin: token.isVerifiedByAdmin
         }
       }
+      // if (trigger === "update" && newSession?.role) {
+      //   // You can update the session in the database if it's not already updated.
+      //   // await adapter.updateUser(session.user.id, { role: newSession.role })
+
+      //   // Make sure the updated value is reflected on the client
+      //   session.user.role = newSession.role;
+      //   userSession.user.role = newSession.role;
+
+      // }
+      // console.log("userSession", userSession,"trigger",trigger,"newSession",newSession);
+      
       return userSession;
     },
+   
   },
   session: {
     strategy: "jwt",

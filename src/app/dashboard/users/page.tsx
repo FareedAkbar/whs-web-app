@@ -17,12 +17,14 @@ import {
   IconRosetteDiscountCheckFilled,
   IconRosetteDiscountCheckOff,
 } from "@tabler/icons-react";
+import Button from "@/components/ui/Button";
 
 const UserPage = () => {
   const { data: users, isLoading, refetch } = api.users.getUsers.useQuery();
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedRole, setSelectedRole] = useState("");
-  const updateUserRole = api.users.updateUser.useMutation();
+  const updateUserRole = api.users.adminUpdateUserRole.useMutation();
+  const [loading, setLoading] = useState(false);
   const { setOpen } = useModal();
   const [filter, setFilter] = useState("all"); // New filter state
   useEffect(() => {
@@ -31,7 +33,7 @@ const UserPage = () => {
 
   const handleAssignRole = async () => {
     if (!selectedUser) return;
-
+    setLoading(true);
     const isSameRole = selectedRole === selectedUser.role;
 
     await updateUserRole.mutateAsync(
@@ -54,6 +56,7 @@ const UserPage = () => {
         },
       },
     );
+    setLoading(false);
     setOpen(false);
   };
   // Filter users based on selected filter
@@ -193,26 +196,37 @@ const UserPage = () => {
           <div className="flex justify-end gap-2">
             {/* Assign Role or Approve & Assign */}
             {selectedUser?.isVerified ? (
-              <button
-                className={`rounded-md px-4 py-2 text-white ${
-                  selectedRole
-                    ? "bg-red-500 hover:bg-red-600"
-                    : "cursor-not-allowed bg-gray-400"
-                }`}
+              <Button
                 onClick={handleAssignRole}
                 disabled={!selectedRole}
-              >
-                {selectedUser?.isVerifiedByAdmin
-                  ? "Change Role"
-                  : "Approve & Assign Role"}
-              </button>
+                loading={loading}
+                title={
+                  selectedUser?.isVerifiedByAdmin
+                    ? "Change Role"
+                    : "Approve & Assign Role"
+                }
+              />
             ) : (
-              <button
-                className="cursor-not-allowed rounded-md bg-gray-400 px-4 py-2 text-white"
-                disabled
-              >
-                Cannot Assign Role
-              </button>
+              // <button
+              //   className={`rounded-md px-4 py-2 text-white ${
+              //     selectedRole
+              //       ? "bg-red-500 hover:bg-red-600"
+              //       : "cursor-not-allowed bg-gray-400"
+              //   }`}
+              //   onClick={handleAssignRole}
+              //   disabled={!selectedRole}
+              // >
+              //   {selectedUser?.isVerifiedByAdmin
+              //     ? "Change Role"
+              //     : "Approve & Assign Role"}
+              // </button>
+              // <button
+              //   className="cursor-not-allowed rounded-md bg-gray-400 px-4 py-2 text-white"
+              //   disabled
+              // >
+              //   Cannot Assign Role
+              // </button>
+              <Button title="Cannot Assign Role" disabled loading={loading} />
             )}
           </div>
         </ModalFooter>

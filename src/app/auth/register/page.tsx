@@ -51,7 +51,7 @@ export default function Register() {
       {
         phone: data.phone,
         name: data.fName + " " + data.lName,
-        email: data.email,
+        email: data.email.toLowerCase(),
         password: data.password,
         role: data.role,
       },

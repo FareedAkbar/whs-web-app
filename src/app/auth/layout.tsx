@@ -11,12 +11,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const session = useSession();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     console.log("Session :", session);
-    if (session.status === "authenticated") {
-      window.location.href = "/";
+    if (
+      session.status === "authenticated" &&
+      session.data.user.role !== "UNDEFINED"
+    ) {
+      window.location.href = "/dashboard";
     }
 
     setLoading(false);

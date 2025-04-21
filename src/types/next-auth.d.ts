@@ -10,6 +10,7 @@ declare module "next-auth" {
             image: string;
             imageUrl: string;
             role: "ADMIN" | "WORKER" | "EMPLOYEE" | "UNDEFINED";
+            isVerifiedByAdmin?: boolean;
         } & DefaultSession['user'];
     }
 
@@ -18,7 +19,8 @@ declare module "next-auth" {
         token: string;
         image: string;
         imageUrl: string;
-            role: "ADMIN" | "WORKER" | "EMPLOYEE" | "UNDEFINED";
+        role: "ADMIN" | "WORKER" | "EMPLOYEE" | "UNDEFINED";
+        isVerifiedByAdmin?: boolean;
     }
 }
 
@@ -29,6 +31,7 @@ declare module "next-auth/jwt" {
         token: string;
         image: string;
         imageUrl: string;
-            role: "ADMIN" | "WORKER" | "EMPLOYEE" | "UNDEFINED";
+        role: "ADMIN" | "WORKER" | "EMPLOYEE" | "UNDEFINED";
+        isVerifiedByAdmin?: boolean;
     }
 }
