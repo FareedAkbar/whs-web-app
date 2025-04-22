@@ -48,8 +48,8 @@ export default function Onboarding() {
             toast.dismiss();
             toast.success("User role updated successfully");
             // refetch();
-            update?.({ newSession: { role: values.role } });
-            router.push("/auth/login");
+            update({ role: values.role });
+            router.push("/dashboard");
           },
           onError: (error) => {
             toast.dismiss();

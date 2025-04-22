@@ -22,7 +22,7 @@ const ProfileScreen = () => {
   const { data, isLoading, refetch } = api.users.getUser.useQuery();
   const updateUserRole = api.users.updateUser.useMutation();
   // const user = session?.data?.user;
-  console.log("user data", data);
+  // console.log("user data", data);
 
   const user = data?.data;
   const router = useRouter();
@@ -32,7 +32,6 @@ const ProfileScreen = () => {
     session?.data?.user?.role ?? "EMPLOYEE",
   );
   const [isUpdating, setIsUpdating] = useState(false);
-  console.log("user", user);
 
   const handleChangeRole = async () => {
     if (selectedRole === user?.role) {
@@ -55,7 +54,7 @@ const ProfileScreen = () => {
             router.refresh?.(); // or `router.push(router.asPath)` to refresh data
             toast.success("User role updated successfully");
             refetch();
-            session.update?.({ user: { role: selectedRole } });
+            session.update?.({ role: selectedRole });
             setIsChangingRole(false);
           },
           onError: (error) => {
@@ -72,7 +71,7 @@ const ProfileScreen = () => {
       setIsUpdating(false);
     }
   };
-  console.log("session", session);
+  // console.log("session", session);
 
   if (isLoading) {
     return (
@@ -82,7 +81,7 @@ const ProfileScreen = () => {
     );
   }
   return (
-    <div className="m-8 h-full rounded-lg bg-white p-6 shadow-lg">
+    <div className="m-8 h-fit rounded-lg bg-white p-6 shadow-lg">
       {/* Header Image */}
       <div className="relative h-48 w-full overflow-hidden rounded-lg">
         <Image

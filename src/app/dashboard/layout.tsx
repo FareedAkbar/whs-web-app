@@ -18,10 +18,10 @@ export default function RootLayout({
   const isVerified =
     session?.data?.user?.isVerifiedByAdmin?.toString() === "true";
 
-  const getSes = getSession();
-  console.log("sessionnnn", session, "getsession", getSes);
+  // const getSes = getSession();
+  // console.log("sessionnnn", session);
 
-  // const router = useRouter();
+  // // const router = useRouter();
   // useEffect(() => {
   //   const checkSession = async () => {
   //     const session = await getSession();
@@ -61,7 +61,7 @@ export default function RootLayout({
         </div>
       </div>
     );
-  } else if (!isVerified) {
+  } else if (session.data?.user?.role !== "ADMIN" && !isVerified) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-gray-100">
         <div className="flex flex-col items-center justify-center rounded-lg bg-white p-8 text-center shadow-md">

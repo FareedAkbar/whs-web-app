@@ -14,7 +14,7 @@ export default function RootLayout({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log("Session :", session);
+    // console.log("Session :", session);
     if (
       session.status === "authenticated" &&
       session.data.user.role !== "UNDEFINED"

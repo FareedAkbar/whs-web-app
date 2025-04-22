@@ -3,7 +3,7 @@
 import ThemeToggle from "@/components/ThemeToggle";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import { IconHelp, IconUserCircle } from "@tabler/icons-react";
-import { LogOutIcon, SettingsIcon } from "lucide-react";
+import { LogOutIcon, SettingsIcon, UserRound } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -104,7 +104,7 @@ export default function TopBar() {
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 disabled={dropdownOpen}
-                className="flex items-center gap-2 rounded-full bg-transparent p-[1px]"
+                className="flex items-center gap-2 rounded-full bg-[#F2F2F2] p-3"
               >
                 {session.data?.user.image && session.data.user.image !== "" ? (
                   <Image
@@ -115,7 +115,10 @@ export default function TopBar() {
                     alt=""
                   />
                 ) : (
-                  <IconUserCircle size={48} />
+                  <UserRound
+                    size={20}
+                    // className="rounded-full bg-[#F2F2F2] p-3"
+                  />
                 )}
               </button>
 

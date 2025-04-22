@@ -102,15 +102,17 @@ export const authConfig = {
           token.role = response.user.role;
           token.isVerifiedByAdmin = response.user.isVerifiedByAdmin
         }
-        // if (trigger === "update" && session?.role) {
-        //   // Note, that `session` can be any arbitrary object, remember to validate it!
-        //   token.role = session.role
-        // }
+         
       }
-
+      
+      if (trigger === "update" && session?.role) {
+        // Note, that `session` can be any arbitrary object, remember to validate it!
+        token.role = session.role
+      }
       return token;
     },
-    async session({ session, token,trigger, newSession }) {
+    async session({ session, token }) {
+      
       const userSession = {
         ...session,
         user: {
@@ -123,17 +125,7 @@ export const authConfig = {
           isVerifiedByAdmin: token.isVerifiedByAdmin
         }
       }
-      // if (trigger === "update" && newSession?.role) {
-      //   // You can update the session in the database if it's not already updated.
-      //   // await adapter.updateUser(session.user.id, { role: newSession.role })
-
-      //   // Make sure the updated value is reflected on the client
-      //   session.user.role = newSession.role;
-      //   userSession.user.role = newSession.role;
-
-      // }
-      // console.log("userSession", userSession,"trigger",trigger,"newSession",newSession);
-      
+    
       return userSession;
     },
    
@@ -192,6 +184,7 @@ export const authConfig = {
               providerImageUrl: response.user.imageUrl,
               role: response.user.role,
               token: response.token,
+              isVerifiedByAdmin: response.user.isVerifiedByAdmin
             };
             return user;
           }
