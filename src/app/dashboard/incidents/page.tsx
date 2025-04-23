@@ -273,9 +273,9 @@ export default function IncidentsList() {
                 router.push(`/dashboard/incidents/${item.incidentReport.id}`)
               }
             >
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
                 <div className="flex gap-3">
-                  <div className="rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2">
+                  <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2">
                     <AlertTriangle
                       size={40}
                       color={`${severityMapping[item?.incidentReport?.priority] || "black"}`}
@@ -306,7 +306,7 @@ export default function IncidentsList() {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex flex-col items-center justify-end gap-4">
                   <span
                     className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.incidentReport.status as keyof typeof statusMapping]}`}
                   >

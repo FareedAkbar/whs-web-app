@@ -17,6 +17,8 @@ export default function RootLayout({
   const session = useSession();
   const isVerified =
     session?.data?.user?.isVerifiedByAdmin?.toString() === "true";
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
 
   // const getSes = getSession();
   // console.log("sessionnnn", session);
@@ -86,9 +88,9 @@ export default function RootLayout({
     >
       <div className="flex h-screen w-screen flex-col">
         <div className="relative flex h-full w-full overflow-hidden">
-          <Sidebar />
+          <Sidebar isDrawerOpen={isDrawerOpen} toggleDrawer={toggleDrawer} />
           <div className="flex-1 overflow-auto">
-            <TopBar />
+            <TopBar toggleDrawer={toggleDrawer} />
             {children}
           </div>
         </div>

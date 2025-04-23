@@ -3,18 +3,21 @@
 import ThemeToggle from "@/components/ThemeToggle";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import { IconHelp, IconUserCircle } from "@tabler/icons-react";
-import { LogOutIcon, SettingsIcon, UserRound } from "lucide-react";
+import { LogOutIcon, MenuIcon, SettingsIcon, UserRound } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
+import Sidebar from "./sidebar";
 
-export default function TopBar() {
+export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
   const session = useSession();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
   const optionsRef = useRef(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  // const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
   const options = [
     {
       value: "Profile",
@@ -86,6 +89,9 @@ export default function TopBar() {
 
   return (
     <div className="flex w-full items-center justify-between gap-4 bg-white px-6 py-5">
+      <button className="block md:hidden" onClick={toggleDrawer}>
+        <MenuIcon size={28} />
+      </button>
       <div
         className="flex cursor-pointer text-2xl"
         // onClick={() => router.push("/dashboard")}
@@ -166,6 +172,7 @@ export default function TopBar() {
           </Link>
         )}
       </div>
+      {/* <Sidebar isDrawerOpen={isDrawerOpen} toggleDrawer={toggleDrawer} /> */}
     </div>
   );
 }
