@@ -18,6 +18,19 @@ import {
   IconRosetteDiscountCheckOff,
 } from "@tabler/icons-react";
 import Button from "@/components/ui/Button";
+import { Select } from "@/components/ui/Select";
+import { useSession } from "next-auth/react";
+import Dropdown from "@/components/ui/Dropdown";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Filter,
+  Search,
+} from "lucide-react";
+import { set } from "zod";
+import Pagination from "@/app/_components/Pagination";
 
 const UserPage = () => {
   const { data: users, isLoading, refetch } = api.users.getUsers.useQuery();
@@ -26,11 +39,52 @@ const UserPage = () => {
   const updateUserRole = api.users.adminUpdateUserRole.useMutation();
   const [loading, setLoading] = useState(false);
   const { setOpen } = useModal();
-  const [filter, setFilter] = useState("all"); // New filter state
+  const [adminVerificationFilter, setAdminVerificationFilter] = useState("all");
+  const [selfVerificationFilter, setSelfVerificationFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const paginatedUsers = filteredUsers.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
+
+  useEffect(() => {
+    if (users?.data) {
+      setFilteredUsers(users.data); // initially show all users
+    }
+  }, [users]);
+  const applyFilters = () => {
+    const result = users?.data?.filter((user) => {
+      const matchesAdmin =
+        adminVerificationFilter === "all" ||
+        (adminVerificationFilter === "approved" && user.isVerifiedByAdmin) ||
+        (adminVerificationFilter === "pending" && !user.isVerifiedByAdmin);
+
+      const matchesSelf =
+        selfVerificationFilter === "all" ||
+        (selfVerificationFilter === "verified" && user.isVerified) ||
+        (selfVerificationFilter === "unverified" && !user.isVerified);
+
+      const matchesSearch =
+        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      return matchesAdmin && matchesSelf && matchesSearch;
+    });
+
+    setFilteredUsers(result || []);
+    setIsFilterOpen(false);
+  };
+  useEffect(() => {
+    applyFilters();
+  }, [searchTerm]);
   useEffect(() => {
     setSelectedRole(selectedUser?.role ?? "");
   }, [selectedUser]);
-
+  const session = useSession();
   const handleAssignRole = async () => {
     if (!selectedUser) return;
     setLoading(true);
@@ -59,12 +113,14 @@ const UserPage = () => {
     setLoading(false);
     setOpen(false);
   };
-  // Filter users based on selected filter
-  const filteredUsers = users?.data?.filter((user) => {
-    if (filter === "approved") return user.isVerifiedByAdmin;
-    if (filter === "pending") return !user.isVerifiedByAdmin;
-    return true; // "all" case
-  });
+  const handleClearFilter = () => {
+    setAdminVerificationFilter("all");
+    setSelfVerificationFilter("all");
+    setSearchTerm("");
+    setFilteredUsers(users?.data || []);
+    setIsFilterOpen(false);
+  };
+
   if (isLoading) {
     return (
       <div className="relative flex h-[90vh] w-[80vw] items-center justify-center">
@@ -74,73 +130,172 @@ const UserPage = () => {
   }
 
   return (
-    <div className="flex w-full flex-col overflow-hidden px-8">
-      <div className="flex items-center justify-end">
-        <select
-          className="my-2 rounded-md border border-gray-300 p-2 text-sm shadow-sm"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+    <div className="overflow- flex w-full flex-col px-8">
+      <div className="mb-4 flex h-full items-center justify-between">
+        <input
+          type="text"
+          placeholder="Search by name or email"
+          className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm"
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <Dropdown
+          button={
+            <button className="flex w-full flex-row items-center border border-gray-300 bg-[#F9F9F9] px-4 py-3 text-sm">
+              Filters
+              <ChevronDown className="ml-2 inline" size={16} />
+            </button>
+          }
+          className="absolute right-0 z-50"
+          dropdownClassName="min-w-72"
+          isOpen={isFilterOpen}
+          setIsOpen={setIsFilterOpen}
         >
-          <option value="all">All</option>
-          <option value="approved">Approved</option>
-          <option value="pending">Pending</option>
-        </select>
-      </div>
-      {/* Scrollable Card Container */}
-      <div className="custom-scrollbar flex max-h-[70vh] flex-col gap-3 overflow-y-auto">
-        {filteredUsers?.map((user) => (
-          <div
-            className="my-2 cursor-pointer rounded-lg border border-gray-200 bg-white p-5 shadow-md transition-all hover:border-gray-300 hover:shadow-lg"
-            onClick={() => {
-              setSelectedUser(user);
-              setSelectedRole(user.role ?? "");
-              setOpen(true);
-            }}
-            key={user.id}
-          >
-            <div className="flex items-center justify-between">
-              {/* User Details */}
-              <div className="items- flex gap-4">
-                <img
-                  src={
-                    user.providerImageUrl !== ""
-                      ? user.providerImageUrl
-                      : "https://placehold.co/150x150"
-                  }
-                  alt={user.name}
-                  className="h-12 w-12 rounded-full border border-gray-300 object-cover"
-                />
-                <div className="flex flex-col items-start">
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    {user.name}
-                  </h2>
-                  <p className="text-sm text-gray-600">{user.email}</p>
-                  <p className="text-sm text-gray-500">
-                    Role:{" "}
-                    <span className="font-medium">
-                      {user.role == "WORKER"
-                        ? "CONTRACTOR"
-                        : (user.role ?? "None")}
-                    </span>
-                  </p>
-                </div>
-              </div>
+          <div className="flex flex-col gap-3 text-sm text-gray-700">
+            <p className="border-b pb-2 font-bold">Filter</p>
+            {/* Date Range */}
+            {/* <div>
+                    <label className="text-sm font-medium">Date Range</label>
+                    <div className="mt-1 flex gap-2">
+                      <input
+                        type="date"
+                        value={dateFrom}
+                        onChange={(e) => setDateFrom(e.target.value)}
+                        className="w-1/2 rounded border border-gray-300 px-2 py-1"
+                      />
+                      <input
+                        type="date"
+                        value={dateTo}
+                        onChange={(e) => setDateTo(e.target.value)}
+                        className="w-1/2 rounded border border-gray-300 px-2 py-1"
+                      />
+                    </div>
+                  </div> */}
 
-              {/* Verification Status */}
-              <div
-                className={`flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium ${
-                  user.isVerifiedByAdmin
-                    ? "bg-green-100 text-green-600"
-                    : "bg-red-100 text-red-600"
-                }`}
-              >
-                <span className="h-2 w-2 rounded-full bg-current"></span>
-                {user.isVerifiedByAdmin ? "Approved" : "Approval Pending"}
+            {/* Assigned Person */}
+            {session.data?.user?.role == "ADMIN" && (
+              <div>
+                <Select
+                  options={[
+                    { value: "all", label: "All" },
+                    { value: "pending", label: "Pending" },
+                    { value: "approved", label: "Approved" },
+                  ]}
+                  value={adminVerificationFilter}
+                  onChange={(e) => {
+                    setAdminVerificationFilter(e.target.value);
+                  }}
+                  label="Admin Verification"
+                />
               </div>
-            </div>
+            )}
+            {session.data?.user?.role == "ADMIN" && (
+              <div>
+                <Select
+                  options={[
+                    { value: "all", label: "All" },
+                    { value: "unverified", label: "Unverified" },
+                    { value: "verified", label: "Verified" },
+                  ]}
+                  value={selfVerificationFilter}
+                  onChange={(e) => {
+                    setSelfVerificationFilter(e.target.value);
+                  }}
+                  label="Self Verification"
+                />
+              </div>
+            )}
+
+            {/* Filter Buttons */}
+            <Button
+              onClick={applyFilters}
+              title="Apply Filters"
+              icon={<Filter size={16} />}
+            />
+            <Button
+              title="Clear Filters"
+              onClick={handleClearFilter}
+              variant="secondary"
+            />
           </div>
-        ))}
+        </Dropdown>
+        <div className="rounded-r-md bg-primary p-[15px]">
+          <Search className="" size={16} color="white" />
+        </div>
       </div>
+      <div className="overflow-x-auto rounded-lg border bg-white shadow">
+        <table className="min-w-full table-auto text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              {/* <th className="w-10 p-4">
+                <input type="checkbox" className="accent-primary" />
+              </th> */}
+              <th className="p-4 text-left font-medium text-gray-700">Name</th>
+              <th className="p-4 text-left font-medium text-gray-700">Email</th>
+              <th className="p-4 text-left font-medium text-gray-700">Role</th>
+              <th className="p-4 text-left font-medium text-gray-700">
+                Status
+              </th>
+              <th className="p-4 text-center font-medium text-gray-700">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedUsers.map((user) => (
+              <tr key={user.id} className="border-t">
+                {/* <td className="p-4 text-center">
+                  <input type="checkbox" className="accent-primary" />
+                </td> */}
+                <td className="p-4">{user.name}</td>
+                <td className="p-4">{user.email}</td>
+                <td className="p-4">
+                  {user.role === "WORKER" ? "CONTRACTOR" : user.role}
+                </td>
+                <td className="p-4">
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerifiedByAdmin ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+                  >
+                    <span className="h-2 w-2 rounded-full bg-current"></span>
+                    {user.isVerifiedByAdmin ? "Approved" : "Pending"}
+                  </span>
+                </td>
+                <td className="space-x-2 p-4 text-center">
+                  <button
+                    className="text-blue-600 hover:text-blue-800"
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setOpen(true);
+                    }}
+                    title="View"
+                  >
+                    <Eye size={18} />
+                  </button>
+                  {/* <button
+              className="text-green-600 hover:text-green-800"
+              onClick={() => {
+                setSelectedUser(user);
+                setSelectedRole(user.role ?? "");
+                setOpen(true);
+              }}
+              title="Edit"
+            >
+              <Pencil size={18} />
+            </button>
+            <button
+              className="text-red-600 hover:text-red-800"
+              onClick={() => handleDeleteUser(user.id)}
+              title="Delete"
+            >
+              <Trash size={18} />
+            </button> */}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <Pagination data={filteredUsers} page={page} setPage={setPage} />
+      </div>
+
       <ModalBody>
         <ModalContent>
           <div className="flex flex-col items-center border-b pb-4">
@@ -231,8 +386,6 @@ const UserPage = () => {
           </div>
         </ModalFooter>
       </ModalBody>
-
-      {/* </div> */}
     </div>
   );
 };

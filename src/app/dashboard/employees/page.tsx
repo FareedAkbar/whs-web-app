@@ -1,52 +1,134 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/trpc/react";
+import {
+  ModalBody,
+  ModalContent,
+  useModal,
+} from "@/components/ui/animated-modal";
+import { Eye } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Pagination from "@/app/_components/Pagination";
 
-export default function EmployeePage() {
+const EmployeePage = () => {
   const { data: employees, isLoading } = api.employees.getEmployees.useQuery();
   const [selectedEmployee, setSelectedEmployee] = useState<User | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredEmployees, setFilteredEmployees] = useState<User[]>([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const { setOpen } = useModal();
+  const session = useSession();
+
+  useEffect(() => {
+    if (employees?.data) {
+      setFilteredEmployees(employees.data);
+    }
+  }, [employees]);
+
+  useEffect(() => {
+    const result = employees?.data?.filter(
+      (emp) =>
+        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.email.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+    setFilteredEmployees(result || []);
+  }, [searchTerm, employees]);
+
+  const paginatedEmployees = filteredEmployees.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
 
   if (isLoading) {
     return (
       <div className="relative flex h-[90vh] w-[80vw] items-center justify-center">
-        <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-red-500"></div>
+        <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex w-full flex-col gap-6 overflow-hidden px-8">
-      <div className="custom-scrollbar flex max-h-[70vh] flex-col gap-3 overflow-y-auto">
-        {employees?.data?.map((employee: User) => (
-          <div
-            key={employee.id}
-            className="rounded-lg border border-gray-200 bg-white p-5 shadow-lg transition-all hover:shadow-xl"
-            // onClick={() => setSelectedEmployee(employee)}
-          >
-            <div className="flex gap-4">
-              <img
-                src={
-                  employee.providerImageUrl !== ""
-                    ? employee.providerImageUrl
-                    : "https://placehold.co/150x150"
-                }
-                alt={employee.name}
-                className="h-12 w-12 rounded-full object-cover"
-              />
-              <div className="flex flex-col items-start">
-                <h2 className="text-lg font-semibold capitalize text-gray-800">
-                  {employee.name}
-                </h2>
-                <p className="text-sm text-gray-600">{employee.email}</p>
-                <p className="text-sm text-gray-500">
-                  Role: {employee.role ?? "None"}
-                </p>
-              </div>
-            </div>
-          </div>
-        ))}
+    <div className="flex w-full flex-col overflow-hidden px-8">
+      <div className="mb-4 flex items-center justify-between">
+        <input
+          type="text"
+          placeholder="Search by name or email"
+          className="my-2 w-full rounded-md border border-gray-300 px-3 py-3 text-sm shadow-sm"
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
+
+      <div className="overflow-x-auto rounded-lg border bg-white shadow">
+        <table className="min-w-full table-auto text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="p-4 text-left font-medium text-gray-700">Name</th>
+              <th className="p-4 text-left font-medium text-gray-700">Email</th>
+              <th className="p-4 text-left font-medium text-gray-700">Role</th>
+              <th className="p-4 text-left font-medium text-gray-700">
+                Status
+              </th>
+              {/* <th className="p-4 text-center font-medium text-gray-700">
+                Actions
+              </th> */}
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedEmployees.map((emp) => (
+              <tr key={emp.id} className="border-t">
+                <td className="p-4">{emp.name}</td>
+                <td className="p-4">{emp.email}</td>
+                <td className="p-4">{emp.role}</td>
+                <td className="p-4">
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
+                      emp.isVerified
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    <span className="h-2 w-2 rounded-full bg-current"></span>
+                    {emp.isVerified ? "Verified" : "Pending"}
+                  </span>
+                </td>
+                {/* <td className="space-x-2 p-4 text-center">
+                  <button
+                    className="text-blue-600 hover:text-blue-800"
+                    onClick={() => {
+                      setSelectedEmployee(emp);
+                      setOpen(true);
+                    }}
+                    title="View"
+                  >
+                    <Eye size={18} />
+                  </button>
+                </td> */}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <Pagination data={filteredEmployees} page={page} setPage={setPage} />
+      </div>
+
+      {/* <ModalBody>
+        <ModalContent>
+          <div className="flex flex-col items-center border-b pb-4">
+            <img
+              src={selectedEmployee?.imageUrl || "/default-avatar.png"}
+              alt="Employee"
+              className="h-24 w-24 rounded-full object-cover"
+            />
+            <h2 className="mt-4 text-lg font-semibold">
+              {selectedEmployee?.name}
+            </h2>
+            <p className="text-sm text-gray-600">{selectedEmployee?.email}</p>
+          </div>
+        </ModalContent>
+      </ModalBody> */}
     </div>
   );
-}
+};
+
+export default EmployeePage;
