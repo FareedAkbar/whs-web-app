@@ -177,6 +177,14 @@ const Dashboard = () => {
             variant="secondary"
           />
         )} */}
+        {user && hasPermission(user.role, "create:checklist") && (
+          <Button
+            title="Create Inspection Checklist"
+            onClick={() => router.push("/dashboard/create-inspection")}
+            icon={<IconClipboardList size={18} />}
+            variant="secondary"
+          />
+        )}
         {user && hasPermission(user.role, "create:incidents") && (
           <Button
             title="Report an Incident"
