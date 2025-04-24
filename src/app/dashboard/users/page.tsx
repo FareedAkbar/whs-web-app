@@ -123,7 +123,7 @@ const UserPage = () => {
 
   if (isLoading) {
     return (
-      <div className="relative flex h-[90vh] w-[80vw] items-center justify-center">
+      <div className="relative flex h-2/3 w-full items-center justify-center">
         <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-red-500"></div>
       </div>
     );
@@ -291,6 +291,7 @@ const UserPage = () => {
                 </td>
               </tr>
             ))}
+            {/* {paginatedUsers} */}
           </tbody>
         </table>
         <Pagination data={filteredUsers} page={page} setPage={setPage} />

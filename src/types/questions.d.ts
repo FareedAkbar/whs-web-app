@@ -1,4 +1,5 @@
 export interface Question {
+    id?: string;
     question: string;
     type: QuestionType;
     options?: string[];
@@ -6,9 +7,10 @@ export interface Question {
   
   export type QuestionType =
     | "text"
-    | "yesno"
-    | "radio"
-    | "select"
+    | "yes_no"
+    | "single_selection"
+    | "multiple_selection"
     | "date"
-    | "daterange";
+    | "date_range"
+    |"media";
   

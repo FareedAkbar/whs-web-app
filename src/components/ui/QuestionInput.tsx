@@ -50,7 +50,10 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
     const finalData: Question = {
       question: question.trim(),
       type,
-      options: type === "select" || type === "radio" ? options : [],
+      options:
+        type === "single_selection" || type === "multiple_selection"
+          ? options
+          : [],
     };
     onDone(finalData);
   };
@@ -77,16 +80,16 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
           onChange={(e) => setType(e.target.value as QuestionType)}
           label="Select Question Type"
           options={[
-            { value: "text", label: "Text" },
-            { value: "yesno", label: "Yes / No" },
-            { value: "radio", label: "Radio" },
-            { value: "select", label: "Select" },
-            { value: "date", label: "Date" },
-            { value: "daterange", label: "Date Range" },
+            { label: "Text", value: "text" },
+            { label: "Yes No", value: "yes_no" },
+            { label: "Single Selection", value: "single_selection" },
+            { label: "Multiple Selection", value: "multiple_selection" },
+            { label: "Date", value: "date" },
+            { label: "Date Range", value: "date_range" },
           ]}
         />
 
-        {(type === "select" || type === "radio") && (
+        {(type === "single_selection" || type === "multiple_selection") && (
           <div className="mt-4 space-y-3">
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
@@ -162,7 +165,8 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
             className="w-full sm:w-auto"
             disabled={
               question.trim() === "" ||
-              ((type === "select" || type === "radio") && options.length === 0)
+              ((type === "single_selection" || type === "multiple_selection") &&
+                options.length === 0)
             }
           />
         </div>

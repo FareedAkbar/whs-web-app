@@ -14,6 +14,7 @@ import {
   IconHomeFilled,
   IconUserCircle,
   IconUserFilled,
+  IconChecklist,
 } from "@tabler/icons-react";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -67,6 +68,11 @@ const Sidebar = ({
           name: "Users",
           icon: <IconUser size={20} />,
           path: "/dashboard/users",
+        },
+        {
+          name: "Inspections Checklist",
+          icon: <IconChecklist size={20} />, // You can also use IconClipboardList or IconNotes if better suited
+          path: "/dashboard/inspections-checklist",
         },
       );
     }

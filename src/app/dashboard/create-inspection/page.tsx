@@ -1,10 +1,12 @@
 "use client";
 
-import { QuestionInput } from "@/app/_components/QuestionInput";
+import { QuestionInput } from "@/components/ui/QuestionInput";
 import Button from "@/components/ui/Button";
 import { Question } from "@/types/questions";
 import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function CreateInspectionPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -42,6 +44,19 @@ export default function CreateInspectionPage() {
     <div className="p-8">
       {/* <h1 className="mb-6 text-3xl font-bold">Create Inspection Checklist</h1> */}
 
+      <Input
+        type="text"
+        placeholder="Inspection Title"
+        label="Inspection Title"
+        className="mb-4 rounded-lg border bg-white p-2 shadow md:w-1/2"
+      />
+      <Label className="text-md mb-2 text-gray-500">
+        Inspection Description
+      </Label>
+      <textarea
+        placeholder="Inspection Description"
+        className="mb-4 min-h-28 w-full rounded-lg border bg-white p-2 shadow focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400"
+      />
       <div className="space-y-6">
         {questions.map((q, i) => (
           <div key={i}>
@@ -58,8 +73,8 @@ export default function CreateInspectionPage() {
                 <div className="flex items-start justify-between rounded-lg border bg-white p-4 shadow">
                   <div>
                     <p className="font-medium">Q: {q.question}</p>
-                    <p className="text-sm text-gray-600">
-                      Type: {q.type?.toUpperCase()}
+                    <p className="text-sm capitalize text-gray-600">
+                      Type: {q.type?.replace("_", " ")}
                     </p>
                     {q.options && q.options.length > 0 && (
                       <ul className="mt-1 list-decimal pl-4 text-sm text-gray-500">
