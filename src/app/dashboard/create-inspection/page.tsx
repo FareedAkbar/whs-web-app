@@ -7,13 +7,17 @@ import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 export default function CreateInspectionPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const router = useRouter();
   const addNewQuestion = () => {
     const newQuestion: Question = {
+      id: `Q${questions.length + 1}`,
       question: "",
       type: "text",
       options: [],
@@ -36,19 +40,43 @@ export default function CreateInspectionPage() {
   };
 
   const handleSubmit = () => {
-    console.log("Checklist submitted:", questions);
-    // Implement actual submit logic here
+    if (!title.trim() || !description.trim()) {
+      alert("Please fill in both title and description.");
+      return;
+    }
+
+    const timestamp = new Date().getTime();
+
+    const checklist = {
+      id: `inspection_${timestamp}`,
+      title,
+      description,
+      questions: questions.map((q, i) => ({
+        ...q,
+        id: `Q${i + 1}`,
+      })),
+    };
+
+    const storedInspections =
+      JSON.parse(localStorage.getItem("inspections") || "[]") || [];
+
+    const updatedInspections = [...storedInspections, checklist];
+    localStorage.setItem("inspections", JSON.stringify(updatedInspections));
+    router.push("/dashboard/inspections-checklist");
+    setQuestions([]);
+    setTitle("");
+    setDescription("");
   };
 
   return (
     <div className="p-8">
-      {/* <h1 className="mb-6 text-3xl font-bold">Create Inspection Checklist</h1> */}
-
       <Input
         type="text"
         placeholder="Inspection Title"
         label="Inspection Title"
         className="mb-4 rounded-lg border bg-white p-2 shadow md:w-1/2"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
       />
       <Label className="text-md mb-2 text-gray-500">
         Inspection Description
@@ -56,6 +84,8 @@ export default function CreateInspectionPage() {
       <textarea
         placeholder="Inspection Description"
         className="mb-4 min-h-28 w-full rounded-lg border bg-white p-2 shadow focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
       />
       <div className="space-y-6">
         {questions.map((q, i) => (

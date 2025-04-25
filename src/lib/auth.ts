@@ -12,6 +12,7 @@ const ROLES = {
     "assign:incidents",
     "create:checklist",
     "update:checklist",
+    "view:checklist",
     "view:homeCards",
     // "view:homeCounters",
     "view:contractors",

@@ -1,11 +1,11 @@
 export interface Question {
-    id?: string;
+    id: string;
     question: string;
-    type: QuestionType;
+    type: AnsType;
     options?: string[];
   }
   
-  export type QuestionType =
+  export type AnsType =
     | "text"
     | "yes_no"
     | "single_selection"

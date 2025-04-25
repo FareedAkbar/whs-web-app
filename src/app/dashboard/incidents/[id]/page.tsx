@@ -396,7 +396,7 @@ export default function IncidentDetailScreen() {
             )}
 
           {(modalMode === "assign" || modalMode === "cancel") && (
-            <ModalBody>
+            <ModalBody className="max-w-[40%]">
               <div className="mt-4">
                 {modalMode === "assign" ? (
                   <>

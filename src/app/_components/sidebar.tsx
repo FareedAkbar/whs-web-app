@@ -123,8 +123,8 @@ const Sidebar = ({
       <div
         className={cn(
           "z-50 h-full w-64 bg-white p-4 shadow-md transition-all duration-300",
-          isDesktop ? "relative" : "fixed left-0 top-0",
           isOpen ? "w-64 p-4" : "w-16 p-2",
+          isDesktop ? "relative" : "fixed left-0 top-0",
           // isDrawerOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >

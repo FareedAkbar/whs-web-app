@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import TopBar from "../_components/topbar";
 import Sidebar from "../_components/sidebar";
 import { redirect, useRouter } from "next/navigation";
+import { dummyInspections } from "@/constants/inspections";
 
 export default function RootLayout({
   children,
@@ -19,7 +20,10 @@ export default function RootLayout({
     session?.data?.user?.isVerifiedByAdmin?.toString() === "true";
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
-
+  useEffect(() => {
+    localStorage.setItem("inspections", JSON.stringify(dummyInspections));
+    console.log("Dummy inspections saved to localStorage.");
+  }, []);
   // const getSes = getSession();
   // console.log("sessionnnn", session);
 
