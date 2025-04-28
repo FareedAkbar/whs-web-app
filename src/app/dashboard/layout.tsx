@@ -22,33 +22,8 @@ export default function RootLayout({
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
   useEffect(() => {
     localStorage.setItem("inspections", JSON.stringify(dummyInspections));
-    console.log("Dummy inspections saved to localStorage.");
   }, []);
-  // const getSes = getSession();
-  // console.log("sessionnnn", session);
 
-  // // const router = useRouter();
-  // useEffect(() => {
-  //   const checkSession = async () => {
-  //     const session = await getSession();
-  //     console.log(session, "sessss");
-  //     if (session?.user?.role === "UNDEFINED") {
-  //       router.replace("/auth/on-boarding");
-  //     } else {
-  //       router.replace("/dashboard");
-  //     }
-  //   };
-
-  //   checkSession();
-  // }, []);
-
-  // if (session.status === "loading") {
-  //   return (
-  //     <div className="flex h-screen w-screen items-center justify-center">
-  //       Loading...
-  //     </div>
-  //   );
-  // } else
   if (session?.data?.user?.role == "UNDEFINED") {
     redirect("/auth/on-boarding");
   } else if (session.status === "unauthenticated") {

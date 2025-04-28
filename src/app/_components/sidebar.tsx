@@ -31,26 +31,19 @@ const Sidebar = ({
   const pathname = usePathname();
   const session = useSession();
   const [isOpen, setIsOpen] = useState(true);
-  const router = useRouter();
-
-  useEffect(() => {
-    void session.update();
-  }, []);
 
   const user = session.data?.user;
-  const navItems = [];
+  const navItems = [
+    { name: "Home", icon: <IconHomeFilled size={20} />, path: "/dashboard" },
+    {
+      name: "Incidents",
+      icon: <IconAlertTriangle size={20} />,
+      path: "/dashboard/incidents",
+    },
+  ];
 
   if (user) {
     const role = user.role;
-
-    navItems.push(
-      { name: "Home", icon: <IconHomeFilled size={20} />, path: "/dashboard" },
-      {
-        name: "Incidents",
-        icon: <IconAlertTriangle size={20} />,
-        path: "/dashboard/incidents",
-      },
-    );
 
     if (role === "ADMIN") {
       navItems.push(
@@ -71,7 +64,7 @@ const Sidebar = ({
         },
         {
           name: "Inspections Checklist",
-          icon: <IconChecklist size={20} />, // You can also use IconClipboardList or IconNotes if better suited
+          icon: <IconChecklist size={20} />,
           path: "/dashboard/inspections-checklist",
         },
       );
@@ -83,21 +76,6 @@ const Sidebar = ({
       path: "/dashboard/profile",
     });
   }
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 768); // Tailwind's md breakpoint
-    };
-
-    handleResize(); // Check on mount
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const shouldShowSidebar = isDesktop || isDrawerOpen;
-
-  if (!shouldShowSidebar) return null;
 
   return (
     <>
@@ -122,10 +100,10 @@ const Sidebar = ({
       > */}
       <div
         className={cn(
-          "z-50 h-full w-64 bg-white p-4 shadow-md transition-all duration-300",
+          "fixed left-0 top-0 z-50 h-full w-64 bg-white p-4 shadow-md transition-all duration-300 md:relative",
           isOpen ? "w-64 p-4" : "w-16 p-2",
-          isDesktop ? "relative" : "fixed left-0 top-0",
-          // isDrawerOpen ? "translate-x-0" : "-translate-x-full",
+          // isDesktop ? "md:relative" : "fixed left-0 top-0",
+          isDrawerOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
       >
         <div className="absolute -right-3 top-10 hidden justify-end rounded-full border bg-white p-1 md:flex">
@@ -142,10 +120,10 @@ const Sidebar = ({
         {isOpen ? (
           <div className="font-nulshock flex text-3xl">
             <span className="text-black">WHS</span>
-            <span className="text-red-700">APP</span>
+            <span className="text-primary">APP</span>
           </div>
         ) : (
-          <span className="font-nulshock text-red-700">WHS</span>
+          <span className="font-nulshock text-primary">WHS</span>
         )}
 
         {/* User Info */}
@@ -184,11 +162,11 @@ const Sidebar = ({
               }}
             >
               <div
-                className={`flex items-center gap-3 rounded-lg p-3 transition-all ${pathname === item.path ? "border border-[#ECE6E6] bg-[#F8F5F5] text-red-600" : "text-gray-700 hover:bg-[#F8F5F5]"}`}
+                className={`flex items-center gap-3 rounded-lg p-3 transition-all ${pathname === item.path ? "border border-[#ECE6E6] bg-[#F8F5F5] text-primary" : "text-gray-700 hover:bg-[#F8F5F5]"}`}
               >
                 <span
                   className={
-                    pathname === item.path ? "text-red-600" : "text-gray-500"
+                    pathname === item.path ? "text-primary" : "text-gray-500"
                   }
                 >
                   {item.icon}
@@ -201,7 +179,7 @@ const Sidebar = ({
 
         <div className="absolute bottom-10 w-3/4">
           <button
-            className="flex w-full items-center gap-3 rounded-md bg-white p-3 text-red-600 shadow-md hover:bg-[#F8F5F5]"
+            className="flex w-full items-center gap-3 rounded-md bg-white p-3 text-primary shadow-md hover:bg-[#F8F5F5]"
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
           >
             <IconLogout size={20} />

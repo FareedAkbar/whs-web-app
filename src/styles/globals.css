@@ -15,11 +15,22 @@
     font-family: 'nulshock';
     src: url('/fonts/nulshock/nulshock-bd.otf') format('opentype'),
 }
-
+:root {
+    --primary-color: 236 28 41; /* RGB values of #EC1C29 */
+  }
+  :root {
+    --font-family: 'var(--font-geist-sans)'; /* Default font */
+  }
 .font-nulshock {
     font-family: 'nulshock', sans-serif;
 }
-
+body {
+    font-family: var(--font-family), sans-serif; /* Apply to all text elements */
+  }
+  
+  * {
+    font-family: var(--font-family), sans-serif; /* Apply globally, ensuring no element is missed */
+  }
 .font-space {
     font-family: "Space Grotesk", sans-serif;
     font-optical-sizing: auto;

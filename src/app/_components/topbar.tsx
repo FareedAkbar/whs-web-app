@@ -10,6 +10,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
 import Sidebar from "./sidebar";
+import ThemeColorPicker from "@/components/ThemeColorPicker";
+import ThemeFontPicker from "@/components/FontPicker";
 
 export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
   const session = useSession();
@@ -127,7 +129,9 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
                   />
                 )}
               </button>
-
+              <ThemeToggle hide />
+              <ThemeColorPicker />
+              <ThemeFontPicker />
               <div
                 ref={optionsRef}
                 className={
