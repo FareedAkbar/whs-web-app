@@ -1,17 +1,16 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 interface PaginationProps {
-  data: any[]; // Replace with your actual data type
+  totalItems: number; // Replace with your actual data type
   page: number;
   setPage: (page: number) => void;
   itemsPerPage?: number; // Optional prop for items per page
 }
 const Pagination = ({
-  data,
+  totalItems,
   page,
   setPage,
   itemsPerPage = 10,
 }: PaginationProps) => {
-  const totalItems = data.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startEntry = (page - 1) * itemsPerPage + 1;
   const endEntry = Math.min(startEntry + itemsPerPage - 1, totalItems);

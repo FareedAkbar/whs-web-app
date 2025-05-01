@@ -74,7 +74,7 @@ export default function Login() {
   }
 
   return (
-    <div className="font-geist container w-full rounded-2xl bg-white/80 p-4 text-black shadow-2xl backdrop-blur-xl sm:m-0 sm:w-[450px] md:p-8 dark:bg-white/60 dark:text-black">
+    <div className="font-geist container mx-auto mt-2 w-full rounded-2xl bg-white/80 p-4 text-black shadow-2xl backdrop-blur-xl sm:m-4 sm:w-[450px] md:p-8 dark:bg-white/60 dark:text-black">
       <div className="flex text-3xl">
         <span className="font-bold text-primary">Welcome Back</span>
       </div>
@@ -107,6 +107,7 @@ export default function Login() {
               required
               label="Password"
               className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-black"
+              onSubmit={handleSubmit(onSubmit)}
             />
           )}
         />

@@ -98,7 +98,11 @@ const ContractorPage = () => {
             ))}
           </tbody>
         </table>
-        <Pagination data={filteredContractors} page={page} setPage={setPage} />
+        <Pagination
+          totalItems={filteredContractors.length}
+          page={page}
+          setPage={setPage}
+        />
       </div>
       {/* {workers?.data?.map((worker) => (
         <Modal key={worker.id}>

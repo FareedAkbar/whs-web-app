@@ -156,9 +156,10 @@ const Sidebar = ({
               href={
                 session.status === "authenticated" ? item.path : "/auth/login"
               }
-              onClick={() => {
+              onClick={async () => {
                 if (toggleDrawer) toggleDrawer();
-                if (item.path === "/auth/login") signOut({ callbackUrl: "/" });
+                if (item.path === "/auth/login")
+                  await signOut({ callbackUrl: "/" });
               }}
             >
               <div

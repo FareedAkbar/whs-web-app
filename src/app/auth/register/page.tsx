@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/trpc/react";
 import Button from "@/components/ui/Button";
-import { IconChevronRight } from "@tabler/icons-react";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { Select } from "@/components/ui/Select";
 
 const inputs = z.object({
@@ -204,11 +204,12 @@ export default function Register() {
             title="Back"
             variant="secondary"
             onClick={() => router.push("/auth/login")}
+            icon={<IconChevronLeft size={15} />}
           />
           <Button
             title="Next"
             onClick={handleSubmit(onSubmit)}
-            icon={<IconChevronRight />}
+            icon={<IconChevronRight size={15} />}
           />
         </div>
 

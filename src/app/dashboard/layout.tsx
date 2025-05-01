@@ -44,7 +44,7 @@ export default function RootLayout({
     );
   } else if (session.data?.user?.role !== "ADMIN" && !isVerified) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-gray-100">
+      <div className="flex h-screen w-screen items-center justify-center bg-white bg-[url('/images/whs-web-bg.png')] bg-cover p-2 sm:p-0 dark:bg-[#0d1117]">
         <div className="flex flex-col items-center justify-center rounded-lg bg-white p-8 text-center shadow-md">
           <AlertTriangle className="mb-4 h-16 w-16 text-primary" />
           <h1 className="mb-2 text-3xl font-bold text-primary">
@@ -58,13 +58,7 @@ export default function RootLayout({
     );
   }
   return (
-    <div
-      className="items- justify- relative flex min-h-screen w-full p-2 sm:p-0"
-      style={{
-        background: "url('/images/whs-web-bg.png')",
-        backgroundSize: "cover",
-      }}
-    >
+    <div className="relative flex min-h-screen w-full bg-white bg-[url('/images/whs-web-bg.png')] bg-cover p-2 sm:p-0 dark:bg-[#0d1117]">
       <div className="flex h-screen w-screen flex-col">
         <div className="relative flex h-full w-full overflow-hidden">
           <Sidebar isDrawerOpen={isDrawerOpen} toggleDrawer={toggleDrawer} />

@@ -22,10 +22,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
 
-    function handleMouseMove({ currentTarget, clientX, clientY }: any) {
-      const { left, top } = currentTarget.getBoundingClientRect();
-      mouseX.set(clientX - left);
-      mouseY.set(clientY - top);
+    function handleMouseMove(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+      const { left, top } = e.currentTarget.getBoundingClientRect();
+      mouseX.set(e.clientX - left);
+      mouseY.set(e.clientY - top);
     }
 
     return (
@@ -60,6 +60,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 error && "border-red-500 focus-visible:ring-red-500",
                 className,
               )}
+              value={props.value ?? ""} // Ensure it's always controlled
+              onChange={props.onChange}
               ref={ref}
               {...props}
             />
@@ -68,7 +70,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700"
               >
                 {showPassword ? (
                   <IconEyeOff size={18} />

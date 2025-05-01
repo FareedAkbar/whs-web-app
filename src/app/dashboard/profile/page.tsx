@@ -40,36 +40,40 @@ const ProfileScreen = () => {
     }
 
     setIsUpdating(true);
-    try {
-      await updateUserRole.mutateAsync(
-        {
-          id: user?.id!,
-          role: selectedRole,
-          isVerifiedByAdmin: false,
-        },
-        {
-          async onSuccess() {
-            toast.dismiss();
-            setSelectedRole(selectedRole);
-            router.refresh?.(); // or `router.push(router.asPath)` to refresh data
-            toast.success("User role updated successfully");
-            refetch();
-            session.update?.({ role: selectedRole });
-            setIsChangingRole(false);
-          },
-          onError: (error) => {
-            toast.dismiss();
-            console.error("Failed to update user role:", error);
-            toast.error(error.message ?? "Something went wrong");
-          },
-        },
-      );
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error.message ?? "Failed to update user role");
-    } finally {
-      setIsUpdating(false);
+    // try {
+    if (!user || !user.id) {
+      throw new Error("User or user ID is missing");
     }
+    await updateUserRole.mutateAsync(
+      {
+        id: user?.id,
+        role: selectedRole,
+        isVerifiedByAdmin: false,
+      },
+      {
+        async onSuccess() {
+          toast.dismiss();
+          setSelectedRole(selectedRole);
+          router.refresh?.(); // or `router.push(router.asPath)` to refresh data
+          toast.success("User role updated successfully");
+          await refetch();
+          await session.update?.({ role: selectedRole });
+          setIsChangingRole(false);
+          setIsUpdating(false);
+        },
+        onError: (error) => {
+          toast.dismiss();
+          console.error("Failed to update user role:", error);
+          toast.error(error.message ?? "Something went wrong");
+        },
+      },
+    );
+    // } catch (error: any) {
+    //   console.error(error);
+    //   toast.error(error.message ?? "Failed to update user role");
+    // } finally {
+    //   setIsUpdating(false);
+    // }
   };
   // console.log("session", session);
 

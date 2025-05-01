@@ -60,13 +60,13 @@ const UserPage = () => {
     const result = users?.data?.filter((user) => {
       const matchesAdmin =
         adminVerificationFilter === "all" ||
-        (adminVerificationFilter === "approved" && user.isVerifiedByAdmin) ||
-        (adminVerificationFilter === "pending" && !user.isVerifiedByAdmin);
+        ((adminVerificationFilter === "approved" && user.isVerifiedByAdmin) ??
+          (adminVerificationFilter === "pending" && !user.isVerifiedByAdmin));
 
       const matchesSelf =
         selfVerificationFilter === "all" ||
-        (selfVerificationFilter === "verified" && user.isVerified) ||
-        (selfVerificationFilter === "unverified" && !user.isVerified);
+        ((selfVerificationFilter === "verified" && user.isVerified) ??
+          (selfVerificationFilter === "unverified" && !user.isVerified));
 
       const matchesSearch =
         user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -75,7 +75,8 @@ const UserPage = () => {
       return matchesAdmin && matchesSelf && matchesSearch;
     });
 
-    setFilteredUsers(result || []);
+    setFilteredUsers(result ?? []);
+    setPage(1);
     setIsFilterOpen(false);
   };
   useEffect(() => {
@@ -117,7 +118,7 @@ const UserPage = () => {
     setAdminVerificationFilter("all");
     setSelfVerificationFilter("all");
     setSearchTerm("");
-    setFilteredUsers(users?.data || []);
+    setFilteredUsers(users?.data ?? []);
     setIsFilterOpen(false);
   };
 
@@ -146,7 +147,7 @@ const UserPage = () => {
             </button>
           }
           className="absolute right-0 z-50"
-          dropdownClassName="min-w-80"
+          dropdownClassName="w-80"
           isOpen={isFilterOpen}
           setIsOpen={setIsFilterOpen}
         >
@@ -294,7 +295,11 @@ const UserPage = () => {
             {/* {paginatedUsers} */}
           </tbody>
         </table>
-        <Pagination data={filteredUsers} page={page} setPage={setPage} />
+        <Pagination
+          totalItems={filteredUsers.length}
+          page={page}
+          setPage={setPage}
+        />
       </div>
 
       <ModalBody>

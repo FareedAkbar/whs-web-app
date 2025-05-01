@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import Button from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
-import { Question, QuestionType } from "@/types/questions";
+import { Question, AnsType } from "@/types/questions";
 import { PlusIcon, Pencil, Trash2 } from "lucide-react";
 
 interface Props {
@@ -13,9 +13,9 @@ interface Props {
 }
 
 export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
-  const [question, setQuestion] = useState(initialData?.question || "");
-  const [type, setType] = useState<QuestionType>(initialData?.type || "text");
-  const [options, setOptions] = useState<string[]>(initialData?.options || []);
+  const [question, setQuestion] = useState(initialData?.question ?? "");
+  const [type, setType] = useState<AnsType>(initialData?.type ?? "text");
+  const [options, setOptions] = useState<string[]>(initialData?.options ?? []);
   const [newOption, setNewOption] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState("");
@@ -48,6 +48,7 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
   };
   const handleDone = () => {
     const finalData: Question = {
+      id: initialData?.id ?? `Q${options.length + 1}`,
       question: question.trim(),
       type,
       options:
@@ -77,7 +78,7 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
       <div className="w-full md:w-1/2">
         <Select
           selectedValue={type}
-          onChange={(e) => setType(e.target.value as QuestionType)}
+          onChange={(e) => setType(e.target.value as AnsType)}
           label="Select Question Type"
           options={[
             { label: "Text", value: "text" },
