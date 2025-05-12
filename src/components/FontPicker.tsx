@@ -31,7 +31,7 @@ export default function ThemeFontPicker() {
   };
 
   return (
-    <div className="flex flex-col items-start rounded-xl bg-gray-100 p-3 shadow-md">
+    <div className="flex flex-col items-start rounded-xl bg-gray-100 p-3 shadow-md dark:bg-gray-800">
       <label htmlFor="fontPicker" className="text-lg font-semibold">
         Choose your Font
       </label>
@@ -39,7 +39,7 @@ export default function ThemeFontPicker() {
         id="fontPicker"
         value={currentFont}
         onChange={(e) => handleFontChange(e.target.value)}
-        className="h-10 cursor-pointer rounded-md border-2 border-gray-300 shadow-md"
+        className="h-10 cursor-pointer rounded-md border-2 border-gray-300 shadow-md dark:bg-gray-600"
       >
         {fonts.map((font) => (
           <option key={font.name} value={font.value}>

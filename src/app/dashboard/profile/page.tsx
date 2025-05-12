@@ -85,7 +85,7 @@ const ProfileScreen = () => {
     );
   }
   return (
-    <div className="m-8 h-fit rounded-lg bg-white p-6 shadow-lg">
+    <div className="m-8 h-fit rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
       {/* Header Image */}
       <div className="relative h-48 w-full overflow-hidden rounded-lg">
         <Image
@@ -139,7 +139,9 @@ const ProfileScreen = () => {
 
           {/* Name & Role */}
           <div>
-            <h1 className="mt-1 text-xl font-bold capitalize">{user?.name}</h1>
+            <h1 className="mt-1 text-xl font-bold capitalize dark:text-white">
+              {user?.name}
+            </h1>
             <p className="capitalize text-gray-500">
               {user?.role !== "UNDEFINED"
                 ? user?.role === "WORKER"
@@ -194,16 +196,20 @@ const ProfileScreen = () => {
       <h2 className="mb-2 ml-5 mt-4 text-sm font-semibold text-gray-500">
         Basic Information
       </h2>
-      <div className="ml-5 rounded-xl bg-gray-100 p-4 shadow">
+      <div className="ml-5 rounded-xl bg-gray-100 p-4 shadow dark:bg-gray-700">
         {/* {user?.phoneNumber && ( */}
         <div className="mb-2 flex items-center gap-2">
           <IconPhoneFilled size={16} className="text-primary" />
-          <span className="text-gray-700">{user?.phoneNumber}</span>
+          <span className="text-gray-700 dark:text-gray-300">
+            {user?.phoneNumber}
+          </span>
         </div>
         {/* )} */}
         <div className="mb-2 flex items-center gap-2">
           <IconMailFilled size={16} className="text-primary" />
-          <span className="text-gray-700">{user?.email}</span>
+          <span className="text-gray-700 dark:text-gray-300">
+            {user?.email}
+          </span>
         </div>
       </div>
 

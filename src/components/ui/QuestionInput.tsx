@@ -60,14 +60,14 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-6 rounded-xl border bg-white p-6 shadow-md md:flex-row md:gap-8 md:p-8">
+    <div className="flex w-full flex-col gap-6 rounded-xl border bg-white p-6 shadow-md md:flex-row md:gap-8 md:p-8 dark:bg-gray-800">
       {/* Left: Question Textarea */}
       <div className="w-full md:w-1/2">
-        <label className="block pb-2 text-sm font-semibold text-gray-600">
+        <label className="block pb-2 text-sm font-semibold text-gray-600 dark:text-gray-300">
           Question
         </label>
         <textarea
-          className="shadow-input h-2/3 w-full appearance-none rounded-md border border-[#ADADAD] bg-gray-50 px-3 py-2 pr-10 text-sm text-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
+          className="shadow-input h-2/3 w-full appearance-none rounded-md border border-[#ADADAD] bg-gray-50 px-3 py-2 pr-10 text-sm text-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:text-white"
           placeholder="Enter your question"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
@@ -118,7 +118,7 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
               {options.map((opt, idx) => (
                 <li
                   key={idx}
-                  className="flex items-center justify-between gap-2"
+                  className="flex items-center justify-between gap-2 dark:text-white"
                 >
                   {idx + 1}.
                   {editingIndex === idx ? (
@@ -137,7 +137,7 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
                   ) : (
                     <div className="flex w-full justify-between border-b px-5 pb-2">
                       <span className="capitalize">{opt}</span>
-                      <div className="flex items-center gap-2 text-gray-600">
+                      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                         <button
                           onClick={() => handleEditOption(idx)}
                           title="Edit"

@@ -114,7 +114,7 @@ const InspectionChecklist = () => {
         {inspections.map((inspection) => (
           <div
             key={inspection.id}
-            className="relative w-full cursor-pointer rounded-lg border bg-white p-6 text-left shadow-md"
+            className="relative w-full cursor-pointer rounded-lg border bg-white p-6 text-left shadow-md dark:bg-gray-800 dark:text-white"
             onClick={() => {
               setSelectedInspection(inspection);
               setFormValues({});
@@ -124,11 +124,13 @@ const InspectionChecklist = () => {
             <div className="flex justify-between">
               <div>
                 <h2 className="text-xl font-bold">{inspection.title}</h2>
-                <p className="text-gray-600">{inspection.description}</p>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {inspection.description}
+                </p>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 {statusIcons[inspection.status]?.icon}
-                <span className="text-gray-600">
+                <span className="text-gray-600 dark:text-gray-400">
                   {statusIcons[inspection.status]?.label}
                 </span>
               </div>
@@ -145,8 +147,8 @@ const InspectionChecklist = () => {
           //     handleSubmit();
           //   }}
           // >
-          <ModalContent className="w-full overflow-y-auto">
-            <h2 className="mb-4 text-2xl font-bold">
+          <ModalContent className="w-full">
+            <h2 className="mb-4 text-2xl font-bold dark:text-white">
               {selectedInspection.title}
             </h2>
 

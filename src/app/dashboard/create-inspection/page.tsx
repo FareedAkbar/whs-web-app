@@ -74,7 +74,7 @@ export default function CreateInspectionPage() {
         type="text"
         placeholder="Inspection Title"
         label="Inspection Title"
-        className="mb-4 rounded-lg border bg-white p-2 shadow md:w-1/2"
+        className="mb-4 rounded-lg p-2 shadow md:w-1/2"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
@@ -83,7 +83,7 @@ export default function CreateInspectionPage() {
       </Label>
       <textarea
         placeholder="Inspection Description"
-        className="mb-4 min-h-28 w-full rounded-lg border bg-white p-2 shadow focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400"
+        className="mb-4 min-h-28 w-full rounded-lg border bg-gray-50 p-2 shadow focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 dark:bg-gray-700 dark:text-white"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
@@ -100,14 +100,14 @@ export default function CreateInspectionPage() {
               />
             ) : (
               q.question.trim() && (
-                <div className="flex items-start justify-between rounded-lg border bg-white p-4 shadow">
+                <div className="flex items-start justify-between rounded-lg border bg-white p-4 shadow dark:bg-gray-700 dark:text-white">
                   <div>
                     <p className="font-medium">Q: {q.question}</p>
-                    <p className="text-sm capitalize text-gray-600">
+                    <p className="text-sm capitalize text-gray-600 dark:text-gray-400">
                       Type: {q.type?.replace("_", " ")}
                     </p>
                     {q.options && q.options.length > 0 && (
-                      <ul className="mt-1 list-decimal pl-4 text-sm text-gray-500">
+                      <ul className="mt-1 list-decimal pl-4 text-sm text-gray-500 dark:text-gray-400">
                         {q.options.map((opt, idx) => (
                           <li key={idx} className="capitalize">
                             {opt}

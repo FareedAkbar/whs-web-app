@@ -108,7 +108,7 @@ export const ModalBody = ({
           <motion.div
             ref={modalRef}
             className={cn(
-              "relative z-50 flex max-h-[90%] w-full min-w-fit flex-1 flex-col overflow-hidden border border-transparent bg-white p-4 md:max-w-[60%] md:rounded-2xl",
+              "relative z-50 flex max-h-[90%] w-full min-w-fit flex-1 flex-col overflow-hidden border border-transparent bg-white p-4 md:max-w-[60%] md:rounded-2xl dark:bg-gray-950",
               className,
             )}
             initial={{
@@ -170,7 +170,12 @@ export const ModalFooter = ({
   className?: string;
 }) => {
   return (
-    <div className={cn("flex justify-end bg-white p-4", className)}>
+    <div
+      className={cn(
+        "flex justify-end bg-white p-4 dark:bg-gray-950",
+        className,
+      )}
+    >
       {children}
     </div>
   );
@@ -190,7 +195,7 @@ const Overlay = ({ className }: { className?: string }) => {
         opacity: 0,
         backdropFilter: "blur(0px)",
       }}
-      className={`fixed inset-0 z-50 h-full w-full bg-black bg-opacity-50 ${className}`}
+      className={`fixed inset-0 z-50 h-full w-full bg-black bg-opacity-50 dark:bg-white dark:bg-opacity-50 ${className}`}
     ></motion.div>
   );
 };

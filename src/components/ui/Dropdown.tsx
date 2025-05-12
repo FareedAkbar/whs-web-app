@@ -67,7 +67,7 @@ const Dropdown: React.FC<DropdownProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className={`absolute z-50 min-w-[10rem] rounded-lg border border-gray-200 bg-white p-4 shadow-lg ${getPositionClasses(
+            className={`absolute z-50 min-w-[10rem] rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-600 dark:bg-gray-700 ${getPositionClasses(
               position,
             )} ${dropdownClassName}`}
           >

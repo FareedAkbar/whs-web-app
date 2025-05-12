@@ -27,12 +27,13 @@ const Button: React.FC<ButtonProps> = ({
 
   const variants = {
     primary: "bg-primary text-white shadow-xl hover:brightness-110",
-    secondary: "bg-white text-primary shadow-lg hover:shadow-xl",
+    secondary:
+      "bg-white dark:bg-gray-900 text-primary shadow-lg hover:brightness-110 hover:shadow-xl",
   };
 
   const iconWrapper = {
     primary: "bg-white text-primary p-1 rounded-full",
-    secondary: "bg-[#F2F2F2] text-primary p-1 rounded-full",
+    secondary: "bg-[#F2F2F2] dark:bg-gray-700 text-primary p-1 rounded-full",
   };
 
   return (

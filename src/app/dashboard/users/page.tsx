@@ -58,15 +58,18 @@ const UserPage = () => {
   }, [users]);
   const applyFilters = () => {
     const result = users?.data?.filter((user) => {
+      const isVerifiedByAdmin = Boolean(user.isVerifiedByAdmin);
+      const isVerified = Boolean(user.isVerified);
+
       const matchesAdmin =
         adminVerificationFilter === "all" ||
-        ((adminVerificationFilter === "approved" && user.isVerifiedByAdmin) ??
-          (adminVerificationFilter === "pending" && !user.isVerifiedByAdmin));
+        (adminVerificationFilter === "approved" && isVerifiedByAdmin) ||
+        (adminVerificationFilter === "pending" && !isVerifiedByAdmin);
 
       const matchesSelf =
         selfVerificationFilter === "all" ||
-        ((selfVerificationFilter === "verified" && user.isVerified) ??
-          (selfVerificationFilter === "unverified" && !user.isVerified));
+        (selfVerificationFilter === "verified" && isVerified) ||
+        (selfVerificationFilter === "unverified" && !isVerified);
 
       const matchesSearch =
         user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -136,12 +139,12 @@ const UserPage = () => {
         <input
           type="text"
           placeholder="Search by name or email"
-          className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm"
+          className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm dark:border-gray-600 dark:bg-gray-700"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Dropdown
           button={
-            <button className="flex w-full flex-row items-center border border-gray-300 bg-[#F9F9F9] px-4 py-3 text-sm">
+            <button className="flex w-full flex-row items-center border border-gray-300 bg-[#F9F9F9] px-4 py-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
               Filters
               <ChevronDown className="ml-2 inline" size={16} />
             </button>
@@ -151,7 +154,7 @@ const UserPage = () => {
           isOpen={isFilterOpen}
           setIsOpen={setIsFilterOpen}
         >
-          <div className="flex flex-col gap-3 text-sm text-gray-700">
+          <div className="flex flex-col gap-3 text-sm text-gray-700 dark:text-gray-200">
             <p className="border-b pb-2 font-bold">Filter</p>
             {/* Date Range */}
             {/* <div>
@@ -223,27 +226,30 @@ const UserPage = () => {
           <Search className="" size={16} color="white" />
         </div>
       </div>
-      <div className="overflow-x-auto rounded-lg border bg-white shadow">
+      <div className="overflow-x-auto rounded-lg border bg-white shadow dark:bg-gray-800">
         <table className="min-w-full table-auto text-sm">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-200">
             <tr>
+              <th></th>
               {/* <th className="w-10 p-4">
                 <input type="checkbox" className="accent-primary" />
               </th> */}
-              <th className="p-4 text-left font-medium text-gray-700">Name</th>
-              <th className="p-4 text-left font-medium text-gray-700">Email</th>
-              <th className="p-4 text-left font-medium text-gray-700">Role</th>
-              <th className="p-4 text-left font-medium text-gray-700">
-                Status
-              </th>
-              <th className="p-4 text-center font-medium text-gray-700">
-                Actions
-              </th>
+              <th className="p-4 text-left font-medium">Name</th>
+              <th className="p-4 text-left font-medium">Email</th>
+              <th className="p-4 text-left font-medium">Role</th>
+              <th className="p-4 text-left font-medium">Status</th>
+              <th className="p-4 text-center font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {paginatedUsers.map((user) => (
-              <tr key={user.id} className="border-t">
+            {paginatedUsers.map((user, index) => (
+              <tr
+                key={user.id}
+                className="border-t dark:border-gray-600 dark:text-white"
+              >
+                <td className="p-4">
+                  {page * pageSize - pageSize + index + 1}.
+                </td>
                 {/* <td className="p-4 text-center">
                   <input type="checkbox" className="accent-primary" />
                 </td> */}
@@ -314,7 +320,7 @@ const UserPage = () => {
               alt={selectedUser?.name}
               className="h-20 w-20 rounded-full border border-gray-300 object-cover"
             />
-            <h2 className="mt-3 flex items-center gap-1 text-xl font-semibold text-gray-900">
+            <h2 className="mt-3 flex items-center gap-1 text-xl font-semibold text-gray-900 dark:text-white">
               {selectedUser?.name}
               {selectedUser?.isVerified ? (
                 <IconRosetteDiscountCheckFilled
@@ -323,7 +329,9 @@ const UserPage = () => {
                 />
               ) : null}
             </h2>
-            <p className="text-sm text-gray-600">{selectedUser?.email}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {selectedUser?.email}
+            </p>
           </div>
 
           {/* Verification Status Messages */}
@@ -339,7 +347,17 @@ const UserPage = () => {
             )}
           </div>
           {/* Role Selection */}
-          <label className="mt-6 block text-sm font-medium text-gray-700">
+          <Select
+            label="Select Role"
+            value={selectedRole}
+            onChange={(e) => setSelectedRole(e.target.value)}
+            disabled={!selectedUser?.isVerified}
+            options={[
+              { value: "EMPLOYEE", label: "EMPLOYEE" },
+              { value: "WORKER", label: "CONTRACTOR" },
+            ]}
+          />
+          {/* <label className="mt-6 block text-sm font-medium text-gray-700">
             Select Role:
           </label>
           <select
@@ -350,7 +368,7 @@ const UserPage = () => {
           >
             <option value="EMPLOYEE">EMPLOYEE</option>
             <option value="WORKER">CONTRACTOR</option>
-          </select>
+          </select> */}
         </ModalContent>
 
         <ModalFooter>

@@ -71,4 +71,7 @@ html {
     .custom-scrollbar::-webkit-scrollbar-track {
       background-color: transparent; /* Scrollbar track color */
     }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #555; /* Dark mode scrollbar thumb color */
+    }
   }

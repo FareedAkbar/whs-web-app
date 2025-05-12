@@ -100,13 +100,13 @@ const Sidebar = ({
       > */}
       <div
         className={cn(
-          "fixed left-0 top-0 z-50 h-full w-64 bg-white p-4 shadow-md transition-all duration-300 md:relative",
+          "fixed left-0 top-0 z-50 h-full w-64 bg-white p-4 shadow-md transition-all duration-300 md:relative dark:bg-gray-950 dark:shadow-gray-500",
           isOpen ? "w-64 p-4" : "w-16 p-2",
           // isDesktop ? "md:relative" : "fixed left-0 top-0",
           isDrawerOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
       >
-        <div className="absolute -right-3 top-10 hidden justify-end rounded-full border bg-white p-1 md:flex">
+        <div className="absolute -right-3 top-10 hidden justify-end rounded-full border bg-white p-1 md:flex dark:bg-gray-950">
           <button onClick={() => setIsOpen(!isOpen)} className="text-gray-500">
             {isOpen ? (
               <IconChevronLeft size={20} />
@@ -118,9 +118,11 @@ const Sidebar = ({
 
         {/* Logo */}
         {isOpen ? (
-          <div className="font-nulshock flex text-3xl">
-            <span className="text-black">WHS</span>
-            <span className="text-primary">APP</span>
+          <div className="flex text-3xl">
+            <span className="font-nulshock text-black dark:text-white">
+              WHS
+            </span>
+            <span className="font-nulshock text-primary">APP</span>
           </div>
         ) : (
           <span className="font-nulshock text-primary">WHS</span>
@@ -140,7 +142,7 @@ const Sidebar = ({
             )}
             <div>
               <p className="text-xs uppercase text-gray-400">Welcome</p>
-              <p className="text-sm font-medium capitalize text-gray-700">
+              <p className="text-sm font-medium capitalize text-gray-700 dark:text-white">
                 {session.data.user.name ?? "User"}
               </p>
             </div>
@@ -163,11 +165,13 @@ const Sidebar = ({
               }}
             >
               <div
-                className={`flex items-center gap-3 rounded-lg p-3 transition-all ${pathname === item.path ? "border border-[#ECE6E6] bg-[#F8F5F5] text-primary" : "text-gray-700 hover:bg-[#F8F5F5]"}`}
+                className={`flex items-center gap-3 rounded-lg p-3 transition-all ${pathname === item.path ? "border border-[#ECE6E6] bg-[#F8F5F5] text-primary dark:bg-gray-700" : "text-gray-700 hover:bg-[#F8F5F5] dark:text-gray-300 dark:hover:bg-gray-700"}`}
               >
                 <span
                   className={
-                    pathname === item.path ? "text-primary" : "text-gray-500"
+                    pathname === item.path
+                      ? "text-primary"
+                      : "text-gray-500 dark:text-gray-300"
                   }
                 >
                   {item.icon}
@@ -180,7 +184,7 @@ const Sidebar = ({
 
         <div className="absolute bottom-10 w-3/4">
           <button
-            className="flex w-full items-center gap-3 rounded-md bg-white p-3 text-primary shadow-md hover:bg-[#F8F5F5]"
+            className="flex w-full items-center gap-3 rounded-md bg-white p-3 text-primary shadow-md hover:bg-[#F8F5F5] dark:bg-gray-700 dark:shadow-gray-500"
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
           >
             <IconLogout size={20} />

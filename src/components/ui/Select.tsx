@@ -70,7 +70,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             value={selectedValue}
             onChange={onChange}
             className={cn(
-              `shadow-input flex h-10 w-full appearance-none rounded-md border border-[#ADADAD] bg-gray-50 px-3 py-2 pr-10 text-sm text-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none`,
+              `shadow-input flex h-10 w-full cursor-pointer appearance-none rounded-md border border-[#ADADAD] bg-gray-50 px-3 py-2 pr-10 text-sm text-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white`,
               error && "border-red-500 focus-visible:ring-red-500",
               className,
             )}

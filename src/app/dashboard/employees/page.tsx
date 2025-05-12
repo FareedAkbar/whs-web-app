@@ -55,21 +55,19 @@ const EmployeePage = () => {
         <input
           type="text"
           placeholder="Search by name or email"
-          className="my-2 w-full rounded-md border border-gray-300 px-3 py-3 text-sm shadow-sm"
+          className="my-2 w-full rounded-md border border-gray-300 px-2 py-3 text-sm shadow-sm dark:border-gray-500 dark:bg-gray-700 dark:text-white"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <div className="overflow-x-auto rounded-lg border bg-white shadow">
+      <div className="overflow-x-auto rounded-lg border bg-white shadow dark:bg-gray-800">
         <table className="min-w-full table-auto text-sm">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-200">
             <tr>
-              <th className="p-4 text-left font-medium text-gray-700">Name</th>
-              <th className="p-4 text-left font-medium text-gray-700">Email</th>
-              <th className="p-4 text-left font-medium text-gray-700">Role</th>
-              <th className="p-4 text-left font-medium text-gray-700">
-                Status
-              </th>
+              <th className="p-4 text-left font-medium">Name</th>
+              <th className="p-4 text-left font-medium">Email</th>
+              <th className="p-4 text-left font-medium">Role</th>
+              <th className="p-4 text-left font-medium">Status</th>
               {/* <th className="p-4 text-center font-medium text-gray-700">
                 Actions
               </th> */}
@@ -77,7 +75,10 @@ const EmployeePage = () => {
           </thead>
           <tbody>
             {paginatedEmployees.map((emp) => (
-              <tr key={emp.id} className="border-t">
+              <tr
+                key={emp.id}
+                className="border-t dark:border-gray-600 dark:text-white"
+              >
                 <td className="p-4">{emp.name}</td>
                 <td className="p-4">{emp.email}</td>
                 <td className="p-4">{emp.role}</td>

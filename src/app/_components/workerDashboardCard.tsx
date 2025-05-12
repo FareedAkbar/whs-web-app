@@ -22,13 +22,13 @@ const WorkerDashboardCard: React.FC<WorkerDashboardCardProps> = ({
 
   return (
     <div
-      className="flex cursor-pointer flex-row items-center justify-between gap-3 rounded-[20px] border border-[#ECE6E6] bg-white p-6 shadow-lg transition-all duration-300 hover:scale-105"
+      className="flex cursor-pointer flex-row items-center justify-between gap-3 rounded-[20px] border border-[#ECE6E6] bg-white p-6 shadow-lg transition-all duration-300 hover:scale-105 dark:border-gray-500 dark:bg-gray-900"
       onClick={onClick}
     >
       {/* Title and Value */}
       <div className="flex flex-col items-start gap-4">
         <p className="font-medium text-gray-500">{title}</p>
-        <p className="text-2xl font-bold">{total}</p>
+        <p className="text-2xl font-bold dark:text-white">{total}</p>
       </div>
 
       {/* Circular Progress */}

@@ -121,12 +121,12 @@ export default function IncidentsList() {
         <input
           type="text"
           placeholder="Search incidents..."
-          className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm"
+          className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm dark:border-gray-600 dark:bg-gray-700"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Dropdown
           button={
-            <button className="flex w-full flex-row items-center border border-gray-300 bg-[#F9F9F9] px-4 py-3 text-sm">
+            <button className="flex w-full flex-row items-center border border-gray-300 bg-[#F9F9F9] px-4 py-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
               Filters
               <ChevronDown className="ml-2 inline" size={16} />
             </button>
@@ -135,7 +135,7 @@ export default function IncidentsList() {
           isOpen={isFilterOpen}
           setIsOpen={setIsFilterOpen}
         >
-          <div className="flex flex-col gap-3 text-sm text-gray-700">
+          <div className="flex flex-col gap-3 text-sm text-gray-700 dark:text-gray-200">
             <p className="border-b pb-2 font-bold">Filter</p>
             {/* Date Range */}
             <div>
@@ -145,13 +145,13 @@ export default function IncidentsList() {
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-1/2 rounded border border-gray-300 px-2 py-1"
+                  className="w-1/2 rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
                 />
                 <input
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className="w-1/2 rounded border border-gray-300 px-2 py-1"
+                  className="w-1/2 rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
                 />
               </div>
             </div>
@@ -264,7 +264,7 @@ export default function IncidentsList() {
           filteredIncidents?.map((item) => (
             <div
               key={item.incidentReport.id}
-              className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg"
+              className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg dark:border-gray-500 dark:bg-gray-800"
               // onClick={() => {
               //   setSelectedIncident(item);
               //   setOpen(true);
@@ -275,7 +275,7 @@ export default function IncidentsList() {
             >
               <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
                 <div className="flex gap-3">
-                  <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2">
+                  <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
                     <AlertTriangle
                       size={40}
                       color={`${severityMapping[item?.incidentReport?.priority] || "black"}`}

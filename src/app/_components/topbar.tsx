@@ -90,7 +90,7 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
   }, [dropdownOpen]);
 
   return (
-    <div className="flex w-full items-center justify-between gap-4 bg-white px-6 py-5">
+    <div className="flex w-full items-center justify-between gap-4 bg-white px-6 py-5 dark:bg-gray-950 dark:text-white">
       <button className="block md:hidden" onClick={toggleDrawer}>
         <MenuIcon size={28} />
       </button>
@@ -105,14 +105,17 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
       <div className="flex">
         {session.data?.user.email ? (
           <div className="flex items-center gap-4">
-            <Link href={"/dashboard"} className="rounded-full bg-[#F2F2F2] p-3">
+            <Link
+              href={"/dashboard"}
+              className="rounded-full bg-[#F2F2F2] p-3 dark:bg-gray-600"
+            >
               <IconHelp size={20} />
             </Link>
             <div className="relative flex items-center gap-2">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 disabled={dropdownOpen}
-                className="flex items-center gap-2 rounded-full bg-[#F2F2F2] p-3"
+                className="flex items-center gap-2 rounded-full bg-[#F2F2F2] p-3 dark:bg-gray-600"
               >
                 {session.data?.user.image && session.data.user.image !== "" ? (
                   <Image
@@ -129,9 +132,9 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
                   />
                 )}
               </button>
-              {/* <ThemeToggle hide />
+              <ThemeToggle hide />
               <ThemeColorPicker />
-              <ThemeFontPicker /> */}
+              <ThemeFontPicker />
               <div
                 ref={optionsRef}
                 className={
@@ -144,20 +147,20 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
                     <p className="text-sm capitalize">
                       {session.data?.user.name}
                     </p>
-                    <p className="text-xs text-neutral-400">
+                    <p className="text-xs text-gray-400">
                       {session.data?.user.email}
                     </p>
                   </div>
                 </div>
-                <div className="mb-[1px] w-full border-[0.5px] border-gray-100/20 bg-neutral-200"></div>
+                <div className="mb-[1px] w-full border-[0.5px] border-gray-100/20 bg-gray-200"></div>
                 {options.map((option, index) => (
                   <Fragment key={index}>
                     {index === options.length - 1 && (
-                      <div className="my-[1px] w-full border-[0.5px] border-gray-100/20 bg-neutral-200"></div>
+                      <div className="my-[1px] w-full border-[0.5px] border-gray-100/20 bg-gray-200"></div>
                     )}
                     <button
                       onClick={() => onOptionSelect(option)}
-                      className="flex w-full items-center gap-2 overflow-x-hidden rounded px-2 py-2 text-sm font-light text-black hover:bg-[#e9e8e8] dark:text-black dark:hover:bg-neutral-200"
+                      className="flex w-full items-center gap-2 overflow-x-hidden rounded px-2 py-2 text-sm font-light text-black hover:bg-[#e9e8e8] dark:text-black dark:hover:bg-gray-200"
                     >
                       {option.icon}
                       <span>{option.label}</span>

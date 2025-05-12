@@ -18,7 +18,7 @@ import Button from "@/components/ui/Button";
 import { Modal, ModalBody, useModal } from "@/components/ui/animated-modal";
 import { hasPermission } from "@/lib/auth";
 import { useSession } from "next-auth/react";
-
+import { Select } from "@/components/ui/Select";
 export default function IncidentDetailScreen() {
   const params = useParams();
   const { setOpen } = useModal();
@@ -186,7 +186,7 @@ export default function IncidentDetailScreen() {
         ← Back to LIst
       </button>
 
-      <div className="rounded-lg border bg-white p-6 shadow-md">
+      <div className="rounded-lg border bg-white p-6 shadow-md dark:border-gray-500 dark:bg-gray-800 dark:text-white dark:shadow-gray-700">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-row items-center gap-4">
             <h2
@@ -266,7 +266,7 @@ export default function IncidentDetailScreen() {
         </div>
 
         <div className="mt-4 space-y-4">
-          <div className="space-y-2 text-sm text-gray-700">
+          <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <p>
               <span className="font-medium">Hazard Description:</span>
               <br />
@@ -291,7 +291,7 @@ export default function IncidentDetailScreen() {
                     assignee.assignedToData ? (
                       <p
                         key={index}
-                        className="text-sm capitalize text-gray-700"
+                        className="text-sm capitalize text-gray-700 dark:text-gray-300"
                       >
                         {assignee.assignedToData.name} (
                         {assignee.acceptanceStatus === true
@@ -312,12 +312,14 @@ export default function IncidentDetailScreen() {
 
           {incident.media?.length ? (
             <div className="mt-6">
-              <h3 className="font-semibold text-gray-800">Incident Gallery</h3>
+              <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                Incident Gallery
+              </h3>
               {groupedImages.map(
                 ({ status, images }) =>
                   images?.length > 0 && (
                     <div key={status} className="mt-2">
-                      <p className="text-sm font-medium capitalize text-gray-700">
+                      <p className="text-sm font-medium capitalize text-gray-700 dark:text-gray-300">
                         {status.toLocaleLowerCase().replace("_", " ")} images
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2">
@@ -396,39 +398,32 @@ export default function IncidentDetailScreen() {
             )}
 
           {(modalMode === "assign" || modalMode === "cancel") && (
-            <ModalBody className="max-w-[40%]">
+            <ModalBody className="max-w-2xl">
               <div className="mt-4">
                 {modalMode === "assign" ? (
-                  <>
-                    <p className="text-sm font-medium text-gray-700">
-                      {(assignees.length ?? 0) > 0 &&
+                  <Select
+                    label={
+                      (assignees.length ?? 0) > 0 &&
                       assignees.every(
                         (assignee) => assignee.acceptanceStatus === false,
                       )
                         ? "Reassign Contractor"
-                        : "Assign Contractor"}
-                    </p>
-                    <select
-                      className="mt-2 w-full rounded border p-2"
-                      onChange={(e) => setSelectedContractor(e.target.value)}
-                      value={selectedContractor}
-                    >
-                      <option value="">Select option</option>
-                      {workers?.data?.map((contractor) => (
-                        <option
-                          key={contractor.id}
-                          value={contractor.id}
-                          className="capitalize"
-                        >
-                          {contractor.name}
-                        </option>
-                      ))}
-                    </select>
-                  </>
+                        : "Assign Contractor"
+                    }
+                    className="mt-2 w-full rounded border p-2"
+                    onChange={(e) => setSelectedContractor(e.target.value)}
+                    value={selectedContractor}
+                    options={
+                      workers?.data?.map((contractor) => ({
+                        value: contractor.id,
+                        label: contractor.name,
+                      })) || []
+                    }
+                  />
                 ) : modalMode === "cancel" ? (
                   <div className="mt-4">
                     <textarea
-                      className="w-full rounded border p-2"
+                      className="mb-4 min-h-28 w-full rounded-lg border bg-gray-50 p-2 shadow focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 dark:bg-gray-700 dark:text-white"
                       placeholder="Add rejection reason..."
                       rows={3}
                       onChange={(e) => setComment(e.target.value)}
