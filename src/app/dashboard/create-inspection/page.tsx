@@ -2,7 +2,7 @@
 
 import { QuestionInput } from "@/components/ui/QuestionInput";
 import Button from "@/components/ui/Button";
-import { Question } from "@/types/questions";
+import type { Question } from "@/types/questions";
 import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -47,7 +47,7 @@ export default function CreateInspectionPage() {
 
     const timestamp = new Date().getTime();
 
-    const checklist = {
+    const checklist: Inspection = {
       id: `inspection_${timestamp}`,
       title,
       description,
@@ -55,12 +55,14 @@ export default function CreateInspectionPage() {
         ...q,
         id: `Q${i + 1}`,
       })),
+      status: "not_started",
     };
 
-    const storedInspections =
-      JSON.parse(localStorage.getItem("inspections") || "[]") || [];
+    const storedInspections = JSON.parse(
+      localStorage.getItem("inspections") ?? "[]",
+    ) as Inspection[];
 
-    const updatedInspections = [...storedInspections, checklist];
+    const updatedInspections: Inspection[] = [...storedInspections, checklist];
     localStorage.setItem("inspections", JSON.stringify(updatedInspections));
     router.push("/dashboard/inspections-checklist");
     setQuestions([]);

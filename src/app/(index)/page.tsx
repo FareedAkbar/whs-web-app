@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import TopBar from "../_components/topbar";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";

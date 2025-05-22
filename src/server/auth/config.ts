@@ -1,10 +1,10 @@
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
-import Credentials from "next-auth/providers/credentials"
+import Credentials from "next-auth/providers/credentials";
 import { env } from "@/env";
 import { createTRPCContext } from "../api/trpc";
 import { createCaller } from "../api/root";
-
+import type { Session } from "next-auth";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -12,6 +12,7 @@ import { createCaller } from "../api/root";
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
+
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
@@ -44,14 +45,18 @@ export const authConfig = {
   secret: env.AUTH_SECRET,
   pages: {
     signIn: "/auth/login",
-    signOut: '/',
+    signOut: "/",
   },
   callbacks: {
     async signIn({ account, profile }) {
       if (account?.provider === "google") {
         const context = await createTRPCContext({ headers: new Headers() });
         const caller = createCaller(context);
-        if (Boolean(profile?.email_verified && profile?.email?.endsWith("@gmail.com"))) {
+        if (
+          Boolean(
+            profile?.email_verified && profile?.email?.endsWith("@gmail.com"),
+          )
+        ) {
           const response = await caller.auth.socialLogin({
             name: profile?.name ?? "",
             email: profile?.email ?? "",
@@ -70,7 +75,7 @@ export const authConfig = {
       }
       return true;
     },
-    async jwt({ token, user, account, profile,trigger,session }) {
+    async jwt({ token: token, user, account, profile, trigger, session }) {
       if (user) {
         token.id = user.id ?? "";
         token.name = user.name;
@@ -79,7 +84,7 @@ export const authConfig = {
         token.token = user.token;
         token.role = user.role;
         token.imageUrl = user.imageUrl;
-        token.isVerifiedByAdmin = user.isVerifiedByAdmin
+        token.isVerifiedByAdmin = user.isVerifiedByAdmin;
       }
 
       if (account?.provider === "google" && profile) {
@@ -100,19 +105,20 @@ export const authConfig = {
           token.imageUrl = response.user.imageUrl;
           token.token = response.token;
           token.role = response.user.role;
-          token.isVerifiedByAdmin = response.user.isVerifiedByAdmin
+          token.isVerifiedByAdmin = response.user.isVerifiedByAdmin;
         }
-         
       }
-      
-      if (trigger === "update" && session?.role) {
-        // Note, that `session` can be any arbitrary object, remember to validate it!
-        token.role = session.role
+
+      if (trigger === "update") {
+        // Safely type-check the session object
+        const typedSession = session as Partial<Session>;
+        if (typedSession?.user?.role) {
+          token.role = typedSession.user.role;
+        }
       }
       return token;
     },
     async session({ session, token }) {
-      
       const userSession = {
         ...session,
         user: {
@@ -122,13 +128,12 @@ export const authConfig = {
           imageUrl: token.imageUrl,
           token: token.token,
           role: token.role,
-          isVerifiedByAdmin: token.isVerifiedByAdmin
-        }
-      }
-    
+          isVerifiedByAdmin: token.isVerifiedByAdmin,
+        },
+      };
+
       return userSession;
     },
-   
   },
   session: {
     strategy: "jwt",
@@ -184,7 +189,7 @@ export const authConfig = {
               providerImageUrl: response.user.imageUrl,
               role: response.user.role,
               token: response.token,
-              isVerifiedByAdmin: response.user.isVerifiedByAdmin
+              isVerifiedByAdmin: response.user.isVerifiedByAdmin,
             };
             return user;
           }

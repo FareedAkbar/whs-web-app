@@ -1,34 +1,20 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/trpc/react";
 import {
-  Modal,
-  ModalTrigger,
   ModalBody,
   ModalContent,
   ModalFooter,
   useModal,
-  ModalProvider,
 } from "@/components/ui/animated-modal"; // Adjust the import path as necessary
 import { toast } from "react-toastify";
-import {
-  IconCheck,
-  IconRosetteDiscountCheckFilled,
-  IconRosetteDiscountCheckOff,
-} from "@tabler/icons-react";
+import { IconRosetteDiscountCheckFilled } from "@tabler/icons-react";
 import Button from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { useSession } from "next-auth/react";
 import Dropdown from "@/components/ui/Dropdown";
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  Filter,
-  Search,
-} from "lucide-react";
+import { ChevronDown, Eye, Filter, Search } from "lucide-react";
 import { set } from "zod";
 import Pagination from "@/app/_components/Pagination";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import Button from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
@@ -60,7 +60,7 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-6 rounded-xl border bg-white p-6 shadow-md md:flex-row md:gap-8 md:p-8 dark:bg-gray-800">
+    <div className="flex w-full flex-col gap-6 rounded-xl border bg-white p-6 shadow-md dark:bg-gray-800 md:flex-row md:gap-8 md:p-8">
       {/* Left: Question Textarea */}
       <div className="w-full md:w-1/2">
         <label className="block pb-2 text-sm font-semibold text-gray-600 dark:text-gray-300">

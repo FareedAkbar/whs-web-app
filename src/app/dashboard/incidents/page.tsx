@@ -3,16 +3,7 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, ChevronDown, Filter, Search } from "lucide-react";
 import { api } from "@/trpc/react";
-import {
-  Modal,
-  ModalTrigger,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  useModal,
-} from "@/components/ui/animated-modal";
-import { toast } from "react-toastify";
-import Image from "next/image";
+
 import Dropdown from "@/components/ui/Dropdown";
 import { Select } from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
@@ -22,16 +13,12 @@ import { severityMapping } from "@/constants/severity";
 import { useRouter } from "next/navigation";
 
 export default function IncidentsList() {
-  const {
-    data: incidents,
-    isLoading,
-    refetch,
-  } = api.incidents.getIncidents.useQuery();
+  const { data: incidents, isLoading } = api.incidents.getIncidents.useQuery();
   const { data: workers } = api.workers.getWorkers.useQuery();
   const [searchTerm, setSearchTerm] = useState("");
 
   const [filteredIncidents, setFilteredIncidents] = useState<IncidentData[]>(
-    incidents?.data || [],
+    incidents?.data ?? [],
   );
   const router = useRouter();
 
@@ -49,7 +36,7 @@ export default function IncidentsList() {
   const [priority, setPriority] = useState<string[]>([]);
   const [status, setStatus] = useState<string[]>([]);
   const [assignedTo, setAssignedTo] = useState("");
-  const [taskType, setTaskType] = useState("");
+  // const [taskType, setTaskType] = useState("");
   const session = useSession();
 
   useEffect(() => {
@@ -57,7 +44,11 @@ export default function IncidentsList() {
       setFilteredIncidents(incidents.data);
     }
   }, [incidents?.data]);
-  const toggleArrayValue = (val: string, setFn: any, state: string[]) => {
+  const toggleArrayValue = (
+    val: string,
+    setFn: React.Dispatch<React.SetStateAction<string[]>>,
+    state: string[],
+  ) => {
     if (state.includes(val)) {
       setFn(state.filter((v) => v !== val));
     } else {
@@ -70,10 +61,10 @@ export default function IncidentsList() {
     setPriority([]);
     setStatus([]);
     setAssignedTo("");
-    setTaskType("");
+    // setTaskType("");
     setIsFilterOpen(false);
     setSearchTerm("");
-    setFilteredIncidents(incidents?.data || []);
+    setFilteredIncidents(incidents?.data ?? []);
   };
   const handleFilter = () => {
     setFilteredIncidents(
@@ -98,7 +89,7 @@ export default function IncidentsList() {
               .toLowerCase()
               .includes(searchTerm.toLowerCase()))
         );
-      }) || [],
+      }) ?? [],
     );
     setIsFilterOpen(false);
   };
@@ -278,7 +269,7 @@ export default function IncidentsList() {
                   <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
                     <AlertTriangle
                       size={40}
-                      color={`${severityMapping[item?.incidentReport?.priority] || "black"}`}
+                      color={`${severityMapping[item?.incidentReport?.priority] ?? "black"}`}
                     />
                   </div>
                   {/* <img
@@ -294,7 +285,7 @@ export default function IncidentsList() {
                       className="font-semibold capitalize"
                       style={{
                         color:
-                          severityMapping[item?.incidentReport?.priority] ||
+                          severityMapping[item?.incidentReport?.priority] ??
                           "#000",
                       }}
                     >

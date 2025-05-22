@@ -2,24 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/trpc/react";
-import {
-  ModalBody,
-  ModalContent,
-  useModal,
-} from "@/components/ui/animated-modal";
-import { Eye } from "lucide-react";
+import { useModal } from "@/components/ui/animated-modal";
 import { useSession } from "next-auth/react";
 import Pagination from "@/app/_components/Pagination";
 
 const EmployeePage = () => {
   const { data: employees, isLoading } = api.employees.getEmployees.useQuery();
-  const [selectedEmployee, setSelectedEmployee] = useState<User | null>(null);
+  // const [selectedEmployee, setSelectedEmployee] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredEmployees, setFilteredEmployees] = useState<User[]>([]);
   const [page, setPage] = useState(1);
   const pageSize = 10;
-  const { setOpen } = useModal();
-  const session = useSession();
 
   useEffect(() => {
     if (employees?.data) {
@@ -33,7 +26,7 @@ const EmployeePage = () => {
         emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.email.toLowerCase().includes(searchTerm.toLowerCase()),
     );
-    setFilteredEmployees(result || []);
+    setFilteredEmployees(result ?? []);
   }, [searchTerm, employees]);
 
   const paginatedEmployees = filteredEmployees.slice(

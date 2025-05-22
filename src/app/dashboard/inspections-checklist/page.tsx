@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/Select";
 import YesNoQuestion from "@/components/ui/YesNoQuestion";
 import {
-  Modal,
   ModalBody,
   ModalContent,
   useModal,
@@ -17,7 +16,7 @@ import { useRouter } from "next/navigation";
 import { CheckCircle, Clock, Hourglass, Send } from "lucide-react";
 import { hasPermission } from "@/lib/auth";
 import { useSession } from "next-auth/react";
-import { Question } from "@/types/questions";
+import type { Question } from "@/types/questions";
 
 const statusIcons: Record<string, { icon: React.JSX.Element; label: string }> =
   {
@@ -35,29 +34,31 @@ const statusIcons: Record<string, { icon: React.JSX.Element; label: string }> =
     },
     submitted: { icon: <Send className="text-blue-500" />, label: "Submitted" },
   };
+type FormValue = string | string[];
+
 const InspectionChecklist = () => {
-  const [selectedInspection, setSelectedInspection] = useState<any | null>(
-    null,
-  );
-  const [formValues, setFormValues] = useState<Record<string, any>>({});
-  const [inspections, setInspections] = useState<any[]>([]);
+  const [selectedInspection, setSelectedInspection] =
+    useState<Inspection | null>(null);
+  const [formValues, setFormValues] = useState<Record<string, FormValue>>({});
+  const [inspections, setInspections] = useState<Inspection[]>([]);
   const router = useRouter();
   const { setOpen } = useModal();
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
-    const getInspections = async () => {
+    const getInspections = () => {
       setIsLoading(true);
-      const stored = await localStorage.getItem("inspections");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setInspections(parsed);
-      }
+      const stored = JSON.parse(
+        localStorage.getItem("inspections") ?? "[]",
+      ) as Inspection[];
+
+      setInspections(stored);
+
       setIsLoading(false);
     };
     getInspections();
   }, []);
 
-  const updateStatus = (id: string, status: string) => {
+  const updateStatus = (id: string, status: Inspection["status"]) => {
     const updated = inspections.map((insp) =>
       insp.id === id ? { ...insp, status } : insp,
     );
@@ -66,14 +67,21 @@ const InspectionChecklist = () => {
   };
   const session = useSession();
   const user = session.data?.user;
-  const handleInputChange = (id: string, value: any) => {
+  const handleInputChange = (id: string, value: FormValue) => {
     setFormValues((prev) => ({ ...prev, [id]: value }));
+    if (!selectedInspection?.id) return;
     updateStatus(selectedInspection.id, "in_progress");
   };
 
   const isFormValid = () => {
-    return selectedInspection.questions.every((q: any) => {
-      if (q.type === "multiple_selection") return formValues[q.id]?.length;
+    return selectedInspection?.questions.every((q: Question) => {
+      if (q.type === "multiple_selection") {
+        const value = formValues[q.id];
+        if (Array.isArray(value)) {
+          return value.length;
+        }
+        return 0;
+      }
       if (q.type === "date_range")
         return formValues[`${q.id}_start`] && formValues[`${q.id}_end`];
       return formValues[q.id] !== undefined && formValues[q.id] !== "";
@@ -86,6 +94,7 @@ const InspectionChecklist = () => {
       return;
     }
 
+    if (!selectedInspection?.id) return;
     updateStatus(selectedInspection.id, "submitted");
     setSelectedInspection(null);
     setFormValues({});
@@ -111,7 +120,7 @@ const InspectionChecklist = () => {
       )}
 
       <div className="w-full space-y-6 p-6">
-        {inspections.map((inspection) => (
+        {inspections.map((inspection: Inspection) => (
           <div
             key={inspection.id}
             className="relative w-full cursor-pointer rounded-lg border bg-white p-6 text-left shadow-md dark:bg-gray-800 dark:text-white"
@@ -153,7 +162,7 @@ const InspectionChecklist = () => {
             </h2>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {selectedInspection.questions.map((q: any) => (
+              {selectedInspection.questions.map((q: Question) => (
                 <div
                   key={q.id}
                   className={`${
@@ -195,9 +204,9 @@ const InspectionChecklist = () => {
 };
 
 function renderQuestion(
-  q: any,
-  formValues: Record<string, any>,
-  onChange: (id: string, value: any) => void,
+  q: Question,
+  formValues: Record<string, FormValue>,
+  onChange: (id: string, value: FormValue) => void,
 ) {
   switch (q.type) {
     case "text":
@@ -206,10 +215,11 @@ function renderQuestion(
         <Input
           type={q.type}
           label={q.question}
-          value={formValues[q.id] || ""}
+          value={typeof formValues[q.id] === "string" ? formValues[q.id] : ""}
           onChange={(e) => onChange(q.id, e.target.value)}
         />
       );
+
     case "date_range":
       return (
         <div>
@@ -218,56 +228,83 @@ function renderQuestion(
             <Input
               type="date"
               label="Start"
-              value={formValues[`${q.id}_start`] || ""}
+              value={
+                typeof formValues[`${q.id}_start`] === "string"
+                  ? formValues[`${q.id}_start`]
+                  : ""
+              }
               onChange={(e) => onChange(`${q.id}_start`, e.target.value)}
             />
             <Input
               type="date"
               label="End"
-              value={formValues[`${q.id}_end`] || ""}
+              value={
+                typeof formValues[`${q.id}_end`] === "string"
+                  ? formValues[`${q.id}_end`]
+                  : ""
+              }
               onChange={(e) => onChange(`${q.id}_end`, e.target.value)}
             />
           </div>
         </div>
       );
+
     case "yes_no":
       return (
         <YesNoQuestion
           question={q.question}
-          value={formValues[q.id]}
           onChange={(val) => onChange(q.id, val)}
+          value={
+            typeof formValues[q.id] === "string"
+              ? (formValues[q.id] as string)
+              : ""
+          }
         />
       );
+
     case "single_selection":
       return (
         <Select
           label={q.question}
-          options={q.options.map((opt: string) => ({
-            label: opt,
-            value: opt,
-          }))}
-          value={formValues[q.id]}
-          onChange={(val) => onChange(q.id, val)}
+          options={
+            q?.options?.map((opt: string) => ({
+              label: opt,
+              value: opt,
+            })) ?? []
+          }
+          value={typeof formValues[q.id] === "string" ? formValues[q.id] : ""}
+          onChange={(e) => onChange(q.id, e.target.value)}
         />
       );
-    case "multiple_selection":
+
+    case "multiple_selection": {
+      const value = formValues[q.id];
+      const selectedValues = Array.isArray(value) ? value : [];
+
       return (
         <div>
           <Label className="mb-1 block">{q.question}</Label>
           <div className="space-y-2">
-            {q.options.map((opt: string) => (
+            {q?.options?.map((opt: string) => (
               <label key={opt} className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  checked={formValues[q.id]?.includes(opt) || false}
+                  checked={selectedValues.includes(opt)}
                   onChange={(e) => {
                     const checked = e.target.checked;
-                    onChange(
-                      q.id,
-                      checked
-                        ? [...(formValues[q.id] || []), opt]
-                        : formValues[q.id]?.filter((o: string) => o !== opt),
-                    );
+
+                    if (Array.isArray(value)) {
+                      // 'value' is typed as string | string[], but inside here it is string[]
+                      onChange(
+                        q.id,
+                        checked
+                          ? [...value, opt]
+                          : value.filter((o) => o !== opt),
+                      );
+                    } else {
+                      // value is not an array, initialize as array with opt if checked, else empty array
+                      onChange(q.id, checked ? [opt] : []);
+                    }
                   }}
                   className="accent-primary"
                 />
@@ -277,10 +314,13 @@ function renderQuestion(
           </div>
         </div>
       );
+    }
+
     default:
       return null;
   }
 }
+
 function renderQuestionViewOnly(q: Question) {
   return (
     <div className="mb-4">

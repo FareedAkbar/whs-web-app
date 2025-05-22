@@ -2,24 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/trpc/react";
-import {
-  ModalBody,
-  ModalContent,
-  useModal,
-} from "@/components/ui/animated-modal";
-import { Eye } from "lucide-react";
+import { useModal } from "@/components/ui/animated-modal";
 import Pagination from "@/app/_components/Pagination";
 
 const ContractorPage = () => {
   const { data: workers, isLoading } = api.workers.getWorkers.useQuery();
-  const [selectedContractor, setSelectedContractor] = useState<User | null>(
-    null,
-  );
+  // const [selectedContractor, setSelectedContractor] = useState<User | null>(
+  //   null,
+  // );
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredContractors, setFilteredContractors] = useState<User[]>([]);
   const [page, setPage] = useState(1);
   const pageSize = 10;
-  const { setOpen } = useModal();
 
   useEffect(() => {
     if (workers?.data) {
@@ -33,7 +27,7 @@ const ContractorPage = () => {
         contractor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         contractor.email.toLowerCase().includes(searchTerm.toLowerCase()),
     );
-    setFilteredContractors(result || []);
+    setFilteredContractors(result ?? []);
   }, [searchTerm, workers]);
 
   const paginatedContractors = filteredContractors.slice(

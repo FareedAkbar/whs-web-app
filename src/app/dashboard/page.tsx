@@ -28,7 +28,9 @@ const Dashboard = () => {
   const workerMutation = api.dashboard.getWorkerCounters.useMutation();
   const employeeMutation = api.dashboard.getEmployeeCounters.useMutation();
 
-  const [roleData, setRoleData] = useState<any>(null);
+  const [roleData, setRoleData] = useState<DashboardStats | WorkerCount | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,13 +40,13 @@ const Dashboard = () => {
       try {
         if (user.role === "ADMIN") {
           const data = await adminMutation.mutateAsync();
-          setRoleData(data);
+          setRoleData(data?.data ?? null);
         } else if (user.role === "WORKER") {
           const data = await workerMutation.mutateAsync();
-          setRoleData(data);
+          setRoleData(data?.data ?? null);
         } else if (user.role === "EMPLOYEE") {
           const data = await employeeMutation.mutateAsync();
-          setRoleData(data);
+          setRoleData(data?.data ?? null);
         }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -53,52 +55,68 @@ const Dashboard = () => {
       }
     };
 
-    fetchRoleData();
+    void fetchRoleData();
   }, [user?.role]);
 
-  const counters = roleData?.data;
+  const counters = roleData;
 
   const adminDashboardItems = [
     {
       title: "Users List",
       icon: <IconUsers size={32} />,
-      value: counters?.allUsers,
+      value: counters && "allUsers" in counters ? counters.allUsers : undefined,
       onClick: () => router.push("/dashboard/users"),
     },
     {
       title: "Employee List",
       icon: <IconUser size={32} />,
-      value: counters?.allEmployees,
+      value:
+        counters && "allEmployees" in counters
+          ? counters.allEmployees
+          : undefined,
       onClick: () => router.push("/dashboard/employees"),
     },
     {
       title: "Contractors List",
       icon: <IconBriefcase size={32} />,
-      value: counters?.allWorkers,
+      value:
+        counters && "allWorkers" in counters ? counters.allWorkers : undefined,
       onClick: () => router.push("/dashboard/contractors"),
     },
     {
       title: "Incidents",
       icon: <IconAlertCircle size={32} />,
-      value: counters?.allIncidents,
+      value:
+        counters && "allIncidents" in counters
+          ? counters.allIncidents
+          : undefined,
       onClick: () => router.push("/dashboard/incidents"),
     },
     {
       title: "Completed Tasks",
       icon: <IconCheck size={32} />,
-      value: counters?.allCompletedIncidents,
+      value:
+        counters && "allCompletedIncidents" in counters
+          ? counters.allCompletedIncidents
+          : undefined,
       onClick: () => router.push("/dashboard/incidents"),
     },
     {
       title: "Assignable Tasks",
       icon: <IconClipboardList size={32} />,
-      value: counters?.allUnassignedIncidents,
+      value:
+        counters && "allUnassignedIncidents" in counters
+          ? counters.allUnassignedIncidents
+          : undefined,
       onClick: () => router.push("/dashboard/incidents"),
     },
     {
       title: "Cancelled Tasks",
       icon: <IconClipboardX size={32} />,
-      value: counters?.allCancelledIncidents,
+      value:
+        counters && "allCancelledIncidents" in counters
+          ? counters.allCancelledIncidents
+          : undefined,
       onClick: () => router.push("/dashboard/incidents"),
     },
   ];
@@ -107,23 +125,47 @@ const Dashboard = () => {
     {
       icon: <CirclePlus size={20} />,
       label: "Reports",
-      count: counters?.completedReports ?? 0,
-      totalCount: counters?.reportsReported ?? 0,
-      action: () => {},
+      count:
+        counters && "completedReports" in counters
+          ? counters.completedReports
+          : 0,
+      totalCount:
+        counters && "reportsReported" in counters
+          ? counters.reportsReported
+          : 0,
+      action: () => {
+        router.push("/dashboard/inspections");
+      },
     },
     {
       icon: <ClipboardList size={20} />,
       label: "Assigned Inspections",
-      count: counters?.reportsAssigned ?? 0,
-      totalCount: counters?.completedReports ?? 0,
-      action: () => {},
+      count:
+        counters && "reportsAssigned" in counters
+          ? counters.reportsAssigned
+          : 0,
+      totalCount:
+        counters && "completedReports" in counters
+          ? counters.completedReports
+          : 0,
+      action: () => {
+        router.push("/dashboard/inspections");
+      },
     },
     {
       icon: <CheckCircle size={20} />,
       label: "Completed Tasks",
-      count: counters?.completedReports ?? 0,
-      totalCount: counters?.reportsAssigned ?? 0,
-      action: () => {},
+      count:
+        counters && "completedReports" in counters
+          ? counters.completedReports
+          : 0,
+      totalCount:
+        counters && "reportsAssigned" in counters
+          ? counters.reportsAssigned
+          : 0,
+      action: () => {
+        router.push("/dashboard/inspections");
+      },
     },
   ];
 

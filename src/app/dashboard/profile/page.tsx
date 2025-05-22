@@ -2,15 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import {
-  IconUser,
-  IconPhone,
-  IconMail,
-  IconMailFilled,
-  IconPhoneFilled,
-  IconUserFilled,
-  IconEdit,
-} from "@tabler/icons-react";
+import { IconMailFilled, IconPhoneFilled, IconEdit } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
@@ -41,9 +33,10 @@ const ProfileScreen = () => {
 
     setIsUpdating(true);
     // try {
-    if (!user || !user.id) {
+    if (!user?.id) {
       throw new Error("User or user ID is missing");
     }
+
     await updateUserRole.mutateAsync(
       {
         id: user?.id,

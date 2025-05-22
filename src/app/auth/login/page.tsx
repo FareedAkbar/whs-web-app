@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
@@ -10,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getSession, signIn, useSession } from "next-auth/react";
-import { IconBrandGoogle } from "@tabler/icons-react";
 import { api } from "@/trpc/react";
 import Button from "@/components/ui/Button";
 
@@ -24,15 +22,12 @@ type InputType = z.infer<typeof inputs>;
 export default function Login() {
   const router = useRouter();
   const {
-    register,
     handleSubmit,
     control,
     formState: { errors },
   } = useForm<InputType>({
     resolver: zodResolver(inputs),
   });
-  const loginUser = api.auth.login.useMutation();
-  const loginWithGoogle = api.auth.socialLogin.useMutation();
   const onSubmit = async (data: InputType) => {
     toast.loading("Logging in...");
 
@@ -52,9 +47,14 @@ export default function Login() {
         toast.dismiss();
         toast.error("Invalid Credentials");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.dismiss();
-      toast.error(error.message ?? "Something went wrong");
+
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     }
   };
 
@@ -74,7 +74,7 @@ export default function Login() {
   }
 
   return (
-    <div className="font-geist container mx-auto mt-2 w-full rounded-2xl bg-white/80 p-4 text-black shadow-2xl backdrop-blur-xl sm:m-4 sm:w-[450px] md:p-8 dark:bg-white/60 dark:text-black">
+    <div className="font-geist container mx-auto mt-2 w-full rounded-2xl bg-white/80 p-4 text-black shadow-2xl backdrop-blur-xl dark:bg-white/60 dark:text-black sm:m-4 sm:w-[450px] md:p-8">
       <div className="flex text-3xl">
         <span className="font-bold text-primary">Welcome Back</span>
       </div>
@@ -121,7 +121,7 @@ export default function Login() {
           <Button title="Sign in" onClick={handleSubmit(onSubmit)} />
           <div className="pt-3">
             <p className="text-center text-sm">
-              Don't have an account?{" "}
+              {`Don't have an account? `}
               <Link href="/auth/register" className="text-primary underline">
                 Sign up
               </Link>{" "}
@@ -199,19 +199,5 @@ const BottomGradient = () => {
       <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
       <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
     </>
-  );
-};
-
-const LabelInputContainer = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
-  return (
-    <div className={cn("flex w-full flex-col space-y-2", className)}>
-      {children}
-    </div>
   );
 };

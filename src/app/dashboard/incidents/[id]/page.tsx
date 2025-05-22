@@ -1,21 +1,14 @@
 // src/app/incidents/[id]/page.tsx
 "use client";
 
-import { use, useEffect, useState } from "react";
-import {
-  AlertTriangle,
-  ChevronDown,
-  Filter,
-  Search,
-  UserPlus,
-} from "lucide-react";
+import { useState } from "react";
+import { UserPlus } from "lucide-react";
 import { api } from "@/trpc/react";
 import { toast } from "react-toastify";
-import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { severityMapping } from "@/constants/severity";
 import Button from "@/components/ui/Button";
-import { Modal, ModalBody, useModal } from "@/components/ui/animated-modal";
+import { ModalBody, useModal } from "@/components/ui/animated-modal";
 import { hasPermission } from "@/lib/auth";
 import { useSession } from "next-auth/react";
 import { Select } from "@/components/ui/Select";
@@ -41,7 +34,6 @@ export default function IncidentDetailScreen() {
   const [selectedContractor, setSelectedContractor] = useState("");
   const [comment, setComment] = useState("");
   const [decision, setDecision] = useState<"accept" | "reject" | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<
     "accept" | "reject" | "assign" | "cancel" | ""
   >("accept");
@@ -76,7 +68,7 @@ export default function IncidentDetailScreen() {
       {
         onSuccess: () => {
           toast.success(`Report has been ${flag ? "Accepted" : "Rejected"}`);
-          refetch();
+          void refetch();
           //   setDecision(null);
         },
         onError: (error) => {
@@ -97,7 +89,7 @@ export default function IncidentDetailScreen() {
       {
         onSuccess: () => {
           toast.success("Incident has been started");
-          refetch();
+          void refetch();
         },
         onError: (error) => {
           toast.error(error.message ?? "Something went wrong");
@@ -117,7 +109,7 @@ export default function IncidentDetailScreen() {
       {
         onSuccess: () => {
           toast.success("Incident has been completed");
-          refetch();
+          void refetch();
         },
         onError: (error) => {
           toast.error(error.message ?? "Something went wrong");
@@ -147,7 +139,7 @@ export default function IncidentDetailScreen() {
           comments: comment,
         });
         toast.success("Incident cancelled successfully");
-        refetch();
+        void refetch();
       } else if (
         modalMode === "assign" ||
         (assignees.length > 0 &&
@@ -158,7 +150,7 @@ export default function IncidentDetailScreen() {
           assignedTo: selectedContractor,
         });
         toast.success("Contractor assigned successfully");
-        refetch();
+        void refetch();
       }
     } catch (error) {
       toast.error("Failed to update incident");
@@ -193,7 +185,7 @@ export default function IncidentDetailScreen() {
               className="text-xl font-semibold capitalize"
               style={{
                 color:
-                  severityMapping[incident?.incidentReport?.priority] ||
+                  severityMapping[incident?.incidentReport?.priority] ??
                   "black",
               }}
               color={severityMapping[incident?.incidentReport?.priority]}
@@ -223,7 +215,6 @@ export default function IncidentDetailScreen() {
                       title="Assign Contractor"
                       icon={<UserPlus size={16} />}
                       onClick={() => {
-                        setModalOpen(true);
                         setModalMode("assign");
                         setOpen(true);
                       }}
@@ -238,7 +229,6 @@ export default function IncidentDetailScreen() {
                         title="Reassign Contractor"
                         icon={<UserPlus size={16} />}
                         onClick={() => {
-                          setModalOpen(true);
                           setModalMode("assign");
                           setOpen(true);
                         }}
@@ -255,7 +245,6 @@ export default function IncidentDetailScreen() {
                   title="Cancel Incident"
                   //   icon={<UserPlus size={16} />}
                   onClick={() => {
-                    setModalOpen(true);
                     setModalMode("cancel");
                     setOpen(true);
                   }}
@@ -379,7 +368,7 @@ export default function IncidentDetailScreen() {
                 <button
                   onClick={() => {
                     setDecision("accept");
-                    handleAcceptAndReject(true);
+                    void handleAcceptAndReject(true);
                   }}
                   className="rounded-full bg-primary px-4 py-2 text-white"
                 >
@@ -388,7 +377,7 @@ export default function IncidentDetailScreen() {
                 <button
                   onClick={() => {
                     setDecision("reject");
-                    handleAcceptAndReject(false);
+                    void handleAcceptAndReject(true);
                   }}
                   className="rounded-full border border-primary px-4 py-2 text-primary"
                 >
@@ -417,7 +406,7 @@ export default function IncidentDetailScreen() {
                       workers?.data?.map((contractor) => ({
                         value: contractor.id,
                         label: contractor.name,
-                      })) || []
+                      })) ?? []
                     }
                   />
                 ) : modalMode === "cancel" ? (

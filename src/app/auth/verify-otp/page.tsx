@@ -1,13 +1,14 @@
 "use client";
-import React, { useRef } from "react";
+import React, { createRef, useMemo } from "react";
 import Button from "@/components/ui/Button";
 import { IconChevronRight } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 
 export default function VerifyOTPScreen() {
   const router = useRouter();
-  const otpRefs = Array.from({ length: 4 }, () =>
-    useRef<HTMLInputElement>(null),
+  const otpRefs = useMemo(
+    () => Array.from({ length: 4 }, () => createRef<HTMLInputElement>()),
+    [],
   );
 
   const handleChange = (index: number, value: string) => {
@@ -31,10 +32,10 @@ export default function VerifyOTPScreen() {
   };
 
   return (
-    <div className="container w-full rounded-2xl bg-white p-4 text-black shadow-2xl sm:w-[450px] md:p-8 dark:bg-white/30 dark:text-black">
+    <div className="container w-full rounded-2xl bg-white p-4 text-black shadow-2xl dark:bg-white/30 dark:text-black sm:w-[450px] md:p-8">
       <h2 className="text-3xl font-bold text-primary">Enter OTP</h2>
       <p className="mt-2 text-sm text-gray-500">
-        We've sent an OTP to your email. Please enter it below.
+        We have sent an OTP to your email. Please enter it below.
       </p>
 
       <div className="my-6 flex justify-between gap-2">

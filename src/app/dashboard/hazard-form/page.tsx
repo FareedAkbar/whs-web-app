@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { api } from "@/trpc/react";
 import { toast } from "react-toastify";
@@ -14,7 +13,6 @@ import {
   IconUpload,
   IconChevronRight,
 } from "@tabler/icons-react";
-import dynamic from "next/dynamic";
 import Button from "@/components/ui/Button";
 import Map from "@/components/Map";
 import { useSession } from "next-auth/react";
@@ -24,13 +22,12 @@ const HazardForm = () => {
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
+
     reset,
     formState: { errors },
   } = useForm<NewIncidentReport>();
 
-  const [date, setDate] = useState<Date | null>(null);
+  // const [date, setDate] = useState<Date | null>(null);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -25,7 +25,7 @@ export default function Onboarding() {
   } = useForm<FormValues>();
 
   //   const { data, isLoading, refetch } = api.users.getUser.useQuery();
-  const { data: session, update, status } = useSession();
+  const { data: session, update } = useSession();
   const user = session?.user;
   const updateUserProfile = api.users.updateUser.useMutation();
   const [loading, setLoading] = useState(false);
@@ -35,11 +35,13 @@ export default function Onboarding() {
       toast.error("Please select a user type.");
       return;
     }
-
+    if (!user) {
+      throw new Error("User is undefined");
+    }
     try {
       await updateUserProfile.mutateAsync(
         {
-          id: user?.id!,
+          id: user.id,
           role: values.role,
           isVerifiedByAdmin: false,
         },
@@ -47,20 +49,29 @@ export default function Onboarding() {
           async onSuccess() {
             toast.dismiss();
             toast.success("User role updated successfully");
-            // refetch();
-            update({ role: values.role });
+            await update({ role: values.role });
             router.push("/dashboard");
           },
-          onError: (error) => {
+          onError: (error: unknown) => {
             toast.dismiss();
             console.error("Failed to update user role:", error);
-            toast.error(error.message ?? "Something went wrong");
+
+            if (error instanceof Error) {
+              toast.error(error.message);
+            } else {
+              toast.error("Something went wrong");
+            }
           },
         },
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(error.message ?? "Failed to update user role");
+
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to update user role");
+      }
     } finally {
       setLoading(false);
     }

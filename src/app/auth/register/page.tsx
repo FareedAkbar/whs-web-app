@@ -1,7 +1,5 @@
 "use client";
 import React from "react";
-import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useForm, Controller } from "react-hook-form";

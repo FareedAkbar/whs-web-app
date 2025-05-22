@@ -1,6 +1,5 @@
 "use client";
 
-import ThemeToggle from "@/components/ThemeToggle";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import { IconHelp, IconUserCircle } from "@tabler/icons-react";
 import { LogOutIcon, SettingsIcon } from "lucide-react";

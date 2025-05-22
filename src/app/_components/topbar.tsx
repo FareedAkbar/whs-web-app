@@ -2,14 +2,13 @@
 
 import ThemeToggle from "@/components/ThemeToggle";
 import { useOutsideClick } from "@/hooks/use-outside-click";
-import { IconHelp, IconUserCircle } from "@tabler/icons-react";
+import { IconHelp } from "@tabler/icons-react";
 import { LogOutIcon, MenuIcon, SettingsIcon, UserRound } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
-import Sidebar from "./sidebar";
 import ThemeColorPicker from "@/components/ThemeColorPicker";
 import ThemeFontPicker from "@/components/FontPicker";
 
@@ -18,7 +17,6 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
   const optionsRef = useRef(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   // const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
   const options = [
     {
@@ -133,8 +131,8 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
                 )}
               </button>
               <ThemeToggle hide />
-              <ThemeColorPicker />
-              <ThemeFontPicker />
+              {/* <ThemeColorPicker />
+              <ThemeFontPicker /> */}
               <div
                 ref={optionsRef}
                 className={
