@@ -253,7 +253,7 @@ export default function IncidentsList() {
           <Search className="" size={16} color="white" />
         </div>
       </div>
-      <div className="custom-scrollbar grid flex-1 grid-cols-1 gap-4 overflow-y-auto px-8 pb-4 md:grid-cols-2">
+      <div className="custom-scrollbar grid flex-1 grid-cols-1 gap-4 overflow-y-auto pb-4 lg:grid-cols-2 lg:px-8">
         {filteredIncidents.length > 0 &&
           filteredIncidents?.map((item) => (
             <div

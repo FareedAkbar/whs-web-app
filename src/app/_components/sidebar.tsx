@@ -187,20 +187,20 @@ const Sidebar = ({
         </nav>
 
         <div className="absolute bottom-10 w-3/4">
-          <Button
+          {/* <Button
             title="Logout"
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
             variant="secondary"
             className="w-full"
             icon={<IconLogout size={20} />}
-          />
-          {/* <button
+          /> */}
+          <button
             className="flex w-full items-center gap-3 rounded-md bg-white p-3 text-primary shadow-md hover:bg-[#F8F5F5] dark:bg-gray-700 dark:shadow-gray-600"
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
           >
             <IconLogout size={20} />
             {isOpen && <span className="font-medium">Logout</span>}
-          </button> */}
+          </button>
         </div>
       </div>
     </>
