@@ -59,7 +59,7 @@ const WorkerDashboardCard: React.FC<WorkerDashboardCardProps> = ({
             transform={`rotate(-90 ${radius} ${radius})`}
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center text-sm font-semibold">
+        <div className="absolute inset-0 flex items-center justify-center text-sm font-semibold dark:text-white">
           {percentage}%
         </div>
       </div>

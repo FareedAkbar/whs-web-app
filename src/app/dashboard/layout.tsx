@@ -62,9 +62,15 @@ export default function RootLayout({
       <div className="flex h-screen w-screen flex-col">
         <div className="relative flex h-full w-full overflow-hidden">
           <Sidebar isDrawerOpen={isDrawerOpen} toggleDrawer={toggleDrawer} />
-          <div className="flex-1 overflow-auto">
-            <TopBar toggleDrawer={toggleDrawer} />
-            {children}
+
+          <div className="flex flex-1 flex-col">
+            {/* TopBar - fixed height */}
+            <div className="h-fit shrink-0">
+              <TopBar toggleDrawer={toggleDrawer} />
+            </div>
+
+            {/* Scrollable children area */}
+            <div className="flex-1 overflow-y-auto">{children}</div>
           </div>
         </div>
       </div>

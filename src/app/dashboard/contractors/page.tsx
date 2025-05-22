@@ -44,8 +44,8 @@ const ContractorPage = () => {
   }
 
   return (
-    <div className="flex w-full flex-col overflow-hidden px-8">
-      <div className="mb-4 flex items-center justify-between">
+    <div className="flex w-full flex-col px-8">
+      <div className="sticky top-0 z-10 mb-4 flex items-center justify-between backdrop-blur">
         <input
           type="text"
           placeholder="Search by name or email"
@@ -54,7 +54,7 @@ const ContractorPage = () => {
         />
       </div>
 
-      <div className="overflow-x-auto rounded-lg border bg-white shadow dark:bg-gray-800">
+      <div className="mb-3 flex-1 overflow-x-auto overflow-y-auto rounded-lg border bg-white shadow dark:border-gray-500 dark:bg-gray-800">
         <table className="min-w-full table-auto text-sm">
           <thead className="bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-200">
             <tr>
@@ -83,9 +83,9 @@ const ContractorPage = () => {
                 <td className="p-4">
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
-                      contractor.isVerified
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
+                      contractor.isVerifiedByAdmin
+                        ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50"
+                        : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:bg-opacity-50"
                     }`}
                   >
                     <span className="h-2 w-2 rounded-full bg-current"></span>

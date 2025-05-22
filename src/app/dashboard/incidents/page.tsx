@@ -23,11 +23,14 @@ export default function IncidentsList() {
   const router = useRouter();
 
   const statusMapping = {
-    INITIATED: "bg-blue-100 text-blue-600",
-    IN_PROGRESS: "bg-yellow-100 text-yellow-600",
-    COMPLETED: "bg-green-100 text-green-600",
-    CANCELLED: "bg-red-100 text-red-600",
-    ASSIGNED: "bg-purple-100 text-purple-600",
+    INITIATED: "bg-blue-100 dark:bg-blue-900 dark:bg-opacity-50 text-blue-600",
+    IN_PROGRESS:
+      "bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-50 text-yellow-600",
+    COMPLETED:
+      "bg-green-100 dark:bg-green-900 dark:bg-opacity-50 text-green-600",
+    CANCELLED: "bg-red-100 dark:bg-red-900 dark:bg-opacity-50 text-red-600",
+    ASSIGNED:
+      "bg-purple-100 dark:bg-purple-900 dark:bg-opacity-50 text-purple-600",
   };
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -108,11 +111,11 @@ export default function IncidentsList() {
 
   return (
     <div className="flex w-full flex-col px-8">
-      <div className="mb-4 flex h-full items-center justify-between">
+      <div className="sticky top-0 z-10 mb-4 flex h-full items-center justify-between backdrop-blur">
         <input
           type="text"
           placeholder="Search incidents..."
-          className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm dark:border-gray-600 dark:bg-gray-700"
+          className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Dropdown
@@ -250,12 +253,12 @@ export default function IncidentsList() {
           <Search className="" size={16} color="white" />
         </div>
       </div>
-      <div className="custom-scrollbar grid max-h-[70vh] grid-cols-1 gap-4 overflow-y-auto md:grid-cols-2">
+      <div className="custom-scrollbar grid flex-1 grid-cols-1 gap-4 overflow-y-auto px-8 pb-4 md:grid-cols-2">
         {filteredIncidents.length > 0 &&
           filteredIncidents?.map((item) => (
             <div
               key={item.incidentReport.id}
-              className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg dark:border-gray-500 dark:bg-gray-800"
+              className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg dark:border-gray-500 dark:bg-gray-800 dark:shadow-gray-700"
               // onClick={() => {
               //   setSelectedIncident(item);
               //   setOpen(true);
@@ -292,7 +295,7 @@ export default function IncidentsList() {
                       {item.incident.title}
                     </h2>
 
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {item.incident.description}
                     </p>
                   </div>

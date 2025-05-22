@@ -105,7 +105,7 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
           <div className="flex items-center gap-4">
             <Link
               href={"/dashboard"}
-              className="rounded-full bg-[#F2F2F2] p-3 dark:bg-gray-600"
+              className="rounded-full bg-[#F2F2F2] p-3 dark:bg-gray-800"
             >
               <IconHelp size={20} />
             </Link>
@@ -113,7 +113,7 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 disabled={dropdownOpen}
-                className="flex items-center gap-2 rounded-full bg-[#F2F2F2] p-3 dark:bg-gray-600"
+                className="flex items-center gap-2 rounded-full bg-[#F2F2F2] p-3 dark:bg-gray-800"
               >
                 {session.data?.user.image && session.data.user.image !== "" ? (
                   <Image

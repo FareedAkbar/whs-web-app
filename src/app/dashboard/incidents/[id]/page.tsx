@@ -40,11 +40,14 @@ export default function IncidentDetailScreen() {
   const user = session.data?.user;
 
   const statusMapping = {
-    INITIATED: "bg-blue-100 text-blue-600",
-    IN_PROGRESS: "bg-yellow-100 text-yellow-600",
-    COMPLETED: "bg-green-100 text-green-600",
-    CANCELLED: "bg-red-100 text-red-600",
-    ASSIGNED: "bg-purple-100 text-purple-600",
+    INITIATED: "bg-blue-100 dark:bg-blue-900 dark:bg-opacity-50 text-blue-600",
+    IN_PROGRESS:
+      "bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-50 text-yellow-600",
+    COMPLETED:
+      "bg-green-100 dark:bg-green-900 dark:bg-opacity-50 text-green-600",
+    CANCELLED: "bg-red-100 dark:bg-red-900 dark:bg-opacity-50 text-red-600",
+    ASSIGNED:
+      "bg-purple-100 dark:bg-purple-900 dark:bg-opacity-50 text-purple-600",
   };
   const assignees = Array.isArray(incident?.incidentAssignee)
     ? incident?.incidentAssignee
@@ -213,7 +216,7 @@ export default function IncidentDetailScreen() {
                     // Show "Assign Contractor" if no one is assigned
                     <Button
                       title="Assign Contractor"
-                      icon={<UserPlus size={16} />}
+                      icon={<UserPlus size={14} />}
                       onClick={() => {
                         setModalMode("assign");
                         setOpen(true);

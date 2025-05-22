@@ -20,6 +20,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { hasPermission } from "@/lib/auth";
 import { cn } from "@/lib/utils"; // optional: Tailwind class helper
+import Button from "@/components/ui/Button";
 
 const Sidebar = ({
   isDrawerOpen = false,
@@ -100,14 +101,17 @@ const Sidebar = ({
       > */}
       <div
         className={cn(
-          "fixed left-0 top-0 z-50 h-full w-64 bg-white p-4 shadow-md transition-all duration-300 md:relative dark:bg-gray-950 dark:shadow-gray-500",
+          "fixed left-0 top-0 z-50 h-full w-64 bg-white p-4 shadow-md transition-all duration-300 dark:bg-gray-950 dark:shadow-gray-500 md:relative",
           isOpen ? "w-64 p-4" : "w-16 p-2",
           // isDesktop ? "md:relative" : "fixed left-0 top-0",
           isDrawerOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
       >
-        <div className="absolute -right-3 top-10 hidden justify-end rounded-full border bg-white p-1 md:flex dark:bg-gray-950">
-          <button onClick={() => setIsOpen(!isOpen)} className="text-gray-500">
+        <div className="absolute -right-3 top-10 hidden justify-end rounded-full border bg-white p-1 dark:border-gray-500 dark:bg-gray-950 md:flex">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="text-gray-600 dark:text-gray-300"
+          >
             {isOpen ? (
               <IconChevronLeft size={20} />
             ) : (
@@ -165,7 +169,7 @@ const Sidebar = ({
               }}
             >
               <div
-                className={`flex items-center gap-3 rounded-lg p-3 transition-all ${pathname === item.path ? "border border-[#ECE6E6] bg-[#F8F5F5] text-primary dark:bg-gray-700" : "text-gray-700 hover:bg-[#F8F5F5] dark:text-gray-300 dark:hover:bg-gray-700"}`}
+                className={`flex items-center gap-3 rounded-lg p-3 transition-all ${pathname === item.path ? "border border-[#ECE6E6] bg-[#F8F5F5] text-primary dark:border-gray-400 dark:bg-gray-700" : "text-gray-700 hover:bg-[#F8F5F5] dark:text-gray-300 dark:hover:bg-gray-700"}`}
               >
                 <span
                   className={
@@ -183,13 +187,20 @@ const Sidebar = ({
         </nav>
 
         <div className="absolute bottom-10 w-3/4">
-          <button
-            className="flex w-full items-center gap-3 rounded-md bg-white p-3 text-primary shadow-md hover:bg-[#F8F5F5] dark:bg-gray-700 dark:shadow-gray-500"
+          <Button
+            title="Logout"
+            onClick={() => signOut({ callbackUrl: "/auth/login" })}
+            variant="secondary"
+            className="w-full"
+            icon={<IconLogout size={20} />}
+          />
+          {/* <button
+            className="flex w-full items-center gap-3 rounded-md bg-white p-3 text-primary shadow-md hover:bg-[#F8F5F5] dark:bg-gray-700 dark:shadow-gray-600"
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
           >
             <IconLogout size={20} />
             {isOpen && <span className="font-medium">Logout</span>}
-          </button>
+          </button> */}
         </div>
       </div>
     </>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import "react-datepicker/dist/react-datepicker.css";
 import { api } from "@/trpc/react";
@@ -17,6 +17,8 @@ import Button from "@/components/ui/Button";
 import Map from "@/components/Map";
 import { useSession } from "next-auth/react";
 import { severityMapping } from "@/constants/severity";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/Select";
 
 const HazardForm = () => {
   const {
@@ -24,6 +26,7 @@ const HazardForm = () => {
     handleSubmit,
 
     reset,
+    control,
     formState: { errors },
   } = useForm<NewIncidentReport>();
 
@@ -132,30 +135,58 @@ const HazardForm = () => {
 
   return (
     <div className="flex flex-col p-6">
-      <div className="rounded-lg bg-white p-6 shadow">
+      <div className="rounded-lg bg-white p-6 shadow dark:border-gray-500 dark:bg-gray-800 dark:text-white dark:shadow-gray-700">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-              <label className="block pb-1 text-sm font-medium text-gray-700">
+              <Controller
+                name="incidentTitle"
+                control={control}
+                rules={{ required: "Incident title is required" }}
+                render={({ field }) => (
+                  <Input
+                    type="text"
+                    label="Incident Title"
+                    placeholder="Enter incident title"
+                    error={errors.incidentTitle?.message}
+                    {...field} // includes value, onChange, ref
+                  />
+                )}
+              />
+              {/* <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                 Incident title
               </label>
               <input
-                {...register("incidentTitle", {
-                  required: "Incident title is required",
-                })}
                 className="w-full rounded-lg border border-gray-300 p-3"
                 type="text"
                 placeholder="Enter incident title"
+                {...register("incidentTitle", {
+                  required: "Incident title is required",
+                })}
               />
               {errors.incidentTitle && (
                 <p className="text-sm text-red-500">
                   {errors?.incidentTitle?.message ?? ""}
                 </p>
-              )}
+              )} */}
             </div>
 
             <div>
-              <label className="block pb-1 text-sm font-medium text-gray-700">
+              <Select
+                label="Hazard Type"
+                options={
+                  enums?.data?.GeneralHazardTypes.map((hazard) => ({
+                    label: hazard,
+                    value: hazard,
+                  })) ?? []
+                }
+                // placeholder="Select a hazard type"
+                error={errors.hazardType?.message}
+                {...register("hazardType", {
+                  required: "Hazard type is required",
+                })}
+              />
+              {/* <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                 Hazard Type
               </label>
               <select
@@ -175,10 +206,24 @@ const HazardForm = () => {
                 <p className="text-sm text-red-500">
                   {errors?.hazardType?.message ?? ""}
                 </p>
-              )}
+              )} */}
             </div>
             <div>
-              <label className="pb-1 text-sm font-medium text-gray-700">
+              <Select
+                label="Incident Type"
+                options={
+                  enums?.data?.IncidentTypes.map((incident) => ({
+                    label: incident,
+                    value: incident,
+                  })) ?? []
+                }
+                // placeholder="Select an incident type"
+                error={errors.incidentType?.message}
+                {...register("incidentType", {
+                  required: "Incident type is required",
+                })}
+              />
+              {/* <label className="pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                 Incident Type
               </label>
               <select
@@ -198,20 +243,20 @@ const HazardForm = () => {
                 <p className="text-sm text-red-500">
                   {errors?.incidentType?.message ?? ""}
                 </p>
-              )}
+              )} */}
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* Description */}
             <div>
-              <label className="block pb-1 text-sm font-medium text-gray-700">
+              <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                 Incident Description
               </label>
               <textarea
                 {...register("incidentDescription", {
                   required: "Incident Description is required",
                 })}
-                className="w-full rounded-lg border border-gray-300 p-3"
+                className={`shadow-input dark:placeholder-text-neutral-600 duration-400 flex w-full rounded-md border bg-gray-50 p-3 text-black transition file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white`}
                 placeholder="Describe the incident"
               />
               {errors.incidentDescription && (
@@ -222,14 +267,14 @@ const HazardForm = () => {
             </div>
             {/* Description */}
             <div>
-              <label className="block pb-1 text-sm font-medium text-gray-700">
+              <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                 General Hazard Description
               </label>
               <textarea
                 {...register("generalHazardDescription", {
                   required: "Incident Description is required",
                 })}
-                className="w-full rounded-lg border border-gray-300 p-3"
+                className={`shadow-input dark:placeholder-text-neutral-600 duration-400 flex w-full rounded-md border bg-gray-50 p-3 text-black transition file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white`}
                 placeholder="Describe the hazard"
               />
               {errors.generalHazardDescription && (
@@ -242,51 +287,54 @@ const HazardForm = () => {
 
           {/* Severity */}
           <div>
-            <label className="block pb-1 text-sm font-medium text-gray-700">
+            <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
               Severity
             </label>
             <div className="flex flex-wrap gap-3">
-              {Object.entries(severityMapping).map(([key, color]) => (
-                <div
-                  key={key}
-                  className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg p-4 text-center font-medium text-gray-800 shadow-sm transition-all duration-150 hover:shadow-md`}
-                  style={{
-                    backgroundColor:
-                      selectedSeverity === key ? `${color}22` : "#F2F2F2",
-                    borderColor:
-                      selectedSeverity === key ? color : "transparent",
-                  }}
-                  onClick={() => setSelectedSeverity(key)}
-                >
-                  {/* Exclamation Mark Icon */}
-                  <div className="">
-                    <IconAlertTriangleFilled
-                      size={25} // Icon size
-                      color={color} // Icon color based on selection
-                    />
+              {Object.entries(severityMapping).map(([key, color]) => {
+                const isSelected = selectedSeverity === key;
+
+                return (
+                  <div
+                    key={key}
+                    className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg p-4 text-center font-medium shadow-sm transition-all duration-150 hover:shadow-md ${isSelected ? "border" : "border border-transparent"} "text-gray-800 dark:text-gray-200" ${!isSelected ? "bg-[#F2F2F2] dark:bg-gray-700" : ""} `}
+                    style={{
+                      backgroundColor: isSelected
+                        ? typeof window !== "undefined" &&
+                          window.matchMedia("(prefers-color-scheme: dark)")
+                            .matches
+                          ? `${color}33` // more visible for dark mode
+                          : `${color}22` // light mode
+                        : undefined,
+                      borderColor: isSelected ? color : "transparent",
+                    }}
+                    onClick={() => setSelectedSeverity(key)}
+                  >
+                    {/* Exclamation Mark Icon */}
+                    <IconAlertTriangleFilled size={25} color={color} />
+
+                    {/* Check Icon */}
+                    {isSelected && (
+                      <IconCircleCheckFilled
+                        className="absolute right-2 top-2 h-5 w-5"
+                        color={color}
+                        stroke={2.5}
+                      />
+                    )}
+
+                    {/* Label */}
+                    <span className="block">
+                      {key.charAt(0) + key.slice(1).toLowerCase()}
+                    </span>
                   </div>
-
-                  {/* Check Icon if selected */}
-                  {selectedSeverity === key && (
-                    <IconCircleCheckFilled
-                      className="absolute right-2 top-2 h-5 w-5"
-                      color={color}
-                      stroke={2.5}
-                    />
-                  )}
-
-                  {/* Severity Text */}
-                  <span className="block">
-                    {key.charAt(0) + key.slice(1).toLowerCase()}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
           {/* Date */}
           {/* <div>
-            <label className="block pb-1 text-sm font-medium text-gray-700">
+            <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
               Date of Incident
             </label>
             <DatePicker
@@ -314,11 +362,11 @@ const HazardForm = () => {
 
           {/* Image Upload */}
           <div>
-            <label className="block pb-1 text-sm font-medium text-gray-700">
+            <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
               Upload Images
             </label>
             <div className="mt-2 flex items-center gap-3">
-              <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-2xl border-gray-400 bg-white shadow-2xl">
+              <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-2xl border-gray-400 bg-white shadow-2xl dark:bg-gray-700">
                 <IconUpload size={32} />
                 <input
                   type="file"
@@ -347,7 +395,7 @@ const HazardForm = () => {
                       className="h-full w-full rounded-xl object-contain"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs text-gray-700">
+                    <div className="flex h-full w-full items-center justify-center text-xs text-gray-700 dark:text-gray-300">
                       {img.id}
                     </div>
                   )}
@@ -367,7 +415,7 @@ const HazardForm = () => {
               type="submit"
               variant="primary"
               title="Submit"
-              icon={<IconChevronRight />}
+              icon={<IconChevronRight size={12} />}
             />
           </div>
         </form>
