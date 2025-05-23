@@ -136,7 +136,7 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
               <div
                 ref={optionsRef}
                 className={
-                  "absolute right-0 top-10 z-[9999] w-full min-w-56 rounded-md border bg-white p-2 py-2 text-black shadow-lg transition-all duration-300 dark:border-[#F8EDED]/20 dark:bg-white dark:text-black" +
+                  "absolute right-0 top-10 z-[9999] w-full min-w-56 rounded-md border bg-white p-2 py-2 text-black shadow-lg transition-all duration-300 dark:border-[#F8EDED]/20 dark:bg-gray-800 dark:text-black dark:text-white" +
                   (dropdownOpen ? "" : " hidden")
                 }
               >
@@ -145,20 +145,20 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
                     <p className="text-sm capitalize">
                       {session.data?.user.name}
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-gray-500">
                       {session.data?.user.email}
                     </p>
                   </div>
                 </div>
-                <div className="mb-[1px] w-full border-[0.5px] border-gray-100/20 bg-gray-200"></div>
+                <div className="mb-[1px] w-full border-[0.5px] border-gray-100/20 bg-gray-200 dark:border-gray-600"></div>
                 {options.map((option, index) => (
                   <Fragment key={index}>
                     {index === options.length - 1 && (
-                      <div className="my-[1px] w-full border-[0.5px] border-gray-100/20 bg-gray-200"></div>
+                      <div className="my-[1px] w-full border-[0.5px] border-gray-100/20 bg-gray-200 dark:border-gray-600"></div>
                     )}
                     <button
                       onClick={() => onOptionSelect(option)}
-                      className="flex w-full items-center gap-2 overflow-x-hidden rounded px-2 py-2 text-sm font-light text-black hover:bg-[#e9e8e8] dark:text-black dark:hover:bg-gray-200"
+                      className="flex w-full items-center gap-2 overflow-x-hidden rounded px-2 py-2 text-sm font-light text-black hover:bg-[#e9e8e8] dark:text-white dark:hover:bg-gray-600"
                     >
                       {option.icon}
                       <span>{option.label}</span>

@@ -38,7 +38,7 @@ export default function RootLayout({
       {/* Background Gradients */}
       <div className="absolute inset-0 z-0 flex">
         <div className="w-full bg-gradient-to-r from-red-500 to-red-800 lg:w-1/2" />
-        <div className="hidden w-1/2 bg-white lg:block" />
+        <div className="hidden w-1/2 bg-white dark:bg-gray-900 lg:block" />
       </div>
 
       {/* Foreground Content */}

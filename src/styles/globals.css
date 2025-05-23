@@ -74,4 +74,39 @@ html {
     .dark .custom-scrollbar::-webkit-scrollbar-thumb {
       background-color: #555; /* Dark mode scrollbar thumb color */
     }
+    input,
+  input:focus,
+  input:active {
+    color: inherit !important;
+    -webkit-text-fill-color: inherit !important;
+  }
+
+  input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #f9fafb inset; /* Light mode */
+    -webkit-text-fill-color: #000 !important;
+  }
+
+  .dark input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #374151 inset; /* Dark bg */
+    -webkit-text-fill-color: #fff !important;
+  }
+    input:-webkit-autofill {
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px #1f2937 inset !important; /* dark:bg-gray-800 */
+    -webkit-text-fill-color: #fff !important;
+  }
+
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus,
+  .dark input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px #616a7a inset !important; /* darker bg */
+    -webkit-text-fill-color: #ffffff !important;
+  }
   }

@@ -32,7 +32,7 @@ export default function VerifyOTPScreen() {
   };
 
   return (
-    <div className="container w-full rounded-2xl bg-white p-4 text-black shadow-2xl dark:bg-white/30 dark:text-black sm:w-[450px] md:p-8">
+    <div className="container w-full rounded-2xl bg-white p-4 text-black shadow-2xl dark:bg-gray-950/60 dark:text-white sm:w-[450px] md:p-8">
       <h2 className="text-3xl font-bold text-primary">Enter OTP</h2>
       <p className="mt-2 text-sm text-gray-500">
         We have sent an OTP to your email. Please enter it below.
@@ -46,20 +46,24 @@ export default function VerifyOTPScreen() {
             maxLength={1}
             type="text"
             inputMode="numeric"
-            className="h-12 w-12 rounded-md border border-primary text-center text-lg text-primary outline-none"
+            className="h-12 w-12 rounded-md border border-primary text-center text-lg text-primary outline-none dark:bg-gray-800 dark:text-white"
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}
           />
         ))}
       </div>
 
-      <div className="flex gap-5 pt-4">
+      <div className="flex items-center gap-5 pt-4">
         <Button
           title="Back"
           variant="secondary"
           onClick={() => router.push("/auth/forgot-password")}
         />
-        <Button title="Next" icon={<IconChevronRight />} onClick={handleNext} />
+        <Button
+          title="Next"
+          icon={<IconChevronRight size={12} />}
+          onClick={handleNext}
+        />
       </div>
     </div>
   );

@@ -74,7 +74,7 @@ export default function Login() {
   }
 
   return (
-    <div className="font-geist container mx-auto mt-2 w-full rounded-2xl bg-white/80 p-4 text-black shadow-2xl backdrop-blur-xl dark:bg-white/60 dark:text-black sm:m-4 sm:w-[450px] md:p-8">
+    <div className="font-geist container mx-auto mt-2 w-full rounded-2xl bg-white/80 p-4 text-black shadow-2xl backdrop-blur-xl dark:bg-gray-950/60 dark:text-white sm:m-4 sm:w-[450px] md:p-8">
       <div className="flex text-3xl">
         <span className="font-bold text-primary">Welcome Back</span>
       </div>
@@ -92,7 +92,7 @@ export default function Login() {
               type="email"
               required
               label="Email Address"
-              className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-black"
+              // className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-black"
             />
           )}
         />
@@ -106,7 +106,7 @@ export default function Login() {
               type="password"
               required
               label="Password"
-              className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-black"
+              // className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-black"
               onSubmit={handleSubmit(onSubmit)}
             />
           )}
@@ -143,7 +143,7 @@ export default function Login() {
               className="group relative flex h-12 items-center gap-3 rounded-md bg-[#EC1C2910] px-6 shadow-[0_0_1px_1px_var(--neutral-800)] transition hover:scale-105"
             >
               <img src="/images/google.png" alt="Google" className="h-6 w-6" />
-              <span className="whitespace-nowrap text-sm font-medium text-neutral-800">
+              <span className="whitespace-nowrap text-sm font-medium text-neutral-800 dark:text-neutral-200">
                 Sign in with Google
               </span>
               <BottomGradient />
@@ -153,7 +153,7 @@ export default function Login() {
             <button
               type="button"
               // onClick={() => handleLoginClick("facebook")}
-              className="group relative flex h-12 w-12 items-center justify-center rounded-md bg-zinc-100 shadow-[0_0_1px_1px_var(--neutral-800)] transition hover:scale-110"
+              className="group relative flex h-12 w-12 items-center justify-center rounded-md bg-zinc-100 shadow-[0_0_1px_1px_var(--neutral-800)] transition hover:scale-110 dark:bg-zinc-800"
             >
               <img
                 src="/images/facebook.png"
@@ -167,7 +167,7 @@ export default function Login() {
             <button
               type="button"
               // onClick={() => handleLoginClick("apple")}
-              className="group relative flex h-12 w-12 items-center justify-center rounded-md bg-zinc-100 shadow-[0_0_1px_1px_var(--neutral-800)] transition hover:scale-110"
+              className="group relative flex h-12 w-12 items-center justify-center rounded-md bg-zinc-100 shadow-[0_0_1px_1px_var(--neutral-800)] transition hover:scale-110 dark:bg-zinc-800"
             >
               <img src="/images/apple.png" alt="Apple" className="h-6 w-6" />
               <BottomGradient />

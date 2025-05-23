@@ -78,7 +78,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="font-geist font-geist container w-full rounded-2xl bg-white/80 p-4 text-black shadow-2xl backdrop-blur-xl sm:m-0 sm:w-[450px] md:p-8">
+    <div className="font-geist font-geist container w-full rounded-2xl bg-white/80 p-4 text-black shadow-2xl backdrop-blur-xl dark:bg-gray-950/60 dark:text-white sm:m-0 sm:w-[450px] md:p-8">
       {/* Image */}
       <Image
         src="/images/welcome.png"
