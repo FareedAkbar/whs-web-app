@@ -80,7 +80,9 @@ export default function TopBar() {
     });
 
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    if (typeof window !== "undefined") {
+      return () => window.removeEventListener("keydown", onKeyDown);
+    }
   }, [dropdownOpen]);
 
   return (

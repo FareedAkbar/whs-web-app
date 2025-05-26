@@ -12,6 +12,7 @@ import { ModalBody, useModal } from "@/components/ui/animated-modal";
 import { hasPermission } from "@/lib/auth";
 import { useSession } from "next-auth/react";
 import { Select } from "@/components/ui/Select";
+import { type } from "os";
 export default function IncidentDetailScreen() {
   const params = useParams();
   const { setOpen } = useModal();
@@ -323,7 +324,9 @@ export default function IncidentDetailScreen() {
                               alt={`Incident Image ${index + 1}`}
                               className="h-20 w-20 cursor-pointer rounded-lg object-contain shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
                               onClick={() =>
-                                image.url && window.open(image.url, "_blank")
+                                image.url &&
+                                typeof window !== "undefined" &&
+                                window.open(image.url, "_blank")
                               }
                               width={1000}
                               height={1000}

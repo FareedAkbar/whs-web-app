@@ -17,7 +17,7 @@ export default function RootLayout({
     // console.log("Session :", session);
     if (
       session.status === "authenticated" &&
-      session.data.user.role !== "UNDEFINED"
+      session?.data?.user?.role !== "UNDEFINED"
     ) {
       window.location.href = "/dashboard";
     }

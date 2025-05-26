@@ -23,7 +23,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`font-mont`}>
       <body>
-        <ThemeProvider initialTheme="dark">
+        <ThemeProvider>
           <TRPCReactProvider>
             <SessionProvider session={session}>
               <ModalProvider>

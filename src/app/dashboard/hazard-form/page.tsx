@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import "react-datepicker/dist/react-datepicker.css";
@@ -14,12 +14,14 @@ import {
   IconChevronRight,
 } from "@tabler/icons-react";
 import Button from "@/components/ui/Button";
-import Map from "@/components/Map";
 import { useSession } from "next-auth/react";
 import { severityMapping } from "@/constants/severity";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/Select";
+import { ThemeContext } from "@/providers/ThemeContext";
+import dynamic from "next/dynamic";
 
+const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 const HazardForm = () => {
   const {
     register,
@@ -38,7 +40,8 @@ const HazardForm = () => {
     latitude: -34.405,
     longitude: 150.644,
   });
-
+  const themeContext = useContext(ThemeContext);
+  const theme = themeContext?.theme;
   const [images, setImages] = useState<{ id: string; url: string }[]>([]);
   const [selectedSeverity, setSelectedSeverity] = useState<string | null>(null);
   // const uploadMedia = api.media.uploadMedia.useMutation();
@@ -300,11 +303,7 @@ const HazardForm = () => {
                     className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg p-4 text-center font-medium shadow-sm transition-all duration-150 hover:shadow-md ${isSelected ? "border" : "border border-transparent"} "text-gray-800 dark:text-gray-200" ${!isSelected ? "bg-[#F2F2F2] dark:bg-gray-700" : ""} `}
                     style={{
                       backgroundColor: isSelected
-                        ? typeof window !== "undefined" &&
-                          window.matchMedia("(prefers-color-scheme: dark)")
-                            .matches
-                          ? `${color}33` // more visible for dark mode
-                          : `${color}22` // light mode
+                        ? `${color}${theme === "dark" ? "33" : "22"}`
                         : undefined,
                       borderColor: isSelected ? color : "transparent",
                     }}

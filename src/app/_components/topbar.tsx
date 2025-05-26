@@ -79,12 +79,15 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
     }
 
     // on scroll
-    window.addEventListener("scroll", () => {
-      setDropdownOpen(false);
-    });
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    if (typeof window !== "undefined") {
+      window.addEventListener("scroll", () => {
+        setDropdownOpen(false);
+      });
+    }
+    if (typeof window !== "undefined") {
+      window.addEventListener("keydown", onKeyDown);
+      return () => window.removeEventListener("keydown", onKeyDown);
+    }
   }, [dropdownOpen]);
 
   return (
