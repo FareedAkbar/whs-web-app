@@ -150,6 +150,7 @@ export const authRouter = createTRPCRouter({
           email: input.email,
           password: input.password,
           phoneNumber: input.phone,
+          role: input.role,
         };
 
         const response = await fetch(`${env.BASE_URL}/user/register`, {

@@ -190,14 +190,14 @@ const ProfileScreen = () => {
         Basic Information
       </h2>
       <div className="ml-5 rounded-xl bg-gray-100 p-4 shadow dark:bg-gray-700">
-        {/* {user?.phoneNumber && ( */}
-        <div className="mb-2 flex items-center gap-2">
-          <IconPhoneFilled size={16} className="text-primary" />
-          <span className="text-gray-700 dark:text-gray-300">
-            {user?.phoneNumber}
-          </span>
-        </div>
-        {/* )} */}
+        {user?.phoneNumber && (
+          <div className="mb-2 flex items-center gap-2">
+            <IconPhoneFilled size={16} className="text-primary" />
+            <span className="text-gray-700 dark:text-gray-300">
+              {user?.phoneNumber}
+            </span>
+          </div>
+        )}
         <div className="mb-2 flex items-center gap-2">
           <IconMailFilled size={16} className="text-primary" />
           <span className="text-gray-700 dark:text-gray-300">

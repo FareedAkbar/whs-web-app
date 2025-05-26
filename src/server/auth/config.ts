@@ -4,7 +4,6 @@ import Credentials from "next-auth/providers/credentials";
 import { env } from "@/env";
 import { createTRPCContext } from "../api/trpc";
 import { createCaller } from "../api/root";
-import type { Session } from "next-auth";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -75,7 +74,7 @@ export const authConfig = {
       }
       return true;
     },
-    async jwt({ token: token, user, account, profile, trigger, session }) {
+    async jwt({ token, user, account, profile, trigger, session }) {
       if (user) {
         token.id = user.id ?? "";
         token.name = user.name;
@@ -109,13 +108,23 @@ export const authConfig = {
         }
       }
 
-      if (trigger === "update") {
-        // Safely type-check the session object
-        const typedSession = session as Partial<Session>;
-        if (typedSession?.user?.role) {
+      if (
+        trigger === "update" &&
+        typeof session === "object" &&
+        session !== null
+      ) {
+        const typedSession = session as {
+          user?: { role?: "ADMIN" | "WORKER" | "EMPLOYEE" | "UNDEFINED" };
+        };
+        if (typedSession.user?.role) {
           token.role = typedSession.user.role;
         }
       }
+
+      // if (trigger === "update" && session?.user?.role) {
+      //   token.role = session.user.role;
+      // }
+
       return token;
     },
     async session({ session, token }) {

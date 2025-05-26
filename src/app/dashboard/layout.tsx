@@ -18,8 +18,6 @@ export default function RootLayout({
   const session = useSession();
   const isVerified =
     session?.data?.user?.isVerifiedByAdmin?.toString() === "true";
-  console.log("session :", session);
-  console.log("isVerified :", isVerified);
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
@@ -47,13 +45,13 @@ export default function RootLayout({
     );
   } else if (session.data?.user?.role !== "ADMIN" && !isVerified) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-white bg-[url('/images/whs-web-bg.png')] bg-cover p-2 dark:bg-gray-900 sm:p-0">
-        <div className="flex flex-col items-center justify-center rounded-lg bg-white p-8 text-center shadow-md">
+      <div className="flex h-screen w-screen items-center justify-center bg-white bg-[url('/images/whs-web-bg.png')] bg-cover p-2 dark:bg-gray-950 sm:p-0">
+        <div className="flex flex-col items-center justify-center rounded-lg bg-white p-8 text-center shadow-md dark:bg-gray-800">
           <AlertTriangle className="mb-4 h-16 w-16 text-primary" />
           <h1 className="mb-2 text-3xl font-bold text-primary">
             Admin Pending Approval
           </h1>
-          <p className="mb-4 text-lg text-gray-700">
+          <p className="mb-4 text-lg text-gray-700 dark:text-gray-300">
             You are not authorized to access this page yet.
           </p>
         </div>
