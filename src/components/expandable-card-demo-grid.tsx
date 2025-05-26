@@ -23,9 +23,10 @@ export default function ExpandableCardDemo() {
     } else {
       document.body.style.overflow = "auto";
     }
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    if (typeof window !== "undefined") {
+      window.addEventListener("keydown", onKeyDown);
+      return () => window.removeEventListener("keydown", onKeyDown);
+    }
   }, [active]);
 
   useOutsideClick(ref, () => setActive(null));
