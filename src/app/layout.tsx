@@ -7,11 +7,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SessionProvider from "@/providers/SessionProvider";
 import { ThemeProvider } from "@/providers/ThemeContext";
-import { GridBackground } from "@/components/ui/grid-background";
 import { auth } from "@/server/auth";
-import { authConfig } from "@/server/auth/config";
-import TopBar from "./_components/topbar";
-import Sidebar from "./_components/sidebar";
 import { ModalProvider } from "@/components/ui/animated-modal";
 
 export const metadata: Metadata = {

@@ -1,65 +1,94 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 "use client";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useMotionTemplate, useMotionValue, motion } from "framer-motion";
+import { IconEye, IconEyeOff } from "@tabler/icons-react";
+import { Label } from "@/components/ui/label"; // Update path if needed
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> { }
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  required?: boolean;
+}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
-    const radius = 100; // change this to increase the rdaius of the hover effect
+  ({ className, type, label, id, error, required, ...props }, ref) => {
+    const radius = 100;
     const [visible, setVisible] = React.useState(false);
+    const [showPassword, setShowPassword] = React.useState(false);
 
+    const isPassword = type === "password";
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
 
-    function handleMouseMove({ currentTarget, clientX, clientY }: any) {
-      const { left, top } = currentTarget.getBoundingClientRect();
-
-      mouseX.set(clientX - left);
-      mouseY.set(clientY - top);
+    function handleMouseMove(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+      const { left, top } = e.currentTarget.getBoundingClientRect();
+      mouseX.set(e.clientX - left);
+      mouseY.set(e.clientY - top);
     }
-    return (
-      <motion.div
-        style={{
-          background: useMotionTemplate`
-        radial-gradient(
-          ${visible ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
-          var(--blue-500),
-          transparent 80%
-        )
-      `,
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setVisible(true)}
-        onMouseLeave={() => setVisible(false)}
-        className="p-[2px] rounded-lg transition duration-300 group/input"
-      >
-        <input
-          type={type}
-          className={cn(
-            `flex h-10 w-full border-none bg-gray-50 dark:bg-zinc-800 text-black dark:text-white shadow-input rounded-md px-3 py-2 text-sm  file:border-0 file:bg-transparent 
-          file:text-sm file:font-medium placeholder:text-neutral-400 dark:placeholder-text-neutral-600 
-          focus-visible:outline-none focus-visible:ring-[2px]  focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-600
-           disabled:cursor-not-allowed disabled:opacity-50
-           dark:shadow-[0px_0px_1px_1px_var(--neutral-700)]
-           group-hover/input:shadow-none transition duration-400
-           `,
-            className
-          )}
-          ref={ref}
-          {...props}
-        />
-      </motion.div>
-    );
-  }
-);
-Input.displayName = "Input";
 
+    return (
+      <div className="mb-4 w-full">
+        {label && (
+          <Label htmlFor={id} className="mb-1 block text-sm font-medium">
+            {label} {required && <span className="text-red-500">*</span>}
+          </Label>
+        )}
+
+        <motion.div
+          style={{
+            background: useMotionTemplate`
+              radial-gradient(
+                ${visible ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
+                var(--red-500),
+                transparent 80%
+              )
+            `,
+          }}
+          onMouseMove={handleMouseMove}
+          onMouseEnter={() => setVisible(true)}
+          onMouseLeave={() => setVisible(false)}
+          className="group/input rounded-lg p-[2px] transition duration-300"
+        >
+          <div className="relative w-full">
+            <input
+              {...props}
+              type={isPassword && showPassword ? "text" : type}
+              id={id}
+              className={cn(
+                `shadow-input dark:placeholder-text-neutral-600 duration-400 dark flex h-10 w-full rounded-md border bg-gray-50 px-3 py-2 text-sm text-black transition file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white dark:autofill:text-white`,
+                error && "border-red-500 focus-visible:ring-red-500",
+                className,
+              )}
+              value={props.value ?? ""} // Ensure it's always controlled
+              onChange={props.onChange}
+              ref={ref}
+            />
+
+            {isPassword && (
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300"
+              >
+                {showPassword ? (
+                  <IconEyeOff size={18} />
+                ) : (
+                  <IconEye size={18} />
+                )}
+              </button>
+            )}
+          </div>
+        </motion.div>
+
+        {error && (
+          <p className="mt-1 text-sm not-italic text-red-600">{error}</p>
+        )}
+      </div>
+    );
+  },
+);
+
+Input.displayName = "Input";
 export { Input };

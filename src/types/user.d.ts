@@ -4,6 +4,12 @@ interface UsersResponseData {
     users: User[];
     token: string;
 }
+interface UserResponseData {
+    status: boolean;
+    message: string;
+    user: User;
+    token: string;
+}
 interface UpdateUserResponseData {
     status: boolean;
     message: string;
@@ -18,7 +24,7 @@ interface User {
     imageUrl: string;
     providerImageUrl: string;
     token: string;
-    role: string;
+    role: "ADMIN" | "WORKER" | "EMPLOYEE" | "UNDEFINED"; // Add "UNDEFINED" if needed
     isVerifiedByAdmin?: boolean;
     phoneNumber?: string;
     isVerified?: boolean;

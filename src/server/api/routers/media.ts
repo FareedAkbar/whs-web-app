@@ -1,8 +1,4 @@
-import { TRPCError } from '@trpc/server';
-import {createTRPCRouter, publicProcedure} from '../trpc';
-import { env } from '@/env';
-// import { assign } from 'nodemailer/lib/shared';
-import { z } from 'zod';
+import { createTRPCRouter } from "../trpc";
 
 export const mediaRouter = createTRPCRouter({
   //   uploadMedia: publicProcedure
@@ -18,21 +14,17 @@ export const mediaRouter = createTRPCRouter({
   //         message: 'Unauthorized',
   //       });
   //     }
-
   //     const formData = new FormData();
   //   console.log('input', input);
   //     console.log('input.files', input.files);
-
   //     // Append files to FormData directly
   //     input.files.map((file: File, index) => {
   //       console.log(`Appending file ${index}:`, file);
   //       console.log(`File Name: ${file.name}`);
   //       console.log(`File Type: ${file.type}`);
   //       console.log(`File Size: ${file.size}`);
-
   //       formData.append('files', file); // Append files directly without validation at this point
   //     });
-
   //     // Debug FormData contents by inspecting each entry
   //     for (const [key, value] of formData.entries()) {
   //       if (value instanceof File) {
@@ -41,7 +33,6 @@ export const mediaRouter = createTRPCRouter({
   //         console.log(`${key}:`, value);
   //       }
   //     }
-
   //     // Send the FormData with the request
   //     const response = await fetch(`${env.BASE_URL}/media`, {
   //       method: 'POST',
@@ -50,7 +41,6 @@ export const mediaRouter = createTRPCRouter({
   //       },
   //       body: formData,
   //     });
-
   //     if (!response.ok) {
   //       const errorData:ErrorResponse= await response.json();
   //       console.error('Upload media error:', errorData);
@@ -59,7 +49,6 @@ export const mediaRouter = createTRPCRouter({
   //         error: errorData.message,
   //       };
   //     }
-
   //     const data: UploadMediaApiResponse = await response.json();
   //     return {
   //       status: true,
@@ -73,50 +62,46 @@ export const mediaRouter = createTRPCRouter({
   //     };
   //   }
   // }),
-
-      
-  
-    // getMedia: publicProcedure
-    // .input(z.object({
-    //     incidentReportId: z.string(),
-    // }))
-    // .query(async ({ ctx, input }) => {
-    //     try {
-    //         const userToken =  ctx.session?.user.token;
-    //         if(!userToken){
-    //             throw new TRPCError({
-    //                 code: 'UNAUTHORIZED',
-    //                 message: 'Unauthorized'
-    //             });
-    //         }
-    // const response = await fetch(`${env.BASE_URL}/incident/media/${input.incidentReportId}`, {
-    //     method: 'GET',
-    //     headers: {
-    //         'authorization': `Bearer ${userToken}`,
-    //         'Content-Type': 'application/json',
-    //     },
-    // });
-    // console.log('response', response);
-    // if (!response.ok) {
-    //     const errorData:ErrorResponse = await response.json() as { message: string };
-    //     console.error('incident assign error:', errorData);
-    //     return {
-    //         status: false,
-    //         error: errorData.message,
-    //     };
-    // }
-    // const data:GetMediaResponse = await response.json();
-    // return {
-    //     status: true,
-    //     data: data,
-    // };
-    // } catch (error) {
-    //     console.error('Incident error:', error);
-    //     return {
-    //         status: false,
-    //         error: error instanceof Error ? error.message : 'An error occurred while logging in.',  
-    //     };
-    // }
-    // })
-    })
-   
+  // getMedia: publicProcedure
+  // .input(z.object({
+  //     incidentReportId: z.string(),
+  // }))
+  // .query(async ({ ctx, input }) => {
+  //     try {
+  //         const userToken =  ctx.session?.user.token;
+  //         if(!userToken){
+  //             throw new TRPCError({
+  //                 code: 'UNAUTHORIZED',
+  //                 message: 'Unauthorized'
+  //             });
+  //         }
+  // const response = await fetch(`${env.BASE_URL}/incident/media/${input.incidentReportId}`, {
+  //     method: 'GET',
+  //     headers: {
+  //         'authorization': `Bearer ${userToken}`,
+  //         'Content-Type': 'application/json',
+  //     },
+  // });
+  // console.log('response', response);
+  // if (!response.ok) {
+  //     const errorData:ErrorResponse = await response.json() as { message: string };
+  //     console.error('incident assign error:', errorData);
+  //     return {
+  //         status: false,
+  //         error: errorData.message,
+  //     };
+  // }
+  // const data:GetMediaResponse = await response.json();
+  // return {
+  //     status: true,
+  //     data: data,
+  // };
+  // } catch (error) {
+  //     console.error('Incident error:', error);
+  //     return {
+  //         status: false,
+  //         error: error instanceof Error ? error.message : 'An error occurred while logging in.',
+  //     };
+  // }
+  // })
+});

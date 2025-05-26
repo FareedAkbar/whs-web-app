@@ -1,16 +1,16 @@
 "use client";
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
-import { IconBrandGoogle } from "@tabler/icons-react";
+import { getSession, signIn, useSession } from "next-auth/react";
+import { api } from "@/trpc/react";
+import Button from "@/components/ui/Button";
 
 const inputs = z.object({
   email: z.string().email(),
@@ -22,25 +22,39 @@ type InputType = z.infer<typeof inputs>;
 export default function Login() {
   const router = useRouter();
   const {
-    register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<InputType>({
     resolver: zodResolver(inputs),
   });
-
   const onSubmit = async (data: InputType) => {
     toast.loading("Logging in...");
-    const response = await signIn("credentials", { ...data, redirect: false });
-    if (response?.status === 200) {
-      console.log("resppp", response);
 
+    try {
+      // Attempt NextAuth sign-in first
+      const response = await signIn("credentials", {
+        ...data,
+        redirect: false,
+      });
+      const session = await getSession();
+
+      if (session !== null && response?.ok && !response.error) {
+        toast.dismiss();
+        toast.success("Successfully Logged in!");
+        router.push("/dashboard");
+      } else {
+        toast.dismiss();
+        toast.error("Invalid Credentials");
+      }
+    } catch (error: unknown) {
       toast.dismiss();
-      toast.success("Successfully Logged in!");
-      router.push("/dashboard");
-    } else {
-      toast.dismiss();
-      toast.error("Invalid Credentials");
+
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     }
   };
 
@@ -60,83 +74,110 @@ export default function Login() {
   }
 
   return (
-    <div className="font-geist font-geist container absolute w-full rounded-2xl bg-white/30 p-4 text-black shadow-2xl backdrop-blur-xl sm:m-0 sm:w-[450px] md:p-8 dark:bg-white/30 dark:text-black">
-      <div className="font-nulshock flex items-center justify-center text-3xl">
-        <span className="text-black">WHS</span>
-        <span className="text-red-700">APP</span>
+    <div className="font-geist container mx-auto mt-2 w-full rounded-2xl bg-white/80 p-4 text-black shadow-2xl backdrop-blur-xl dark:bg-gray-950/60 dark:text-white sm:m-4 sm:w-[450px] md:p-8">
+      <div className="flex text-3xl">
+        <span className="font-bold text-primary">Welcome Back</span>
       </div>
-      <p className="mt-2 max-w-sm text-center text-xs">
-        Login to your account.
+      <p className="mt-2 max-w-sm text-xs text-gray-500">
+        Enter your email and password to sign in
       </p>
-      <form className="my-8" onSubmit={handleSubmit(onSubmit)}>
-        <LabelInputContainer className="mb-4">
-          <Label htmlFor="email" className="text-black dark:text-black">
-            Email Address
-          </Label>
-          <Input
-            title="email"
-            aria-label="email"
-            id="email"
-            type="email"
-            className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-black"
-            {...register("email", { required: true })}
-          />
-          {errors.email && (
-            <p className="text-xs italic text-red-600">
-              {errors.email.message}
-            </p>
+      <form className="mt-5" onSubmit={handleSubmit(onSubmit)}>
+        <Controller
+          name="email"
+          control={control}
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="email"
+              type="email"
+              required
+              label="Email Address"
+              // className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-black"
+            />
           )}
-        </LabelInputContainer>
-        <LabelInputContainer className="mb-4">
-          <Label htmlFor="password" className="text-black dark:text-black">
-            Password
-          </Label>
-          <Input
-            title="password"
-            aria-label="password"
-            id="password"
-            type="password"
-            className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-black"
-            {...register("password", { required: true })}
-          />
-          {errors.password && (
-            <p className="text-xs italic text-red-600">
-              {errors.password.message}
-            </p>
+        />
+        <Controller
+          name="password"
+          control={control}
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="password"
+              type="password"
+              required
+              label="Password"
+              // className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-black"
+              onSubmit={handleSubmit(onSubmit)}
+            />
           )}
-          <div className="mb-4 w-full text-right">
-            <Link href="/auth/resetPassword" className="text-xs underline">
-              Forgot Password?
-            </Link>
-          </div>
-        </LabelInputContainer>
+        />
+        <div className="mb-4 w-full text-right text-primary">
+          <Link href="/auth/forgot-password" className="text-xs underline">
+            Forgot Password?
+          </Link>
+        </div>
+
         <div className="flex h-full w-full flex-col gap-2">
-          <button
+          <Button title="Sign in" onClick={handleSubmit(onSubmit)} />
+          <div className="pt-3">
+            <p className="text-center text-sm">
+              {`Don't have an account? `}
+              <Link href="/auth/register" className="text-primary underline">
+                Sign up
+              </Link>{" "}
+            </p>
+          </div>
+          <p className="text-center text-gray-500">OR</p>
+          {/* <button
             className="group/btn relative flex h-10 w-full items-center justify-center space-x-2 rounded-md border border-zinc-200 bg-transparent px-4 font-medium shadow-[0px_0px_1px_1px_var(--neutral-800)]"
             type="submit"
           >
             Login &rarr;
             <BottomGradient />
-          </button>
-          <button
-            className="group/btn relative flex h-10 w-full items-center justify-center space-x-2 rounded-md border border-zinc-200 bg-transparent px-4 font-medium shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-            type="button"
-            onClick={handleLoginClick}
-          >
-            <IconBrandGoogle className="h-4 w-4 text-neutral-800" />
-            <span className="text-sm text-neutral-800">
-              Continue with Google
-            </span>
-            <BottomGradient />
-          </button>
+          </button> */}
+          <div className="flex w-full flex-wrap items-center justify-center gap-4">
+            {/* Google Button */}
+            <button
+              type="button"
+              onClick={() => handleLoginClick()}
+              className="group relative flex h-12 items-center gap-3 rounded-md bg-[#EC1C2910] px-6 shadow-[0_0_1px_1px_var(--neutral-800)] transition hover:scale-105"
+            >
+              <img src="/images/google.png" alt="Google" className="h-6 w-6" />
+              <span className="whitespace-nowrap text-sm font-medium text-neutral-800 dark:text-neutral-200">
+                Sign in with Google
+              </span>
+              <BottomGradient />
+            </button>
+
+            {/* Facebook Button - Icon only */}
+            <button
+              type="button"
+              // onClick={() => handleLoginClick("facebook")}
+              className="group relative flex h-12 w-12 items-center justify-center rounded-md bg-zinc-100 shadow-[0_0_1px_1px_var(--neutral-800)] transition hover:scale-110 dark:bg-zinc-800"
+            >
+              <img
+                src="/images/facebook.png"
+                alt="Facebook"
+                className="h-6 w-6"
+              />
+              <BottomGradient />
+            </button>
+
+            {/* Apple Button - Icon only */}
+            <button
+              type="button"
+              // onClick={() => handleLoginClick("apple")}
+              className="group relative flex h-12 w-12 items-center justify-center rounded-md bg-zinc-100 shadow-[0_0_1px_1px_var(--neutral-800)] transition hover:scale-110 dark:bg-zinc-800"
+            >
+              <img src="/images/apple.png" alt="Apple" className="h-6 w-6" />
+              <BottomGradient />
+            </button>
+          </div>
         </div>
-        <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-700 to-transparent" />
+        {/* <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-700 to-transparent" /> */}
       </form>
 
-      <div className="mt-10 flex flex-col space-y-2">
-        <p className="text-center text-sm">
-          {`Don't have an account? Sign up!`}&nbsp;
-        </p>
+      {/* <div className="mt-10 flex flex-col space-y-2">
         <Link
           href="/"
           className="group/btn relative flex h-10 w-full items-center justify-center space-x-2 rounded-md border border-zinc-200 bg-transparent px-4 font-medium text-black shadow-[0px_0px_1px_1px_var(--neutral-800)]"
@@ -147,7 +188,7 @@ export default function Login() {
           </span>
           <BottomGradient />
         </Link>
-      </div>
+      </div> */}
     </div>
   );
 }
@@ -158,19 +199,5 @@ const BottomGradient = () => {
       <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
       <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
     </>
-  );
-};
-
-const LabelInputContainer = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
-  return (
-    <div className={cn("flex w-full flex-col space-y-2", className)}>
-      {children}
-    </div>
   );
 };

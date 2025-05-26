@@ -1,75 +1,106 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/trpc/react";
-import {
-  Modal,
-  ModalTrigger,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-} from "@/components/ui/animated-modal"; // Adjust the import path as necessary
+import { useModal } from "@/components/ui/animated-modal";
+import Pagination from "@/app/_components/Pagination";
 
-export default function workersList() {
+const ContractorPage = () => {
   const { data: workers, isLoading } = api.workers.getWorkers.useQuery();
-  // const [selectedWorker, setSelectedWorker] = useState<User | null>(null);
+  // const [selectedContractor, setSelectedContractor] = useState<User | null>(
+  //   null,
+  // );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredContractors, setFilteredContractors] = useState<User[]>([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
-  // const handleAccept = (workerId: string) => {
-  //   // API call to accept request (Replace with actual mutation)
-  //   // api.workers.acceptRequest.mutate({ workerId });
-  //   setSelectedWorker(null);
-  // };
+  useEffect(() => {
+    if (workers?.data) {
+      setFilteredContractors(workers.data);
+    }
+  }, [workers]);
 
-  // const handleReject = (workerId: string) => {
-  //   // API call to reject request (Replace with actual mutation)
-  //   // api.workers.rejectRequest.mutate({ workerId });
-  //   setSelectedWorker(null);
-  // };
+  useEffect(() => {
+    const result = workers?.data?.filter(
+      (contractor) =>
+        contractor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contractor.email.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+    setFilteredContractors(result ?? []);
+  }, [searchTerm, workers]);
+
+  const paginatedContractors = filteredContractors.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
 
   if (isLoading) {
     return (
-      <div className="relative flex h-full w-full items-center justify-center">
-        <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-red-500"></div>
+      <div className="relative flex h-2/3 w-full items-center justify-center">
+        <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex overflow-hidden px-8">
-      <div className="custom-scrollbar flex max-h-[70vh] w-full flex-col gap-3 overflow-y-auto">
-        {workers?.data?.map((employee: User) => (
-          <div
-            key={employee.id}
-            className="cursor-pointer rounded-lg border border-gray-200 bg-white p-5 shadow-lg transition-all hover:shadow-xl"
-            // onClick={() => setSelectedEmployee(employee)}
-          >
-            <div className="flex items-center gap-4">
-              <img
-                src={
-                  employee.providerImageUrl !== ""
-                    ? employee.providerImageUrl
-                    : "https://placehold.co/150x150"
-                }
-                alt={employee.name}
-                className="h-12 w-12 rounded-full object-cover"
-              />
-              <div className="flex flex-col items-start">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  {employee.name}
-                </h2>
-                <p className="text-sm text-gray-600">{employee.email}</p>
-                <p className="text-sm text-gray-500">
-                  Role:{" "}
-                  <span className="font-medium">
-                    {employee.role == "WORKER"
-                      ? "CONTRACTOR"
-                      : (employee.role ?? "None")}
+    <div className="flex w-full flex-col px-8">
+      <div className="sticky top-0 z-10 mb-4 flex items-center justify-between backdrop-blur">
+        <input
+          type="text"
+          placeholder="Search by name or email"
+          className="my-2 w-full rounded-md border border-gray-300 px-2 py-3 text-sm shadow-sm dark:border-gray-500 dark:bg-gray-700 dark:text-white"
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      <div className="mb-3 flex-1 overflow-x-auto overflow-y-auto rounded-lg border bg-white shadow dark:border-gray-500 dark:bg-gray-800">
+        <table className="min-w-full table-auto text-sm">
+          <thead className="bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-200">
+            <tr>
+              <th className="p-4 text-left font-medium">Name</th>
+              <th className="p-4 text-left font-medium">Email</th>
+              <th className="p-4 text-left font-medium">Role</th>
+              <th className="p-4 text-left font-medium">Status</th>
+              {/* <th className="p-4 text-center font-medium text-gray-700">
+                Actions
+              </th> */}
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedContractors.map((contractor) => (
+              <tr
+                key={contractor.id}
+                className="border-t dark:border-gray-600 dark:text-white"
+              >
+                <td className="p-4">{contractor.name}</td>
+                <td className="p-4">{contractor.email}</td>
+                <td className="p-4">
+                  {contractor.role === "WORKER"
+                    ? "CONTRACTOR"
+                    : contractor.role}
+                </td>
+                <td className="p-4">
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
+                      contractor.isVerifiedByAdmin
+                        ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50"
+                        : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:bg-opacity-50"
+                    }`}
+                  >
+                    <span className="h-2 w-2 rounded-full bg-current"></span>
+                    {contractor.isVerified ? "Verified" : "Pending"}
                   </span>
-                </p>
-              </div>
-            </div>
-          </div>
-        ))}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <Pagination
+          totalItems={filteredContractors.length}
+          page={page}
+          setPage={setPage}
+        />
       </div>
       {/* {workers?.data?.map((worker) => (
         <Modal key={worker.id}>
@@ -198,7 +229,8 @@ export default function workersList() {
           </ModalBody>
         </Modal>
       ))} */}
-      {/* Modal for worker Details */}
     </div>
   );
-}
+};
+
+export default ContractorPage;

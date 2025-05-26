@@ -2,14 +2,15 @@ import { type Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
 
 export default {
+    darkMode: 'class', // NOT 'media'
   content: ["./src/**/*.tsx"],
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-geist-sans)", ...fontFamily.sans],
+        sans: ["var(--font-family)", ...fontFamily.sans],
       },
       colors: {
-        primary: "#EC1C29",
+        primary: "rgb(var(--primary-color) / <alpha-value>)",
       }
     },
   },

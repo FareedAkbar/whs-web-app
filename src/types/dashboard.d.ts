@@ -14,4 +14,16 @@ interface DashboardStats {
     message: string;
     data: DashboardStats;
   }
+   interface WorkerCount  {
+    reportsAssigned: number;
+    completedReports: number;
+    reportsReported: number;
+}
+
+
+ interface workerDashboardApiResponse {
+    status: string;
+    message: string;
+    data: WorkerCount
+}
   

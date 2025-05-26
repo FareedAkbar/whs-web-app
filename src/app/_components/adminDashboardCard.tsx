@@ -1,14 +1,14 @@
 "use client";
 import React from "react";
 
-interface DashboardCardProps {
+interface AdminDashboardCardProps {
   icon: React.ReactNode;
   title: string;
   onClick: () => void;
   value?: number;
 }
 
-const DashboardCard: React.FC<DashboardCardProps> = ({
+const AdminDashboardCard: React.FC<AdminDashboardCardProps> = ({
   icon,
   title,
   onClick,
@@ -16,13 +16,13 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
 }) => {
   return (
     <div
-      className="flex cursor-pointer flex-row items-center justify-between gap-3 rounded-[20px] border border-[#ECE6E6] bg-white p-6 shadow-lg transition-all duration-300 hover:scale-105"
+      className="flex cursor-pointer flex-row items-center justify-between gap-3 rounded-[20px] border border-[#ECE6E6] bg-white p-6 shadow-lg transition-all duration-300 hover:scale-105 dark:border-gray-500 dark:bg-gray-900"
       onClick={onClick}
     >
       {/* Title */}
       <div className="flex flex-col items-start gap-4">
         <p className="font-medium text-gray-500">{title}</p>
-        <p className="text-2xl font-bold">{value}</p>
+        <p className="text-2xl font-bold dark:text-white">{value}</p>
       </div>
       {/* Icon Wrapper */}
       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary">
@@ -32,4 +32,4 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
   );
 };
 
-export default DashboardCard;
+export default AdminDashboardCard;

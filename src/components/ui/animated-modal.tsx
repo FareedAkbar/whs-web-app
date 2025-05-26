@@ -101,14 +101,14 @@ export const ModalBody = ({
             opacity: 0,
             backdropFilter: "blur(0px)",
           }}
-          className="fixed inset-0 z-50 flex h-full w-full items-center justify-center [perspective:800px] [transform-style:preserve-3d]"
+          className="fixed inset-0 top-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto [perspective:800px] [transform-style:preserve-3d]"
         >
           <Overlay />
 
           <motion.div
             ref={modalRef}
             className={cn(
-              "relative z-50 flex max-h-[90%] min-h-[50%] flex-1 flex-col overflow-hidden border border-transparent bg-white md:max-w-[40%] md:rounded-2xl dark:border-neutral-800 dark:bg-neutral-950",
+              "relative z-50 flex max-h-[90%] w-full min-w-fit flex-1 flex-col overflow-hidden border border-transparent bg-white p-4 md:max-w-[60%] md:rounded-2xl dark:bg-gray-950",
               className,
             )}
             initial={{
@@ -151,7 +151,12 @@ export const ModalContent = ({
   className?: string;
 }) => {
   return (
-    <div className={cn("flex flex-1 flex-col p-8 md:p-10", className)}>
+    <div
+      className={cn(
+        "custom-scrollbar flex flex-1 flex-col overflow-y-auto p-8",
+        className,
+      )}
+    >
       {children}
     </div>
   );
@@ -167,7 +172,7 @@ export const ModalFooter = ({
   return (
     <div
       className={cn(
-        "flex justify-end bg-gray-100 p-4 dark:bg-neutral-900",
+        "flex justify-end bg-white p-4 dark:bg-gray-950",
         className,
       )}
     >
@@ -190,7 +195,7 @@ const Overlay = ({ className }: { className?: string }) => {
         opacity: 0,
         backdropFilter: "blur(0px)",
       }}
-      className={`fixed inset-0 z-50 h-full w-full bg-black bg-opacity-50 ${className}`}
+      className={`fixed inset-0 z-50 h-full w-full bg-black bg-opacity-50 dark:bg-white dark:bg-opacity-50 ${className}`}
     ></motion.div>
   );
 };
