@@ -44,7 +44,7 @@ const Dashboard = () => {
         } else if (user.role === "WORKER") {
           const data = await workerMutation.mutateAsync();
           setRoleData(data?.data ?? null);
-        } else if (user.role === "EMPLOYEE") {
+        } else if (user.role === "STAFF") {
           const data = await employeeMutation.mutateAsync();
           setRoleData(data?.data ?? null);
         }
@@ -192,7 +192,7 @@ const Dashboard = () => {
               value={item.value}
             />
           ))}
-        {(user?.role === "WORKER" || user?.role === "EMPLOYEE") &&
+        {(user?.role === "WORKER" || user?.role === "STAFF") &&
           hasPermission(user.role, "view:homeCounters") &&
           workerDashboardItems.map((item, index) => (
             <WorkerDashboardCard

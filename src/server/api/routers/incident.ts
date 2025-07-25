@@ -14,7 +14,7 @@ export const incidentRouter = createTRPCRouter({
           message: "Unauthorized",
         });
       }
-      const response = await fetch(`${env.BASE_URL}/incident`, {
+      const response = await fetch(`${env.BASE_URL}/incident?type=INCIDENT`, {
         method: "GET",
         headers: {
           authorization: `Bearer ${userToken}`,
@@ -63,7 +63,7 @@ export const incidentRouter = createTRPCRouter({
           });
         }
         const response = await fetch(
-          `${env.BASE_URL}/incident?id=${input.incidentReportId}`,
+          `${env.BASE_URL}/incident?id=${input.incidentReportId}&type=INCIDENT`,
           {
             method: "GET",
             headers: {
@@ -101,8 +101,10 @@ export const incidentRouter = createTRPCRouter({
   assignIncident: publicProcedure
     .input(
       z.object({
-        incidentReportId: z.string(),
+        reportId: z.string(),
+        incidentId: z.string().optional(),
         assignedTo: z.string(),
+        hazardId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

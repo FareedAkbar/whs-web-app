@@ -1,9 +1,10 @@
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
+import { User, type DefaultSession, type NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { env } from "@/env";
 import { createTRPCContext } from "../api/trpc";
 import { createCaller } from "../api/root";
+import { UserRole } from "@/types/roles";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -114,7 +115,7 @@ export const authConfig = {
         session !== null
       ) {
         const typedSession = session as {
-          user?: { role?: "ADMIN" | "WORKER" | "EMPLOYEE" | "UNDEFINED" };
+          user?: { role?: UserRole };
         };
         if (typedSession.user?.role) {
           token.role = typedSession.user.role;
@@ -188,6 +189,7 @@ export const authConfig = {
             if (!response.user) {
               return null;
             }
+            console.log("response.user", response);
 
             const user: User = {
               ...response.user,
@@ -195,7 +197,7 @@ export const authConfig = {
               name: response.user.name,
               email: response.user.email,
               imageUrl: response.user.imageUrl,
-              providerImageUrl: response.user.imageUrl,
+              // providerImageUrl: response.user.imageUrl,
               role: response.user.role,
               token: response.token,
               isVerifiedByAdmin: response.user.isVerifiedByAdmin,

@@ -17,6 +17,8 @@ import Dropdown from "@/components/ui/Dropdown";
 import { ChevronDown, Eye, Filter, Search } from "lucide-react";
 import { set } from "zod";
 import Pagination from "@/app/_components/Pagination";
+import { userRoles } from "@/types/roles";
+import { User } from "@/types/user";
 
 const UserPage = () => {
   const { data: users, isLoading, refetch } = api.users.getUsers.useQuery();
@@ -46,7 +48,7 @@ const UserPage = () => {
     }
   }, [users]);
   const applyFilters = () => {
-    const result = users?.data?.filter((user) => {
+    const result = users?.data?.filter((user: User) => {
       const isVerifiedByAdmin = Boolean(user.isVerifiedByAdmin);
       const isVerified = Boolean(user.isVerified);
 
@@ -94,6 +96,8 @@ const UserPage = () => {
         async onSuccess() {
           toast.dismiss();
           setSelectedUser(null);
+          setSearchTerm("");
+          setSelectedRole("");
           toast.success("User role updated successfully");
           await refetch();
         },
@@ -375,10 +379,10 @@ const UserPage = () => {
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
               disabled={!selectedUser?.isVerified}
-              options={[
-                { value: "EMPLOYEE", label: "EMPLOYEE" },
-                { value: "WORKER", label: "CONTRACTOR" },
-              ]}
+              options={Array.from(Object.values(userRoles)).map((role) => ({
+                value: role,
+                label: role.replaceAll("_", " "),
+              }))}
             />
             {/* <label className="mt-6 block text-sm font-medium text-gray-700">
             Select Role:

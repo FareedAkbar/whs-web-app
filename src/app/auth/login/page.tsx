@@ -24,7 +24,7 @@ export default function Login() {
   const {
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<InputType>({
     resolver: zodResolver(inputs),
   });
@@ -38,6 +38,7 @@ export default function Login() {
         redirect: false,
       });
       const session = await getSession();
+      console.log("response", response);
 
       if (session !== null && response?.ok && !response.error) {
         toast.dismiss();
@@ -118,7 +119,11 @@ export default function Login() {
         </div>
 
         <div className="flex h-full w-full flex-col gap-2">
-          <Button title="Sign in" onClick={handleSubmit(onSubmit)} />
+          <Button
+            title="Sign in"
+            onClick={handleSubmit(onSubmit)}
+            loading={isSubmitting}
+          />
           <div className="pt-3">
             <p className="text-center text-sm">
               {`Don't have an account? `}

@@ -14,14 +14,12 @@ import { useRouter } from "next/navigation";
 
 export default function IncidentsList() {
   const { data: incidents, isLoading } = api.incidents.getIncidents.useQuery();
-  // const { data: workers } = api.workers.getWorkers.useQuery();
+  const { data: workers } = api.workers.getWorkers.useQuery();
   const [searchTerm, setSearchTerm] = useState("");
 
   const [filteredIncidents, setFilteredIncidents] = useState<IncidentData[]>(
     incidents?.data ?? [],
   );
-  console.log("filteredIncidents", filteredIncidents);
-
   const router = useRouter();
 
   const statusMapping = {
@@ -72,27 +70,27 @@ export default function IncidentsList() {
     setFilteredIncidents(incidents?.data ?? []);
   };
   const handleFilter = () => {
-    if (!incidents?.data) return;
-
     setFilteredIncidents(
       incidents?.data?.filter((item) => {
         return (
-          (!dateFrom || item.report.createdAt >= dateFrom) &&
-          (!dateTo || item.report.createdAt <= dateTo) &&
-          (!priority.length || priority.includes(item.report.priority)) &&
-          status.includes(item.report.status) &&
-          // (!status.length || status.includes(item.report.status)) &&
-          // (!assignedTo ||
-          //   (Array.isArray(item.incidentAssignee) &&
-          //     item.incidentAssignee.some(
-          //       (assignee) => assignee.assignedTo === assignedTo,
-          //     ))) &&
-          // (!taskType || item.report.taskType === taskType) &&
+          (!dateFrom || item.incidentReport.createdAt >= dateFrom) &&
+          (!dateTo || item.incidentReport.createdAt <= dateTo) &&
+          (!priority.length ||
+            priority.includes(item.incidentReport.priority)) &&
+          (!status.length || status.includes(item.incidentReport.status)) &&
+          (!assignedTo ||
+            (Array.isArray(item.incidentAssignee) &&
+              item.incidentAssignee.some(
+                (assignee) => assignee.assignedTo === assignedTo,
+              ))) &&
+          // (!taskType || item.incidentReport.taskType === taskType) &&
           (!searchTerm ||
-            item.report.description
+            item.incidentReport.description
               .toLowerCase()
               .includes(searchTerm.toLowerCase()) ||
-            item.report.title.toLowerCase().includes(searchTerm.toLowerCase()))
+            item.incidentReport.title
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()))
         );
       }) ?? [],
     );
@@ -204,7 +202,7 @@ export default function IncidentsList() {
             </div>
 
             {/* Assigned Person */}
-            {/* {session.data?.user?.role == "ADMIN" && (
+            {session.data?.user?.role == "ADMIN" && (
               <div>
                 <Select
                   options={
@@ -218,7 +216,7 @@ export default function IncidentsList() {
                   label="Assigned To"
                 />
               </div>
-            )} */}
+            )}
 
             {/* Task Type */}
             {/* <div>
@@ -259,14 +257,14 @@ export default function IncidentsList() {
         {filteredIncidents.length > 0 &&
           filteredIncidents?.map((item) => (
             <div
-              key={item.report.id}
+              key={item.incidentReport.id}
               className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg dark:border-gray-500 dark:bg-gray-800 dark:shadow-gray-700"
               // onClick={() => {
               //   setSelectedIncident(item);
               //   setOpen(true);
               // }}
               onClick={() =>
-                router.push(`/dashboard/incidents/${item.report.id}`)
+                router.push(`/dashboard/incidents/${item.incidentReport.id}`)
               }
             >
               <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
@@ -274,7 +272,7 @@ export default function IncidentsList() {
                   <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
                     <AlertTriangle
                       size={40}
-                      color={`${severityMapping[item?.report?.priority] ?? "black"}`}
+                      color={`${severityMapping[item?.incidentReport?.priority] ?? "black"}`}
                     />
                   </div>
                   {/* <img
@@ -290,33 +288,34 @@ export default function IncidentsList() {
                       className="font-semibold capitalize"
                       style={{
                         color:
-                          severityMapping[item?.report?.priority] ?? "#000",
+                          severityMapping[item?.incidentReport?.priority] ??
+                          "#000",
                       }}
                     >
-                      {item.report.title}
+                      {item.incident.title}
                     </h2>
 
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {item.report.description}
+                      {item.incident.description}
                     </p>
                   </div>
                 </div>
                 <div className="flex flex-col items-center justify-end gap-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.report.status as keyof typeof statusMapping]}`}
+                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.incidentReport.status as keyof typeof statusMapping]}`}
                   >
-                    {item.report.status.replace("_", " ")}
+                    {item.incidentReport.status.replace("_", " ")}
                   </span>
                   {/* <div
                     className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium text-white ${
                       severityMapping[
-                        item?.report
+                        item?.incidentReport
                           ?.priority as keyof typeof severityMapping
                       ] || "bg-gray-400"
                     }`}
                   >
                     <AlertTriangle size={18} />
-                    <span>{item?.report?.priority}</span>
+                    <span>{item?.incidentReport?.priority}</span>
                   </div> */}
                 </div>
               </div>

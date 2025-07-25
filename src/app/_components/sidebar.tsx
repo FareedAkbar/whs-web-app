@@ -68,6 +68,11 @@ const Sidebar = ({
           icon: <IconChecklist size={20} />,
           path: "/dashboard/inspections-checklist",
         },
+        {
+          name: "Departments",
+          icon: <IconTable size={20} />,
+          path: "/dashboard/departments",
+        },
       );
     }
 

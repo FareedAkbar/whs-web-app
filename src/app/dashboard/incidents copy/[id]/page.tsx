@@ -13,11 +13,8 @@ import { hasPermission } from "@/lib/auth";
 import { useSession } from "next-auth/react";
 import { Select } from "@/components/ui/Select";
 import { type } from "os";
-import { User } from "@/types/user";
 export default function IncidentDetailScreen() {
   const params = useParams();
-  const { data: departments, isLoading: isLoadingDepartments } =
-    api.groups.getGroupData.useQuery({ groupType: "DEPARTMENT" });
   const { setOpen } = useModal();
   const session = useSession();
   const router = useRouter();
@@ -31,20 +28,17 @@ export default function IncidentDetailScreen() {
     incidentReportId: id,
   });
   const { data: workers } = api.workers.getWorkers.useQuery();
-  // const { data: departments } = api.department.getDepartments.useQuery();
-  const assignIncidentToGroup = api.incidents.assignIncident.useMutation();
+  const assignIncidentToWorker = api.incidents.assignIncident.useMutation();
   const updateIncidentStatus = api.incidents.updateStatus.useMutation();
   const incidentAcceptance = api.incidents.incidentAcceptance.useMutation();
   const incident = incidentData?.data;
   const [selectedContractor, setSelectedContractor] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("");
   const [comment, setComment] = useState("");
   const [decision, setDecision] = useState<"accept" | "reject" | null>(null);
   const [modalMode, setModalMode] = useState<
-    "accept" | "reject" | "assign" | "cancel" | "" | "assign-department"
+    "accept" | "reject" | "assign" | "cancel" | ""
   >("accept");
   const user = session.data?.user;
-  console.log("userrr", user);
 
   const statusMapping = {
     INITIATED: "bg-blue-100 dark:bg-blue-900 dark:bg-opacity-50 text-blue-600",
@@ -72,7 +66,7 @@ export default function IncidentDetailScreen() {
     if (!incident) return;
     await incidentAcceptance.mutateAsync(
       {
-        incidentReportId: incident.report.id,
+        incidentReportId: incident.incidentReport.id,
         acceptanceStatus: flag,
       },
       {
@@ -92,7 +86,7 @@ export default function IncidentDetailScreen() {
 
     await updateIncidentStatus.mutateAsync(
       {
-        incidentReportId: incident.report.id,
+        incidentReportId: incident.incidentReport.id,
         status: "IN_PROGRESS",
         comments: "",
       },
@@ -112,7 +106,7 @@ export default function IncidentDetailScreen() {
 
     await updateIncidentStatus.mutateAsync(
       {
-        incidentReportId: incident.report.id,
+        incidentReportId: incident.incidentReport.id,
         status: "COMPLETED",
         comments: "",
       },
@@ -144,32 +138,23 @@ export default function IncidentDetailScreen() {
     try {
       if (modalMode === "cancel") {
         await updateIncidentStatus.mutateAsync({
-          incidentReportId: incident.report.id,
+          incidentReportId: incident.incidentReport.id,
           status: "CANCELLED",
           comments: comment,
         });
         toast.success("Incident cancelled successfully");
         void refetch();
       } else if (
-        modalMode === "assign-department"
-        // ||
-        // (assignees.length > 0 &&
-        //   assignees.every((assignee) => assignee.acceptanceStatus === false))
+        modalMode === "assign" ||
+        (assignees.length > 0 &&
+          assignees.every((assignee) => assignee.acceptanceStatus === false))
       ) {
-        await assignIncidentToGroup.mutateAsync({
-          incidentId: incident.incident.id,
-          assignedTo: selectedDepartment,
-          reportId: incident.report.id,
-        }),
-          {
-            onSuccess: () => {
-              toast.success("Incident assigned successfully");
-              void refetch();
-            },
-            onError: (error) => {
-              toast.error(error.message ?? "Something went wrong");
-            },
-          };
+        await assignIncidentToWorker.mutateAsync({
+          incidentReportId: incident.incidentReport.id,
+          assignedTo: selectedContractor,
+        });
+        toast.success("Contractor assigned successfully");
+        void refetch();
       }
     } catch (error) {
       toast.error("Failed to update incident");
@@ -203,42 +188,29 @@ export default function IncidentDetailScreen() {
             <h2
               className="text-xl font-semibold capitalize"
               style={{
-                color: severityMapping[incident?.report?.priority] ?? "black",
+                color:
+                  severityMapping[incident?.incidentReport?.priority] ??
+                  "black",
               }}
-              color={severityMapping[incident?.report?.priority]}
+              color={severityMapping[incident?.incidentReport?.priority]}
             >
-              {incident.report.title}
+              {incident.incident.title}
             </h2>
             <span
               className={`rounded-full px-3 py-1 text-xs ${
                 statusMapping[
-                  incident.report.status as keyof typeof statusMapping
+                  incident.incidentReport.status as keyof typeof statusMapping
                 ]
               }`}
             >
-              {incident.report.status.replace("_", " ")}
+              {incident.incidentReport.status.replace("_", " ")}
             </span>
           </div>
           <div className="flex flex-row items-center gap-4">
             {user &&
-              hasPermission(user.role, "assign:departments") &&
-              !incident.incident.groupId &&
-              incident.report.status === "INITIATED" && (
-                <div className="flex items-center gap-4">
-                  <Button
-                    title="Assign department"
-                    icon={<UserPlus size={16} />}
-                    onClick={() => {
-                      setModalMode("assign-department");
-                      setOpen(true);
-                    }}
-                  />
-                </div>
-              )}
-            {/* {user &&
               hasPermission(user.role, "assign:contractors") &&
-              incident.report.status !== "COMPLETED" &&
-              incident.report.status !== "CANCELLED" && (
+              incident.incidentReport.status !== "COMPLETED" &&
+              incident.incidentReport.status !== "CANCELLED" && (
                 <>
                   {assignees.length === 0 ||
                   incident.incidentAssignee == null ? (
@@ -268,11 +240,11 @@ export default function IncidentDetailScreen() {
                     </div>
                   ) : null}
                 </>
-              )} */}
+              )}
 
             {user &&
               hasPermission(user.role, "cancel:incidents") &&
-              incident.report.status === "INITIATED" && (
+              incident.incidentReport.status === "INITIATED" && (
                 <Button
                   title="Cancel Incident"
                   //   icon={<UserPlus size={16} />}
@@ -289,16 +261,16 @@ export default function IncidentDetailScreen() {
         <div className="mt-4 space-y-4">
           <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <p>
-              <span className="font-medium">Report Description:</span>
+              <span className="font-medium">Hazard Description:</span>
               <br />
-              {incident.report.description}
+              {incident.generalHazard.description}
             </p>
-            {incident.report.description && (
+            {incident.incidentReport.description && (
               <p>
                 <span className="font-medium text-red-500">
-                  Incident Detailed Description:
+                  Report Description:
                 </span>{" "}
-                {incident.incident.incidentDescription}
+                {incident.incidentReport.description}
               </p>
             )}
 
@@ -378,13 +350,13 @@ export default function IncidentDetailScreen() {
           <div className="flex items-center gap-4">
             {user &&
               hasPermission(user.role, "start:incident") &&
-              incident.report.status === "ASSIGNED" &&
+              incident.incidentReport.status === "ASSIGNED" &&
               assignees?.[0]?.acceptanceStatus == true && (
                 <Button title="Mark as Start" onClick={() => handleStart()} />
               )}
             {user &&
               hasPermission(user.role, "complete:incident") &&
-              incident.report.status === "IN_PROGRESS" &&
+              incident.incidentReport.status === "IN_PROGRESS" &&
               assignees?.[0]?.acceptanceStatus == true && (
                 <Button
                   title="Mark as Completed"
@@ -395,7 +367,7 @@ export default function IncidentDetailScreen() {
 
           {user &&
             hasPermission(user.role, "accept/reject:incidents") &&
-            incident.report.status === "ASSIGNED" &&
+            incident.incidentReport.status === "ASSIGNED" &&
             assignees?.[0]?.acceptanceStatus == null &&
             !decision && (
               <div className="mt-6 flex items-center gap-4">
@@ -418,7 +390,7 @@ export default function IncidentDetailScreen() {
               </div>
             )}
 
-          {/* {(modalMode === "assign" || modalMode === "cancel") && (
+          {(modalMode === "assign" || modalMode === "cancel") && (
             <ModalBody className="max-w-2xl">
               <div className="mt-4">
                 {modalMode === "assign" ? (
@@ -435,7 +407,7 @@ export default function IncidentDetailScreen() {
                     onChange={(e) => setSelectedContractor(e.target.value)}
                     value={selectedContractor}
                     options={
-                      workers?.data?.map((contractor: User) => ({
+                      workers?.data?.map((contractor) => ({
                         value: contractor.id,
                         label: contractor.name,
                       })) ?? []
@@ -457,39 +429,10 @@ export default function IncidentDetailScreen() {
                     title="Confirm"
                     onClick={handleDone}
                     loading={
-                      assignIncidentToGroup.isPending ||
+                      assignIncidentToWorker.isPending ||
                       updateIncidentStatus.isPending
                     }
                     disabled={!selectedContractor && !comment}
-                  />
-                </div>
-              </div>
-            </ModalBody>
-          )} */}
-          {modalMode == "assign-department" && (
-            <ModalBody className="max-w-2xl">
-              <div className="mt-4">
-                <Select
-                  label="Assign department"
-                  className="mt-2 w-full rounded border p-2"
-                  onChange={(e) => setSelectedDepartment(e.target.value)}
-                  value={selectedDepartment}
-                  options={
-                    departments?.data?.map((contractor: Group) => ({
-                      value: contractor.id,
-                      label: contractor.name,
-                    })) ?? []
-                  }
-                />
-                <div className="mt-4 flex justify-end">
-                  <Button
-                    title="Confirm"
-                    onClick={handleDone}
-                    loading={
-                      assignIncidentToGroup.isPending ||
-                      updateIncidentStatus.isPending
-                    }
-                    disabled={!selectedDepartment && !comment}
                   />
                 </div>
               </div>
