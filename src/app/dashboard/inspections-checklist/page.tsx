@@ -16,7 +16,8 @@ import { useRouter } from "next/navigation";
 import { CheckCircle, Clock, Hourglass, Send } from "lucide-react";
 import { hasPermission } from "@/lib/auth";
 import { useSession } from "next-auth/react";
-import type { Question } from "@/types/questions";
+// import type { Question } from "@/types/questions";
+import { api } from "@/trpc/react";
 
 const statusIcons: Record<string, { icon: React.JSX.Element; label: string }> =
   {
@@ -40,29 +41,31 @@ const InspectionChecklist = () => {
   const [selectedInspection, setSelectedInspection] =
     useState<Inspection | null>(null);
   const [formValues, setFormValues] = useState<Record<string, FormValue>>({});
-  const [inspections, setInspections] = useState<Inspection[]>([]);
+  // const [inspections, setInspections] = useState<Inspection[]>([]);
   const router = useRouter();
   const { setOpen } = useModal();
-  const [isLoading, setIsLoading] = useState(true);
-  useEffect(() => {
-    const getInspections = () => {
-      setIsLoading(true);
-      const stored = JSON.parse(
-        localStorage.getItem("inspections") ?? "[]",
-      ) as Inspection[];
+  // const [isLoading, setIsLoading] = useState(true);
+  const { data: inspections, isLoading } =
+    api.inspections.getInsepctions.useQuery();
+  // useEffect(() => {
+  //   const getInspections = () => {
+  //     setIsLoading(true);
+  //     const stored = JSON.parse(
+  //       localStorage.getItem("inspections") ?? "[]",
+  //     ) as Inspection[];
 
-      setInspections(stored);
+  //     setInspections(stored);
 
-      setIsLoading(false);
-    };
-    getInspections();
-  }, []);
+  //     setIsLoading(false);
+  //   };
+  //   getInspections();
+  // }, []);
 
   const updateStatus = (id: string, status: Inspection["status"]) => {
-    const updated = inspections.map((insp) =>
+    const updated = inspections?.data?.map((insp) =>
       insp.id === id ? { ...insp, status } : insp,
     );
-    setInspections(updated);
+    // setInspections(updated);
     localStorage.setItem("inspections", JSON.stringify(updated));
   };
   const session = useSession();
@@ -74,18 +77,22 @@ const InspectionChecklist = () => {
   };
 
   const isFormValid = () => {
-    return selectedInspection?.questions.every((q: Question) => {
-      if (q.type === "multiple_selection") {
-        const value = formValues[q.id];
-        if (Array.isArray(value)) {
-          return value.length;
+    return (
+      selectedInspection?.questions.every((q: Question) => {
+        if (q.type === "MULTI_OPTION") {
+          const value = formValues[q.id];
+          return Array.isArray(value) && value.length > 0;
         }
-        return 0;
-      }
-      if (q.type === "date_range")
-        return formValues[`${q.id}_start`] && formValues[`${q.id}_end`];
-      return formValues[q.id] !== undefined && formValues[q.id] !== "";
-    });
+
+        if (q.type === "DATE_RANGE") {
+          return Boolean(
+            formValues[`${q.id}_start`] && formValues[`${q.id}_end`],
+          );
+        }
+
+        return formValues[q.id] !== undefined && formValues[q.id] !== "";
+      }) ?? false
+    );
   };
 
   const handleSubmit = () => {
@@ -120,7 +127,7 @@ const InspectionChecklist = () => {
       )}
 
       <div className="w-full space-y-6 p-6">
-        {inspections.map((inspection: Inspection) => (
+        {inspections?.data?.map((inspection: Inspection) => (
           <div
             key={inspection.id}
             className="relative w-full cursor-pointer rounded-lg border bg-white p-6 text-left shadow-md dark:bg-gray-800 dark:text-white"
@@ -137,12 +144,12 @@ const InspectionChecklist = () => {
                   {inspection.description}
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-sm">
+              {/* <div className="flex items-center gap-2 text-sm">
                 {statusIcons[inspection.status]?.icon}
                 <span className="text-gray-600 dark:text-gray-400">
                   {statusIcons[inspection.status]?.label}
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
         ))}
@@ -166,7 +173,7 @@ const InspectionChecklist = () => {
                 <div
                   key={q.id}
                   className={`${
-                    q.type === "yes_no" || q.type === "date_range"
+                    q.type === "YES_NO" || q.type === "DATE_RANGE"
                       ? "col-span-2"
                       : ""
                   }`}
@@ -209,21 +216,21 @@ function renderQuestion(
   onChange: (id: string, value: FormValue) => void,
 ) {
   switch (q.type) {
-    case "text":
-    case "date":
+    case "TEXT":
+    case "DATE":
       return (
         <Input
           type={q.type}
-          label={q.question}
+          label={q.title}
           value={typeof formValues[q.id] === "string" ? formValues[q.id] : ""}
           onChange={(e) => onChange(q.id, e.target.value)}
         />
       );
 
-    case "date_range":
+    case "DATE_RANGE":
       return (
         <div>
-          <Label>{q.question}</Label>
+          <Label>{q.title}</Label>
           <div className="flex space-x-4">
             <Input
               type="date"
@@ -249,10 +256,10 @@ function renderQuestion(
         </div>
       );
 
-    case "yes_no":
+    case "YES_NO":
       return (
         <YesNoQuestion
-          question={q.question}
+          question={q.title}
           onChange={(val) => onChange(q.id, val)}
           value={
             typeof formValues[q.id] === "string"
@@ -262,10 +269,10 @@ function renderQuestion(
         />
       );
 
-    case "single_selection":
+    case "SINGLE_OPTION":
       return (
         <Select
-          label={q.question}
+          label={q.title}
           options={
             q?.options?.map((opt: string) => ({
               label: opt,
@@ -277,13 +284,13 @@ function renderQuestion(
         />
       );
 
-    case "multiple_selection": {
+    case "MULTI_OPTION": {
       const value = formValues[q.id];
       const selectedValues = Array.isArray(value) ? value : [];
 
       return (
         <div>
-          <Label className="mb-1 block">{q.question}</Label>
+          <Label className="mb-1 block">{q.title}</Label>
           <div className="space-y-2">
             {q?.options?.map((opt: string) => (
               <label key={opt} className="flex items-center space-x-2">
@@ -325,12 +332,12 @@ function renderQuestionViewOnly(q: Question) {
   return (
     <div className="mb-4">
       <Label className="block font-semibold">
-        {q.id}: {q.question}
+        {q.questionNumber}: {q.title}
       </Label>
       <p className="text-sm capitalize text-gray-500">
         Type: {q.type.replaceAll("_", " ")}
       </p>
-      {(q.type === "single_selection" || q.type === "multiple_selection") &&
+      {(q.type === "SINGLE_OPTION" || q.type === "MULTI_OPTION") &&
         q.options &&
         q.options?.length > 0 && (
           <div className="mt-1 text-sm text-gray-700">

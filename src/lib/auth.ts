@@ -1,10 +1,10 @@
+// ✅ Roles type aur permission helper same rehenga
 type Role = keyof typeof ROLES;
 type Permission = (typeof ROLES)[Role][number];
 
 const ROLES = {
   ADMIN: [
     "view:incidents",
-    // "create:incidents",
     "update:incidents",
     "delete:incidents",
     "assign:incidents",
@@ -12,12 +12,10 @@ const ROLES = {
     "update:checklist",
     "view:checklist",
     "view:homeCards",
-    // "view:homeCounters",
     "view:contractors",
     "assign:contractors",
     "cancel:incidents",
     "assign:departments",
-    // "accept/reject:incidents"
   ],
   WORKER: [
     "view:incidents",
@@ -42,10 +40,10 @@ const ROLES = {
     "fill:checklist",
     "change:role",
   ],
+  DEPARTMENT_MANAGER: ["view:homeCounters"],
+  FACILITY_MANAGER: ["view:homeCounters"],
+  PC_MEMBER: ["view:homeCounters"],
   UNDEFINED: [],
-  DEPARTMENT_MANAGER: [],
-  FACILITY_MANAGER: [],
-  PC_MEMBER: [],
 } as const;
 
 export function hasPermission(role: Role, permission: Permission) {
@@ -53,6 +51,5 @@ export function hasPermission(role: Role, permission: Permission) {
     console.warn("User or roles are undefined:", role);
     return false;
   }
-
   return (ROLES[role] as readonly Permission[]).includes(permission);
 }
