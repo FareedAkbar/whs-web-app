@@ -16,6 +16,7 @@ const ROLES = {
     "assign:contractors",
     "cancel:incidents",
     "assign:departments",
+    "assign:inspections",
   ],
   WORKER: [
     "view:incidents",

@@ -11,12 +11,12 @@ import {
   useModal,
 } from "@/components/ui/animated-modal";
 import Button from "@/components/ui/Button";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Clock, Hourglass, Send } from "lucide-react";
 import { hasPermission } from "@/lib/auth";
 import { useSession } from "next-auth/react";
-// import type { Question } from "@/types/questions";
+import { Eye, Trash2 } from "lucide-react";
 import { api } from "@/trpc/react";
 
 const statusIcons: Record<string, { icon: React.JSX.Element; label: string }> =
@@ -35,41 +35,65 @@ const statusIcons: Record<string, { icon: React.JSX.Element; label: string }> =
     },
     submitted: { icon: <Send className="text-blue-500" />, label: "Submitted" },
   };
+
 type FormValue = string | string[];
 
 const InspectionChecklist = () => {
   const [selectedInspection, setSelectedInspection] =
     useState<Inspection | null>(null);
   const [formValues, setFormValues] = useState<Record<string, FormValue>>({});
-  // const [inspections, setInspections] = useState<Inspection[]>([]);
+  const [confirmDelete, setConfirmDelete] = useState<Inspection | null>(null);
+
   const router = useRouter();
   const { setOpen } = useModal();
-  // const [isLoading, setIsLoading] = useState(true);
-  const { data: inspections, isLoading } =
-    api.inspections.getInsepctions.useQuery();
-  // useEffect(() => {
-  //   const getInspections = () => {
-  //     setIsLoading(true);
-  //     const stored = JSON.parse(
-  //       localStorage.getItem("inspections") ?? "[]",
-  //     ) as Inspection[];
 
-  //     setInspections(stored);
+  const {
+    data: inspections,
+    isLoading,
+    refetch,
+  } = api.inspections.getInsepctions.useQuery();
+  const deleteInspection = api.inspections.deleteInspection.useMutation({
+    onSuccess: () => {
+      setConfirmDelete(null);
+      refetch();
+    },
+  });
+  const assignMutation = api.inspections.assignInspection.useMutation({
+    onSuccess: () => {
+      setAssignInspection(null);
+      setSelectedUser(null);
+      setDueDate("");
+      refetch();
+    },
+  });
+  const session = useSession();
+  const user = session.data?.user;
+  // NEW STATE for assign modal
+  const [assignInspection, setAssignInspection] = useState<Inspection | null>(
+    null,
+  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [dueDate, setDueDate] = useState("");
 
-  //     setIsLoading(false);
-  //   };
-  //   getInspections();
-  // }, []);
+  const { data: verifiedUsers, isLoading: loadingUsers } =
+    api.users.getVerifiedUsers.useQuery(undefined, {
+      enabled: user?.role === "ADMIN",
+    });
+
+  // ✅ Filter users by search
+  const filteredUsers =
+    verifiedUsers?.data?.filter((u) =>
+      u.name?.toLowerCase().includes(searchTerm.toLowerCase()),
+    ) ?? [];
 
   const updateStatus = (id: string, status: Inspection["status"]) => {
     const updated = inspections?.data?.map((insp) =>
       insp.id === id ? { ...insp, status } : insp,
     );
     // setInspections(updated);
-    localStorage.setItem("inspections", JSON.stringify(updated));
+    // localStorage.setItem("inspections", JSON.stringify(updated));
   };
-  const session = useSession();
-  const user = session.data?.user;
   const handleInputChange = (id: string, value: FormValue) => {
     setFormValues((prev) => ({ ...prev, [id]: value }));
     if (!selectedInspection?.id) return;
@@ -130,63 +154,84 @@ const InspectionChecklist = () => {
         {inspections?.data?.map((inspection: Inspection) => (
           <div
             key={inspection.id}
-            className="relative w-full cursor-pointer rounded-lg border bg-white p-6 text-left shadow-md dark:bg-gray-800 dark:text-white"
-            onClick={() => {
-              setSelectedInspection(inspection);
-              setFormValues({});
-              setOpen(true);
-            }}
+            className="relative w-full rounded-lg border bg-white p-6 text-left shadow-md dark:bg-gray-800 dark:text-white"
           >
-            <div className="flex justify-between">
+            <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-bold">{inspection.title}</h2>
+                <h2 className="text-xl font-bold capitalize">
+                  {inspection.title}
+                </h2>
                 <p className="text-gray-600 dark:text-gray-400">
                   {inspection.description}
                 </p>
               </div>
-              {/* <div className="flex items-center gap-2 text-sm">
-                {statusIcons[inspection.status]?.icon}
-                <span className="text-gray-600 dark:text-gray-400">
-                  {statusIcons[inspection.status]?.label}
-                </span>
-              </div> */}
+              <div className="flex flex-col items-end justify-center gap-2">
+                {/* Right Side Icons */}
+                <div className="flex justify-end space-x-3">
+                  {/* View icon */}
+                  <button
+                    onClick={() => {
+                      setSelectedInspection(inspection);
+                      setFormValues({});
+                      setOpen(true);
+                    }}
+                    className="text-primary hover:scale-105"
+                  >
+                    <Eye size={20} />
+                  </button>
+
+                  {/* Delete icon */}
+                  <button
+                    onClick={() => {
+                      setConfirmDelete(inspection);
+                      setOpen(true);
+                    }}
+                    className="text-primary hover:scale-105"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
+                <Button
+                  title="Assign Inspection"
+                  icon={<UserPlus size={16} />}
+                  onClick={() => {
+                    setAssignInspection(inspection);
+                    setOpen(true);
+                  }}
+                />
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      <ModalBody className="mx-3 w-full overflow-y-auto">
-        {selectedInspection && (
-          // <form
-          //   onSubmit={(e) => {
-          //     e.preventDefault();
-          //     handleSubmit();
-          //   }}
-          // >
+      {/* View Modal */}
+      {selectedInspection && (
+        <ModalBody className="mx-3 w-full overflow-y-auto">
           <ModalContent className="w-full">
             <h2 className="mb-4 text-2xl font-bold dark:text-white">
               {selectedInspection.title}
             </h2>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="gap-4">
               {selectedInspection.questions.map((q: Question) => (
                 <div
                   key={q.id}
-                  className={`${
-                    q.type === "YES_NO" || q.type === "DATE_RANGE"
-                      ? "col-span-2"
-                      : ""
-                  }`}
+                  // className={`${
+                  //   q.type === "YES_NO" || q.type === "DATE_RANGE"
+                  //     ? "col-span-2"
+                  //     : ""
+                  // }`}
                 >
                   {user && hasPermission(user.role, "fill:checklist")
                     ? renderQuestion(q, formValues, handleInputChange)
                     : user &&
                       hasPermission(user.role, "view:checklist") &&
                       renderQuestionViewOnly(q)}
-                  {/* {renderQuestion(q, formValues, handleInputChange)} */}
                 </div>
               ))}
             </div>
+
             {user && hasPermission(user.role, "fill:checklist") && (
               <form
                 onSubmit={(e) => {
@@ -203,9 +248,109 @@ const InspectionChecklist = () => {
               </form>
             )}
           </ModalContent>
-          // </form>
-        )}
-      </ModalBody>
+        </ModalBody>
+      )}
+
+      {/* Delete Modal */}
+      {confirmDelete && (
+        <ModalBody className="mx-3 w-full">
+          <ModalContent className="w-full">
+            <h2 className="mb-4 text-xl font-bold dark:text-white">
+              Delete Inspection
+            </h2>
+            <p className="mb-6 text-gray-600 dark:text-gray-300">
+              Are you sure you want to delete{" "}
+              <span className="font-semibold">{confirmDelete.title}</span>? This
+              action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                title="Cancel"
+                onClick={() => setConfirmDelete(null)}
+                variant="secondary"
+              />
+              <Button
+                title={deleteInspection.isPending ? "Deleting..." : "Delete"}
+                onClick={() =>
+                  deleteInspection.mutate({ id: confirmDelete.id })
+                }
+                disabled={deleteInspection.isPending}
+              />
+            </div>
+          </ModalContent>
+        </ModalBody>
+      )}
+
+      {/* Assign Modal */}
+      {assignInspection && (
+        <ModalBody className="mx-3 w-full">
+          <ModalContent className="w-full">
+            <h2 className="mb-4 text-xl font-bold dark:text-white">
+              Assign Inspection: {assignInspection.title}
+            </h2>
+
+            {/* Search Users */}
+            <Input
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              // className="mb-4"
+            />
+
+            {/* Users List */}
+            <div className="mb-4 max-h-60 overflow-y-auto rounded-md border p-2">
+              {loadingUsers ? (
+                <p>Loading users...</p>
+              ) : filteredUsers.length > 0 ? (
+                filteredUsers.map((u) => (
+                  <div
+                    key={u.id}
+                    onClick={() => setSelectedUser(u.id)}
+                    className={`cursor-pointer rounded-md p-2 ${
+                      selectedUser === u.id
+                        ? "bg-primary text-white"
+                        : "border-b hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    {u.name} ({u.email})
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">No users found</p>
+              )}
+            </div>
+
+            {/* Due Date */}
+            <Label className="mb-1 block">Due Date</Label>
+            <Input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="mb-6"
+            />
+
+            {/* Actions */}
+            <div className="flex justify-end gap-3">
+              <Button
+                title="Cancel"
+                variant="secondary"
+                onClick={() => setAssignInspection(null)}
+              />
+              <Button
+                title={assignMutation.isPending ? "Assigning..." : "Assign"}
+                disabled={!selectedUser || !dueDate || assignMutation.isPending}
+                onClick={() =>
+                  assignMutation.mutate({
+                    surveyId: assignInspection.id,
+                    assignedTo: selectedUser!,
+                    dueDate,
+                  })
+                }
+              />
+            </div>
+          </ModalContent>
+        </ModalBody>
+      )}
     </div>
   );
 };

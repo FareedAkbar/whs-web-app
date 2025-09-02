@@ -100,7 +100,8 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
         // onClick={() => router.push("/dashboard")}
       >
         <span className="pl-6 font-semibold capitalize">
-          {path.split("/")[2] ?? path.split("/")[1]}
+          {path.split("/")[2]?.replaceAll("-", " ") ??
+            path.split("/")[1]?.replaceAll("-", " ")}
         </span>
       </div>
       <div className="flex">

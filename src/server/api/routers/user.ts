@@ -2,6 +2,11 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "@/env";
 import { z } from "zod";
+import {
+  UpdateUserResponseData,
+  UserResponseData,
+  UsersResponseData,
+} from "@/types/user";
 
 export const userRouter = createTRPCRouter({
   getUsers: publicProcedure.query(async ({ ctx }) => {
@@ -192,4 +197,47 @@ export const userRouter = createTRPCRouter({
         };
       }
     }),
+  getVerifiedUsers: publicProcedure.query(async ({ ctx }) => {
+    try {
+      const userToken = ctx.session?.user.token;
+      const userRole = ctx.session?.user.role; // 👈 role extract
+
+      if (!userToken || userRole !== "ADMIN") {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Unauthorized",
+        });
+      }
+
+      const response = await fetch(`${env.BASE_URL}/admin/all-verified-users`, {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = (await response.json()) as { message: string };
+        return {
+          status: false,
+          error: errorData.message,
+        };
+      }
+
+      const usersData = (await response.json()) as UsersResponseData;
+      return {
+        status: true,
+        data: usersData.users,
+      };
+    } catch (error) {
+      return {
+        status: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "An error occurred while fetching verified users.",
+      };
+    }
+  }),
 });

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
+import { IconChecklist } from "@tabler/icons-react";
 
 export default function CreateInspectionPage() {
   const [questions, setQuestions] = useState<NewQuestion[]>([]);
@@ -40,7 +41,7 @@ export default function CreateInspectionPage() {
     if (editingIndex === index) setEditingIndex(null);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title.trim() || !description.trim()) {
       alert("Please fill in both title and description.");
       return;
@@ -51,10 +52,7 @@ export default function CreateInspectionPage() {
     const checklist: NewInspection = {
       title,
       description,
-      questions: questions.map((q, i) => ({
-        ...q,
-        id: `Q${i + 1}`,
-      })),
+      questions: questions,
       status: "not_started",
     };
 
@@ -64,15 +62,28 @@ export default function CreateInspectionPage() {
 
     // const updatedInspections: Inspection[] = [...storedInspections, checklist];
     // localStorage.setItem("inspections", JSON.stringify(updatedInspections));
-    createInspection.mutate(checklist);
-    router.push("/dashboard/inspections-checklist");
-    setQuestions([]);
-    setTitle("");
-    setDescription("");
+    await createInspection.mutateAsync(checklist, {
+      onSuccess: () => {
+        router.push("/dashboard/inspections-checklist");
+        setQuestions([]);
+        setTitle("");
+        setDescription("");
+      },
+      onError: (error) => {
+        alert(`Error creating inspection: ${error.message}`);
+      },
+    });
   };
 
   return (
     <div className="p-8">
+      <div className="flex w-full items-center justify-end">
+        <Button
+          onClick={() => router.push("/dashboard/inspections-checklist")}
+          title="Inspections List"
+          icon={<IconChecklist />}
+        />
+      </div>
       <Input
         type="text"
         placeholder="Inspection Title"
@@ -81,6 +92,7 @@ export default function CreateInspectionPage() {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
+
       <Label className="text-md mb-2 text-gray-500">
         Inspection Description
       </Label>
@@ -144,6 +156,8 @@ export default function CreateInspectionPage() {
               onClick={handleSubmit}
               variant="secondary"
               title="Submit Checklist"
+              disabled={createInspection.isPending}
+              loading={createInspection.isPending}
             />
           )}
         </div>

@@ -47,7 +47,7 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
   };
   const handleDone = () => {
     const finalData: NewQuestion = {
-      questionNumber: options.length + 1,
+      questionNumber: initialData?.questionNumber ?? 1,
       title: question.trim(),
       type,
       options:
