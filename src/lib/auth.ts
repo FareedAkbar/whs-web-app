@@ -45,7 +45,7 @@ const ROLES = {
   FACILITY_MANAGER: ["view:homeCounters"],
   // P_AND_C_MEMBER: ["view:homeCounters", "create:incidents"],
   P_AND_C_MANAGER: ["view:homeCounters", "close:incident", "assign:officer"],
-  P_AND_C_OFFICER: ["view:homeCounters", "pick:incident"],
+  P_AND_C_OFFICER: ["view:homeCounters", "pick:incident", "complete:incident"],
   FACILITY_OFFICER: ["view:homeCounters"],
   UNDEFINED: [],
 } as const;

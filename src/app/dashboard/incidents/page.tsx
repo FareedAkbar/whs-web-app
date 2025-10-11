@@ -11,16 +11,16 @@ import { set } from "zod";
 import { useSession } from "next-auth/react";
 import { severityMapping } from "@/constants/severity";
 import { useRouter } from "next/navigation";
+import { ReportResponse } from "@/types/report";
 
 export default function IncidentsList() {
   const { data: incidents, isLoading } = api.incidents.getIncidents.useQuery();
   // const { data: workers } = api.workers.getWorkers.useQuery();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [filteredIncidents, setFilteredIncidents] = useState<IncidentData[]>(
+  const [filteredIncidents, setFilteredIncidents] = useState<ReportResponse[]>(
     incidents?.data ?? [],
   );
-  console.log("filteredIncidents", filteredIncidents);
 
   const router = useRouter();
 
@@ -81,7 +81,7 @@ export default function IncidentsList() {
           (!dateFrom || item.report.createdAt >= dateFrom) &&
           (!dateTo || item.report.createdAt <= dateTo) &&
           (!priority.length || priority.includes(item.report.priority)) &&
-          (!status.length || status.includes(item.incident.status)) &&
+          (!status.length || status.includes(item.incident?.status!)) &&
           // (!status.length || status.includes(item.report.status)) &&
           // (!assignedTo ||
           //   (Array.isArray(item.incidentAssignee) &&
@@ -304,9 +304,9 @@ export default function IncidentsList() {
                 </div>
                 <div className="flex flex-col items-center justify-end gap-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.incident.status as keyof typeof statusMapping]}`}
+                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.incident?.status as keyof typeof statusMapping]}`}
                   >
-                    {item.incident.status.replace("_", " ")}
+                    {item.incident?.status.replace("_", " ")}
                   </span>
                   {/* <div
                     className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium text-white ${

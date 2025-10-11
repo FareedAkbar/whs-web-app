@@ -253,10 +253,10 @@ export const incidentRouter = createTRPCRouter({
       }
     }),
 
-  updateStatus: publicProcedure
+  updateIncidentStatus: publicProcedure
     .input(
       z.object({
-        incidentReportId: z.string(),
+        incidentId: z.string(),
         status: z.string(),
         comments: z.string().optional(),
       }),

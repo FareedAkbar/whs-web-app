@@ -116,7 +116,7 @@ const FollowUpsSection: React.FC<FollowUpsSectionProps> = ({
               onChange={(e) => setFollowUpText(e.target.value)}
               placeholder="Enter your follow-up..."
               rows={3}
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-800 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+              className="w-full rounded-md border bg-gray-50 p-3 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white dark:autofill:text-white"
             />
             <div className="flex justify-end gap-3">
               <Button
@@ -131,6 +131,7 @@ const FollowUpsSection: React.FC<FollowUpsSectionProps> = ({
                 title={"Add"}
                 onClick={handleAddFollowUp}
                 disabled={!followUpText.trim() || isPending}
+                loading={isPending}
               />
             </div>
           </div>

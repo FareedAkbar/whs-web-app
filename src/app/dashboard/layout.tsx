@@ -18,7 +18,6 @@ export default function RootLayout({
   const session = useSession();
   const isVerified =
     session?.data?.user?.isVerifiedByAdmin?.toString() === "true";
-  console.log(session);
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);

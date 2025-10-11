@@ -37,7 +37,8 @@ export default function IncidentDetailScreen() {
   // const { data: workers } = api.workers.getWorkers.useQuery();
   // const { data: departments } = api.department.getDepartments.useQuery();
   const assignIncidentToOfficer = api.incidents.assignIncident.useMutation();
-  const updateIncidentStatus = api.incidents.updateStatus.useMutation();
+  const updateIncidentStatus = api.incidents.updateIncidentStatus.useMutation();
+  const updateReportStatus = api.reports.updateReportStatus.useMutation();
   const incidentAcceptance = api.incidents.incidentAcceptance.useMutation();
   const incident = incidentData?.data;
   const [selectedOfficer, setSelectedOfficer] = useState("");
@@ -86,26 +87,7 @@ export default function IncidentDetailScreen() {
       },
     );
   };
-  const handleStart = async () => {
-    if (!incident) return;
 
-    await updateIncidentStatus.mutateAsync(
-      {
-        incidentReportId: incident.report.id,
-        status: "IN_PROGRESS",
-        comments: "",
-      },
-      {
-        onSuccess: () => {
-          toast.success("Incident has been started");
-          void refetch();
-        },
-        onError: (error) => {
-          toast.error(error.message ?? "Something went wrong");
-        },
-      },
-    );
-  };
   const handleDownload = (url?: string, filename?: string) => {
     if (!url) return;
     // open in new tab (user can right click -> save) and also force download
@@ -117,26 +99,7 @@ export default function IncidentDetailScreen() {
     a.click();
     a.remove();
   };
-  const handleComplete = async () => {
-    if (!incident) return;
 
-    await updateIncidentStatus.mutateAsync(
-      {
-        incidentReportId: incident.report.id,
-        status: "COMPLETED",
-        comments: "",
-      },
-      {
-        onSuccess: () => {
-          toast.success("Incident has been completed");
-          void refetch();
-        },
-        onError: (error) => {
-          toast.error(error.message ?? "Something went wrong");
-        },
-      },
-    );
-  };
   const groupedImages = statusOrder.map((status) => ({
     status,
     images: incident?.media?.filter((image) => image.status === status) ?? [],
@@ -145,12 +108,30 @@ export default function IncidentDetailScreen() {
     if (!incident) return;
     await updateIncidentStatus.mutateAsync(
       {
-        incidentReportId: incident.report.id,
+        incidentId: incidentMeta?.id!,
         status: newStatus,
       },
       {
         onSuccess: () => {
-          toast.success("Incident status updated successfully");
+          toast.success(`Incident ${newStatus.toLowerCase()} successfully`);
+          void refetch();
+        },
+        onError: (error) => {
+          toast.error(error.message ?? "Something went wrong");
+        },
+      },
+    );
+  };
+  const closeIncident = async () => {
+    if (!incident) return;
+    await updateReportStatus.mutateAsync(
+      {
+        incidentReportId: incident.report.id,
+        status: "CLOSED",
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Incident report has been closed`);
           void refetch();
         },
         onError: (error) => {
@@ -179,16 +160,21 @@ export default function IncidentDetailScreen() {
       //   //   assignees.every((assignee) => assignee.acceptanceStatus === false))
       // ) {
       (await assignIncidentToOfficer.mutateAsync({
-        incidentId: incident.incident?.id,
-        assignedTo: selectedOfficer,
+        assignedTo:
+          user?.role === "P_AND_C_MANAGER" ? selectedOfficer : user?.id!,
+        incidentId: incident.incident?.id!,
         reportId: incident.report.id,
       }),
         {
           onSuccess: () => {
+            void refetch();
+            console.log("close modal");
+
+            setOpen(false);
+            setModalMode("");
             toast.success(
               `${user?.role == "P_AND_C_MANAGER" ? "Incident assigned successfully" : "Incident picked successfully"} `,
             );
-            void refetch();
           },
           onError: (error: ErrorResponse) => {
             toast.error(error.message ?? "Something went wrong");
@@ -198,9 +184,6 @@ export default function IncidentDetailScreen() {
     } catch (error) {
       toast.error("Failed to update incident");
       console.error(error);
-    } finally {
-      setOpen(false);
-      setModalMode("");
     }
   };
 
@@ -260,7 +243,7 @@ export default function IncidentDetailScreen() {
                   title="Assign Officer"
                   onClick={() => {
                     setModalMode("assign-officer");
-
+                    setOpen(true);
                     // open modal logic left to you — this demonstrates the button
                   }}
                 />
@@ -273,6 +256,47 @@ export default function IncidentDetailScreen() {
                     setSelectedOfficer(user?.id || "");
                     handleDone();
                   }}
+                  loading={assignIncidentToOfficer.isPending}
+                  disabled={assignIncidentToOfficer.isPending}
+                />
+              )}
+            {/* Complete Incident - allowed roles & when assigned / in progress */}
+            {user &&
+              hasPermission(user.role, "complete:incident") &&
+              incidentMeta?.status === "ASSIGNED" && (
+                <Button
+                  title={"Complete Incident"}
+                  onClick={() => {
+                    if (
+                      report.followUp &&
+                      !incident.followUps?.some((f) => f.userId === user.id)
+                    ) {
+                      toast.error(
+                        "Please add a follow-up before completing the incident",
+                      );
+                      return;
+                    }
+                    void handleUpdateStatus("COMPLETED");
+                  }}
+                  loading={updateIncidentStatus.isPending}
+                  disabled={updateIncidentStatus.isPending}
+                  // disabled={isUpdatingStatus}
+                />
+              )}
+
+            {/* Close Incident - P_AND_C_MANAGER when incident completed */}
+            {user &&
+              hasPermission(user.role, "close:incident") &&
+              incidentMeta &&
+              incidentMeta.status === "COMPLETED" &&
+              report.status !== "CLOSED" && (
+                <Button
+                  title={"Close Incident"}
+                  onClick={closeIncident}
+                  loading={updateReportStatus.isPending}
+                  disabled={updateReportStatus.isPending}
+                  // disabled={isUpdatingStatus}
+                  // variant="secondary"
                 />
               )}
             {hasPermission(session.data?.user?.role!, "cancel:incidents") &&
@@ -335,9 +359,9 @@ export default function IncidentDetailScreen() {
               {groupedImages.map(({ status, images }) =>
                 images?.length ? (
                   <div key={status} className="mt-2">
-                    <p className="text-sm font-medium capitalize text-gray-700 dark:text-gray-300">
+                    {/* <p className="text-sm font-medium capitalize text-gray-700 dark:text-gray-300">
                       {status.toLocaleLowerCase().replaceAll("_", " ")} images
-                    </p>
+                    </p> */}
                     <div className="mt-2 flex flex-wrap gap-2">
                       {images.map((image, index) => (
                         <div
@@ -429,7 +453,7 @@ export default function IncidentDetailScreen() {
             reportId={incident?.report.id!}
             onCommentAdded={() => void refetch()}
           />
-          {incident?.report.followUp && incident.report.status !== "CLOSED" && (
+          {incident?.report.followUp && (
             <FollowUpsSection
               followUps={incident?.followUps!}
               reportId={incident?.report.id!}
@@ -440,15 +464,7 @@ export default function IncidentDetailScreen() {
           {/* Role-based action buttons */}
           <div className="mt-4 flex items-center gap-4">
             {/* Pick Incident (for P_AND_C_OFFICER or any user who can self pick) */}
-            {user &&
-              hasPermission(user?.role, "assign:incidents") &&
-              !assignee && (
-                <Button
-                  title={"Pick Incident"}
-                  onClick={handleDone}
-                  // disabled={isAssigning}
-                />
-              )}
+
             {modalMode == "assign-officer" && (
               <ModalBody className="max-w-2xl">
                 <div className="mt-4">
@@ -490,31 +506,6 @@ export default function IncidentDetailScreen() {
                     // for now, just a placeholder
                     console.log("open upload");
                   }}
-                />
-              )}
-
-            {/* Complete Incident - allowed roles & when assigned / in progress */}
-            {user &&
-              hasPermission(user.role ?? "", "complete:incident") &&
-              report.status === "IN_PROGRESS" && (
-                <Button
-                  title={"Complete"}
-                  onClick={() => void handleUpdateStatus("COMPLETED")}
-                  // disabled={isUpdatingStatus}
-                />
-              )}
-
-            {/* Close Incident - P_AND_C_MANAGER when incident completed */}
-            {user &&
-              hasPermission(user.role, "close:incident") &&
-              incidentMeta &&
-              incidentMeta.status === "COMPLETED" &&
-              report.status !== "CLOSED" && (
-                <Button
-                  title={"Close Incident"}
-                  onClick={() => void handleUpdateStatus("CLOSED")}
-                  // disabled={isUpdatingStatus}
-                  variant="secondary"
                 />
               )}
           </div>

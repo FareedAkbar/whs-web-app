@@ -245,9 +245,8 @@ export const userRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       try {
         const userToken = ctx.session?.user.token;
-        const userRole = ctx.session?.user.role; // 👈 role extract
 
-        if (!userToken || userRole !== "ADMIN") {
+        if (!userToken) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "Unauthorized",
@@ -273,10 +272,16 @@ export const userRouter = createTRPCRouter({
           };
         }
 
-        const usersData = (await response.json()) as UsersResponseData;
+        const usersData = (await response.json()) as {
+          status: string;
+          message: string;
+          user: User[];
+        };
+        console.log("usersData", usersData);
+
         return {
           status: true,
-          data: usersData.users,
+          data: usersData.user,
         };
       } catch (error) {
         return {
