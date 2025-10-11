@@ -30,6 +30,7 @@ import {
   NewIncidentReport,
   treatmentType,
 } from "@/types/report";
+import DateField from "@/components/ui/DateField";
 
 const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 const HazardForm = () => {
@@ -286,6 +287,9 @@ const HazardForm = () => {
 
             {/* Medical / injury fields */}
             <div className="flex flex-wrap gap-4">
+              {/* <div className="min-w-[220px] flex-1">
+                <DateField name="incidentDate" required />
+              </div> */}
               <div className="min-w-[220px] flex-1">
                 <Controller
                   name="treatmentType"
@@ -330,7 +334,10 @@ const HazardForm = () => {
                   </p>
                 )}
               </div>
+            </div>
 
+            {/* Contact fields */}
+            <div className="flex flex-wrap gap-4">
               <div className="min-w-[220px] flex-1">
                 <Controller
                   name="injuredPersonName"
@@ -346,10 +353,6 @@ const HazardForm = () => {
                   </p>
                 )}
               </div>
-            </div>
-
-            {/* Contact fields */}
-            <div className="flex flex-wrap gap-4">
               <div className="min-w-[220px] flex-1">
                 <Controller
                   name="injuredPhoneNumber"
@@ -455,23 +458,7 @@ const HazardForm = () => {
                     </p>
                   )}
                 </div>
-                {/* <div>
-            <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Date of Incident
-            </label>
-            <DatePicker
-              selected={date}
-              onChange={(selectedDate) => {
-                setDate(selectedDate);
-                setValue("incidentDate", selectedDate, {
-                  shouldValidate: true,
-                });
-              }}
-              className="z-10 w-full rounded-lg border border-gray-300 p-3"
-              placeholderText="Select date"
-              calendarClassName="z-50"
-            />
-          </div> */}
+
                 {/* <div className="min-w-[220px] flex-1">
                   <Controller
                     name="firstAidDate"
