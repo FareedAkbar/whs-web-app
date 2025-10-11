@@ -52,6 +52,53 @@ export const incidentRouter = createTRPCRouter({
       };
     }
   }),
+  getHazards: publicProcedure.query(async ({ ctx }) => {
+    try {
+      const userToken = ctx.session?.user.token;
+      console.log("userToken", userToken);
+      if (!userToken) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Unauthorized",
+        });
+      }
+      const response = await fetch(`${env.BASE_URL}/incident?type=HAZARD`, {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+      console.log("response", response);
+      if (!response.ok) {
+        const errorData = (await response.json()) as { message: string };
+        console.error("incidents getting error:", errorData);
+        return {
+          status: false,
+          error: errorData.message,
+        };
+      }
+
+      const incidentsData = (await response.json()) as {
+        status: string;
+        message: string;
+        data: ReportResponse[];
+      };
+      return {
+        status: true,
+        data: incidentsData.data,
+      };
+    } catch (error) {
+      console.error("Incidents error:", error);
+      return {
+        status: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "An error occurred while logging in.",
+      };
+    }
+  }),
   assignIncident: publicProcedure
     .input(
       z.object({
@@ -190,6 +237,81 @@ export const incidentRouter = createTRPCRouter({
         injuredPersonName: z.string(),
         injuredPhoneNumber: z.string(),
         injuredPersonEmail: z.string(),
+        managerSignatureConfirmationDate: z.string().nullable(),
+        dynamicQuestion: z.array(
+          z.object({
+            questionId: z.string(),
+            answer: z.string(),
+          }),
+        ),
+        media: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const userToken = ctx.session?.user.token;
+        if (!userToken) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Unauthorized",
+          });
+        }
+
+        const response = await fetch(`${env.BASE_URL}/incident`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(input),
+        });
+
+        console.log("Incident API Response:", response);
+
+        if (!response.ok) {
+          const errorData = (await response.json()) as { message: string };
+          console.error("Incident report error:", errorData);
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: errorData.message || "Failed to report incident",
+          });
+        }
+
+        const responseData = (await response.json()) as {
+          status: string;
+          message: string;
+          data: ReportResponse;
+        };
+        console.log("Incident Reported Successfully:", responseData);
+
+        return {
+          status: true,
+          data: responseData.data,
+        };
+      } catch (error) {
+        console.error("Incident Report Error:", error);
+        return {
+          status: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "An error occurred while reporting the incident.",
+        };
+      }
+    }),
+  reportHazard: publicProcedure
+    .input(
+      z.object({
+        // Report Data
+        reportTitle: z.string(),
+        coordinates: z.string(),
+        reportDescription: z.string(),
+        severity: z.enum(["LOW", "MEDIUM", "HIGH", "EXTREME"]),
+        mainType: z.literal("HAZARD"),
+        status: z.string(),
+
+        // categoryType: z.string(),
+
         managerSignatureConfirmationDate: z.string().nullable(),
         dynamicQuestion: z.array(
           z.object({

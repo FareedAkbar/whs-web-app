@@ -194,12 +194,12 @@ export interface NewHazardReport {
   reportTitle: string;
   coordinates: string;
   reportDescription: string;
-  severity: "LOW" | "MEDIUM" | "HIGH"; // assuming possible values
+  severity: "LOW" | "MEDIUM" | "HIGH" | "EXTREME"; // assuming possible values
   mainType: "HAZARD";
   status: "INITIATED" | "IN_PROGRESS" | "RESOLVED" | string;
 
   // Incident Data
-  categoryType: string;
+  // categoryType: string;
   hazardDescription: string;
 
   managerSignatureConfirmationDate: string | null;

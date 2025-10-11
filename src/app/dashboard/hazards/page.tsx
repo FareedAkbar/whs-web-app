@@ -3,23 +3,22 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, ChevronDown, Filter, Search } from "lucide-react";
 import { api } from "@/trpc/react";
-
 import Dropdown from "@/components/ui/Dropdown";
-import { Select } from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
 import { set } from "zod";
 import { useSession } from "next-auth/react";
 import { severityMapping } from "@/constants/severity";
 import { useRouter } from "next/navigation";
+import { ReportResponse } from "@/types/report";
 
-export default function IncidentsList() {
-  const { data: incidents, isLoading } = api.incidents.getIncidents.useQuery();
-  const { data: workers } = api.workers.getWorkers.useQuery();
+export default function HazardsList() {
+  const { data: hazards, isLoading } = api.incidents.getHazards.useQuery();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [filteredIncidents, setFilteredIncidents] = useState<IncidentData[]>(
-    incidents?.data ?? [],
+  const [filteredHazards, setFilteredHazards] = useState<ReportResponse[]>(
+    hazards?.data ?? [],
   );
+
   const router = useRouter();
 
   const statusMapping = {
@@ -31,6 +30,7 @@ export default function IncidentsList() {
     CANCELLED: "bg-red-100 dark:bg-red-900 dark:bg-opacity-50 text-red-600",
     ASSIGNED:
       "bg-purple-100 dark:bg-purple-900 dark:bg-opacity-50 text-purple-600",
+    CLOSED: "bg-gray-100 dark:bg-gray-900 dark:text-gray-400 text-gray-600",
   };
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -38,15 +38,12 @@ export default function IncidentsList() {
 
   const [priority, setPriority] = useState<string[]>([]);
   const [status, setStatus] = useState<string[]>([]);
-  const [assignedTo, setAssignedTo] = useState("");
-  // const [taskType, setTaskType] = useState("");
-  const session = useSession();
 
   useEffect(() => {
-    if (incidents?.data) {
-      setFilteredIncidents(incidents.data);
+    if (hazards?.data) {
+      setFilteredHazards(hazards.data);
     }
-  }, [incidents?.data]);
+  }, [hazards?.data]);
   const toggleArrayValue = (
     val: string,
     setFn: React.Dispatch<React.SetStateAction<string[]>>,
@@ -63,34 +60,34 @@ export default function IncidentsList() {
     setDateTo("");
     setPriority([]);
     setStatus([]);
-    setAssignedTo("");
+    // setAssignedTo("");
     // setTaskType("");
     setIsFilterOpen(false);
     setSearchTerm("");
-    setFilteredIncidents(incidents?.data ?? []);
+    setFilteredHazards(hazards?.data ?? []);
   };
   const handleFilter = () => {
-    setFilteredIncidents(
-      incidents?.data?.filter((item) => {
+    if (!hazards?.data) return;
+
+    setFilteredHazards(
+      hazards?.data?.filter((item) => {
         return (
-          (!dateFrom || item.incidentReport.createdAt >= dateFrom) &&
-          (!dateTo || item.incidentReport.createdAt <= dateTo) &&
-          (!priority.length ||
-            priority.includes(item.incidentReport.priority)) &&
-          (!status.length || status.includes(item.incidentReport.status)) &&
-          (!assignedTo ||
-            (Array.isArray(item.incidentAssignee) &&
-              item.incidentAssignee.some(
-                (assignee) => assignee.assignedTo === assignedTo,
-              ))) &&
-          // (!taskType || item.incidentReport.taskType === taskType) &&
+          (!dateFrom || item.report.createdAt >= dateFrom) &&
+          (!dateTo || item.report.createdAt <= dateTo) &&
+          (!priority.length || priority.includes(item.report.priority)) &&
+          (!status.length || status.includes(item.hazard?.status!)) &&
+          // (!status.length || status.includes(item.report.status)) &&
+          // (!assignedTo ||
+          //   (Array.isArray(item.incidentAssignee) &&
+          //     item.incidentAssignee.some(
+          //       (assignee) => assignee.assignedTo === assignedTo,
+          //     ))) &&
+          // (!taskType || item.report.taskType === taskType) &&
           (!searchTerm ||
-            item.incidentReport.description
+            item.report.description
               .toLowerCase()
               .includes(searchTerm.toLowerCase()) ||
-            item.incidentReport.title
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()))
+            item.report.title.toLowerCase().includes(searchTerm.toLowerCase()))
         );
       }) ?? [],
     );
@@ -114,7 +111,7 @@ export default function IncidentsList() {
       <div className="sticky top-0 z-10 mb-4 flex h-full items-center justify-between backdrop-blur">
         <input
           type="text"
-          placeholder="Search incidents..."
+          placeholder="Search hazards..."
           className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -202,7 +199,7 @@ export default function IncidentsList() {
             </div>
 
             {/* Assigned Person */}
-            {session.data?.user?.role == "ADMIN" && (
+            {/* {session.data?.user?.role == "ADMIN" && (
               <div>
                 <Select
                   options={
@@ -216,7 +213,7 @@ export default function IncidentsList() {
                   label="Assigned To"
                 />
               </div>
-            )}
+            )} */}
 
             {/* Task Type */}
             {/* <div>
@@ -254,17 +251,17 @@ export default function IncidentsList() {
         </div>
       </div>
       <div className="custom-scrollbar grid flex-1 grid-cols-1 gap-4 overflow-y-auto pb-4 lg:grid-cols-2 lg:px-8">
-        {filteredIncidents.length > 0 &&
-          filteredIncidents?.map((item) => (
+        {filteredHazards.length > 0 &&
+          filteredHazards?.map((item) => (
             <div
-              key={item.incidentReport.id}
+              key={item.report.id}
               className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg dark:border-gray-500 dark:bg-gray-800 dark:shadow-gray-700"
               // onClick={() => {
               //   setSelectedIncident(item);
               //   setOpen(true);
               // }}
               onClick={() =>
-                router.push(`/dashboard/incidents/${item.incidentReport.id}`)
+                router.push(`/dashboard/hazards/${item.report.id}`)
               }
             >
               <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
@@ -272,7 +269,7 @@ export default function IncidentsList() {
                   <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
                     <AlertTriangle
                       size={40}
-                      color={`${severityMapping[item?.incidentReport?.priority] ?? "black"}`}
+                      color={`${severityMapping[item?.report?.priority] ?? "black"}`}
                     />
                   </div>
                   {/* <img
@@ -288,34 +285,33 @@ export default function IncidentsList() {
                       className="font-semibold capitalize"
                       style={{
                         color:
-                          severityMapping[item?.incidentReport?.priority] ??
-                          "#000",
+                          severityMapping[item?.report?.priority] ?? "#000",
                       }}
                     >
-                      {item.incident.title}
+                      {item.report.title}
                     </h2>
 
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {item.incident.description}
+                      {item.report.description}
                     </p>
                   </div>
                 </div>
                 <div className="flex flex-col items-center justify-end gap-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.incidentReport.status as keyof typeof statusMapping]}`}
+                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.hazard?.status as keyof typeof statusMapping]}`}
                   >
-                    {item.incidentReport.status.replace("_", " ")}
+                    {item.hazard?.status.replace("_", " ")}
                   </span>
                   {/* <div
                     className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium text-white ${
                       severityMapping[
-                        item?.incidentReport
+                        item?.report
                           ?.priority as keyof typeof severityMapping
                       ] || "bg-gray-400"
                     }`}
                   >
                     <AlertTriangle size={18} />
-                    <span>{item?.incidentReport?.priority}</span>
+                    <span>{item?.report?.priority}</span>
                   </div> */}
                 </div>
               </div>
@@ -351,9 +347,9 @@ export default function IncidentsList() {
               )} */}
             </div>
           ))}
-        {filteredIncidents.length === 0 && (
+        {filteredHazards.length === 0 && (
           <div className="flex h-full w-full items-center justify-center text-gray-500">
-            No incidents found
+            No hazards found
           </div>
         )}
       </div>
