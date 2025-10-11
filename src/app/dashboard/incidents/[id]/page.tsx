@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserPlus } from "lucide-react";
+import { Download, DownloadIcon, UserPlus } from "lucide-react";
 import { api } from "@/trpc/react";
 import { toast } from "react-toastify";
 import { useParams, useRouter } from "next/navigation";
@@ -14,10 +14,14 @@ import { useSession } from "next-auth/react";
 import { Select } from "@/components/ui/Select";
 import { type } from "os";
 import { User } from "@/types/user";
+import CommentsSection from "@/components/ui/CommentsSection";
+import FollowUpsSection from "@/components/ui/FollowUpsSection";
 export default function IncidentDetailScreen() {
   const params = useParams();
-  const { data: departments, isLoading: isLoadingDepartments } =
-    api.groups.getGroupData.useQuery({ groupType: "DEPARTMENT" });
+  // const { data: departments, isLoading: isLoadingDepartments } =
+  //   api.groups.getGroupData.useQuery({ groupType: "DEPARTMENT" });
+  const { data: officers, isLoading: isLoadingOfficers } =
+    api.users.getUsersByRole.useQuery({ role: "P_AND_C_OFFICER" });
   const { setOpen } = useModal();
   const session = useSession();
   const router = useRouter();
@@ -30,21 +34,20 @@ export default function IncidentDetailScreen() {
   } = api.incidents.getIncidentById.useQuery({
     incidentReportId: id,
   });
-  const { data: workers } = api.workers.getWorkers.useQuery();
+  // const { data: workers } = api.workers.getWorkers.useQuery();
   // const { data: departments } = api.department.getDepartments.useQuery();
-  const assignIncidentToGroup = api.incidents.assignIncident.useMutation();
+  const assignIncidentToOfficer = api.incidents.assignIncident.useMutation();
   const updateIncidentStatus = api.incidents.updateStatus.useMutation();
   const incidentAcceptance = api.incidents.incidentAcceptance.useMutation();
   const incident = incidentData?.data;
-  const [selectedContractor, setSelectedContractor] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("");
-  const [comment, setComment] = useState("");
-  const [decision, setDecision] = useState<"accept" | "reject" | null>(null);
+  const [selectedOfficer, setSelectedOfficer] = useState("");
+  // const [selectedDepartment, setSelectedDepartment] = useState("");
+  // const [comment, setComment] = useState("");
+  // const [decision, setDecision] = useState<"accept" | "reject" | null>(null);
   const [modalMode, setModalMode] = useState<
-    "accept" | "reject" | "assign" | "cancel" | "" | "assign-department"
+    "accept" | "reject" | "assign" | "cancel" | "" | "assign-officer"
   >("accept");
   const user = session.data?.user;
-  console.log("userrr", user);
 
   const statusMapping = {
     INITIATED: "bg-blue-100 dark:bg-blue-900 dark:bg-opacity-50 text-blue-600",
@@ -56,11 +59,7 @@ export default function IncidentDetailScreen() {
     ASSIGNED:
       "bg-purple-100 dark:bg-purple-900 dark:bg-opacity-50 text-purple-600",
   };
-  const assignees = Array.isArray(incident?.incidentAssignee)
-    ? incident?.incidentAssignee
-    : incident?.incidentAssignee
-      ? [incident.incidentAssignee]
-      : [];
+
   const statusOrder = [
     "INITIATED",
     "ASSIGNED",
@@ -107,6 +106,17 @@ export default function IncidentDetailScreen() {
       },
     );
   };
+  const handleDownload = (url?: string, filename?: string) => {
+    if (!url) return;
+    // open in new tab (user can right click -> save) and also force download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename || "image";
+    a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
   const handleComplete = async () => {
     if (!incident) return;
 
@@ -131,46 +141,60 @@ export default function IncidentDetailScreen() {
     status,
     images: incident?.media?.filter((image) => image.status === status) ?? [],
   }));
-
+  const handleUpdateStatus = async (newStatus: string) => {
+    if (!incident) return;
+    await updateIncidentStatus.mutateAsync(
+      {
+        incidentReportId: incident.report.id,
+        status: newStatus,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Incident status updated successfully");
+          void refetch();
+        },
+        onError: (error) => {
+          toast.error(error.message ?? "Something went wrong");
+        },
+      },
+    );
+  };
   const handleDone = async () => {
     if (!incident) return;
 
-    const assignees = Array.isArray(incident?.incidentAssignee)
-      ? incident.incidentAssignee
-      : incident?.incidentAssignee
-        ? [incident.incidentAssignee]
-        : [];
-
     try {
-      if (modalMode === "cancel") {
-        await updateIncidentStatus.mutateAsync({
-          incidentReportId: incident.report.id,
-          status: "CANCELLED",
-          comments: comment,
+      // if (modalMode === "cancel") {
+      //   await updateIncidentStatus.mutateAsync({
+      //     incidentReportId: incident.report.id,
+      //     status: "CANCELLED",
+      //     comments: comment,
+      //   });
+      //   toast.success("Incident cancelled successfully");
+      //   void refetch();
+      // } else
+      // if (
+      //   modalMode === "assign-officer"
+      //   // ||
+      //   // (assignees.length > 0 &&
+      //   //   assignees.every((assignee) => assignee.acceptanceStatus === false))
+      // ) {
+      (await assignIncidentToOfficer.mutateAsync({
+        incidentId: incident.incident?.id,
+        assignedTo: selectedOfficer,
+        reportId: incident.report.id,
+      }),
+        {
+          onSuccess: () => {
+            toast.success(
+              `${user?.role == "P_AND_C_MANAGER" ? "Incident assigned successfully" : "Incident picked successfully"} `,
+            );
+            void refetch();
+          },
+          onError: (error: ErrorResponse) => {
+            toast.error(error.message ?? "Something went wrong");
+          },
         });
-        toast.success("Incident cancelled successfully");
-        void refetch();
-      } else if (
-        modalMode === "assign-department"
-        // ||
-        // (assignees.length > 0 &&
-        //   assignees.every((assignee) => assignee.acceptanceStatus === false))
-      ) {
-        await assignIncidentToGroup.mutateAsync({
-          incidentId: incident.incident.id,
-          assignedTo: selectedDepartment,
-          reportId: incident.report.id,
-        }),
-          {
-            onSuccess: () => {
-              toast.success("Incident assigned successfully");
-              void refetch();
-            },
-            onError: (error) => {
-              toast.error(error.message ?? "Something went wrong");
-            },
-          };
-      }
+      // }
     } catch (error) {
       toast.error("Failed to update incident");
       console.error(error);
@@ -187,6 +211,10 @@ export default function IncidentDetailScreen() {
       </div>
     );
   }
+  // convenience getters
+  const report = incident.report;
+  const incidentMeta = incident.incident;
+  const assignee = incident.incidentAssignee ?? null;
 
   return (
     <div className="flex w-full flex-col px-8 py-6">
@@ -194,7 +222,7 @@ export default function IncidentDetailScreen() {
         onClick={() => router.back()}
         className="mb-4 flex items-center text-sm text-primary"
       >
-        ← Back to LIst
+        ← Back to List
       </button>
 
       <div className="rounded-lg border bg-white p-6 shadow-md dark:border-gray-500 dark:bg-gray-800 dark:text-white dark:shadow-gray-700">
@@ -203,298 +231,293 @@ export default function IncidentDetailScreen() {
             <h2
               className="text-xl font-semibold capitalize"
               style={{
-                color: severityMapping[incident?.report?.priority] ?? "black",
+                color:
+                  severityMapping[
+                    report.priority as keyof typeof severityMapping
+                  ] ?? "black",
               }}
-              color={severityMapping[incident?.report?.priority]}
             >
-              {incident.report.title}
+              {report.title}
             </h2>
+
             <span
               className={`rounded-full px-3 py-1 text-xs ${
-                statusMapping[
-                  incident.report.status as keyof typeof statusMapping
-                ]
+                // try to use statusMapping constant, otherwise fallback styles
+                (statusMapping &&
+                  statusMapping[report.status as keyof typeof statusMapping]) ||
+                "bg-gray-100 text-gray-700"
               }`}
             >
-              {incident.report.status.replace("_", " ")}
+              {report.status.replaceAll("_", " ")}
             </span>
           </div>
-          <div className="flex flex-row items-center gap-4">
-            {user &&
-              hasPermission(user.role, "assign:departments") &&
-              !incident.incident.groupId &&
-              incident.report.status === "INITIATED" && (
-                <div className="flex items-center gap-4">
-                  <Button
-                    title="Assign department"
-                    icon={<UserPlus size={16} />}
-                    onClick={() => {
-                      setModalMode("assign-department");
-                      setOpen(true);
-                    }}
-                  />
-                </div>
-              )}
-            {/* {user &&
-              hasPermission(user.role, "assign:contractors") &&
-              incident.report.status !== "COMPLETED" &&
-              incident.report.status !== "CANCELLED" && (
-                <>
-                  {assignees.length === 0 ||
-                  incident.incidentAssignee == null ? (
-                    // Show "Assign Contractor" if no one is assigned
-                    <Button
-                      title="Assign Contractor"
-                      icon={<UserPlus size={14} />}
-                      onClick={() => {
-                        setModalMode("assign");
-                        setOpen(true);
-                      }}
-                    />
-                  ) : assignees.every(
-                      (assignee) => assignee.acceptanceStatus === false,
-                    ) ? (
-                    // Show "Reassign Contractor" if all rejected
-                    <div className="flex items-center gap-4">
-                      <p className="font-semibold text-primary">Rejected!</p>
-                      <Button
-                        title="Reassign Contractor"
-                        icon={<UserPlus size={16} />}
-                        onClick={() => {
-                          setModalMode("assign");
-                          setOpen(true);
-                        }}
-                      />
-                    </div>
-                  ) : null}
-                </>
-              )} */}
 
-            {user &&
-              hasPermission(user.role, "cancel:incidents") &&
-              incident.report.status === "INITIATED" && (
+          <div className="flex flex-row items-center gap-4">
+            {/* Cancel (example) */}
+            {hasPermission(user?.role!, "assign:officer") &&
+              !incident?.incidentAssignee && (
+                <Button
+                  title="Assign Officer"
+                  onClick={() => {
+                    setModalMode("assign-officer");
+
+                    // open modal logic left to you — this demonstrates the button
+                  }}
+                />
+              )}
+            {hasPermission(user?.role!, "pick:incident") &&
+              !incident?.incidentAssignee && (
+                <Button
+                  title="Pick Incident"
+                  onClick={() => {
+                    setSelectedOfficer(user?.id || "");
+                    handleDone();
+                  }}
+                />
+              )}
+            {hasPermission(session.data?.user?.role!, "cancel:incidents") &&
+              report.status === "INITIATED" && (
                 <Button
                   title="Cancel Incident"
-                  //   icon={<UserPlus size={16} />}
+                  variant="secondary"
                   onClick={() => {
                     setModalMode("cancel");
-                    setOpen(true);
+                    // open modal logic left to you — this demonstrates the button
                   }}
-                  variant="secondary"
                 />
               )}
           </div>
         </div>
 
         <div className="mt-4 space-y-4">
+          {/* Report Description */}
           <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <p>
               <span className="font-medium">Report Description:</span>
               <br />
-              {incident.report.description}
+              {report.description}
             </p>
-            {incident.report.description && (
+
+            {/* Detailed description from incident object (if present) */}
+            {incidentMeta?.incidentDescription && (
               <p>
                 <span className="font-medium text-red-500">
                   Incident Detailed Description:
-                </span>{" "}
-                {incident.incident.incidentDescription}
+                </span>
+                {incidentMeta.incidentDescription}
               </p>
             )}
 
+            {/* Assigned to */}
             <div className="mt-4">
-              {incident.incidentAssignee && assignees.length > 0 ? (
+              {assignee ? (
                 <div className="mt-3 space-y-2">
                   <p className="text-sm font-semibold text-red-500">
-                    Assigned Contractor(s):
+                    Assigned to:
                   </p>
-                  {assignees.map((assignee, index) =>
-                    assignee.assignedToData ? (
-                      <p
-                        key={index}
-                        className="text-sm capitalize text-gray-700 dark:text-gray-300"
-                      >
-                        {assignee.assignedToData.name} (
-                        {assignee.acceptanceStatus === true
-                          ? "Accepted"
-                          : assignee.acceptanceStatus === false
-                            ? "Rejected"
-                            : "Pending"}
-                        )
-                      </p>
-                    ) : null,
-                  )}
+                  <p className="text-sm capitalize text-gray-700 dark:text-gray-300">
+                    {assignee.name} ({assignee.role.replaceAll("_", " ")})
+                  </p>
                 </div>
               ) : (
-                <p className="text-sm font-medium">No Contractor assigned.</p>
+                <p className="text-sm font-medium">No Officer assigned.</p>
               )}
             </div>
           </div>
 
-          {incident.media?.length ? (
+          {/* Images */}
+          {groupedImages.length ? (
             <div className="mt-6">
               <h3 className="font-semibold text-gray-800 dark:text-gray-200">
                 Incident Gallery
               </h3>
-              {groupedImages.map(
-                ({ status, images }) =>
-                  images?.length > 0 && (
-                    <div key={status} className="mt-2">
-                      <p className="text-sm font-medium capitalize text-gray-700 dark:text-gray-300">
-                        {status.toLocaleLowerCase().replace("_", " ")} images
-                      </p>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {images && images.length > 0 ? (
-                          images.map((image, index) => (
-                            <img
-                              key={image.id || index}
-                              src={image.url || "/images/n-img.jpg"}
-                              alt={`Incident Image ${index + 1}`}
-                              className="h-20 w-20 cursor-pointer rounded-lg object-contain shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
-                              onClick={() =>
-                                image.url &&
-                                typeof window !== "undefined" &&
-                                window.open(image.url, "_blank")
-                              }
-                              width={1000}
-                              height={1000}
-                            />
-                          ))
-                        ) : (
+
+              {groupedImages.map(({ status, images }) =>
+                images?.length ? (
+                  <div key={status} className="mt-2">
+                    <p className="text-sm font-medium capitalize text-gray-700 dark:text-gray-300">
+                      {status.toLocaleLowerCase().replaceAll("_", " ")} images
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {images.map((image, index) => (
+                        <div
+                          key={image.id || index}
+                          className="relative cursor-pointer rounded-lg"
+                        >
                           <img
-                            src="/images/no-img.jpg"
-                            alt="No Image Available"
-                            className="h-20 w-20 rounded-lg object-contain shadow-md sm:h-28 sm:w-28"
-                            width={1000}
-                            height={1000}
+                            src={image.url || "/images/n-img.jpg"}
+                            alt={`Incident Image ${index + 1}`}
+                            className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
+                            onClick={() =>
+                              image.url && window.open(image.url, "_blank")
+                            }
                           />
-                        )}
-                      </div>
+                          <button
+                            onClick={() =>
+                              handleDownload(image.url, `incident_${index}.jpg`)
+                            }
+                            className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
+                          >
+                            <DownloadIcon className="h-3 w-3" color="red" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  ),
+                  </div>
+                ) : null,
               )}
             </div>
           ) : null}
-          <div className="flex items-center gap-4">
-            {user &&
-              hasPermission(user.role, "start:incident") &&
-              incident.report.status === "ASSIGNED" &&
-              assignees?.[0]?.acceptanceStatus == true && (
-                <Button title="Mark as Start" onClick={() => handleStart()} />
-              )}
-            {user &&
-              hasPermission(user.role, "complete:incident") &&
-              incident.report.status === "IN_PROGRESS" &&
-              assignees?.[0]?.acceptanceStatus == true && (
-                <Button
-                  title="Mark as Completed"
-                  onClick={() => handleComplete()}
-                />
-              )}
-          </div>
 
-          {user &&
-            hasPermission(user.role, "accept/reject:incidents") &&
-            incident.report.status === "ASSIGNED" &&
-            assignees?.[0]?.acceptanceStatus == null &&
-            !decision && (
-              <div className="mt-6 flex items-center gap-4">
-                <Button
-                  title="Accept"
-                  onClick={() => {
-                    setDecision("accept");
-                    void handleAcceptAndReject(true);
-                  }}
-                />
+          {/* Medical Details */}
+          <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+            <h4 className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">
+              Medical Details
+            </h4>
 
-                <Button
-                  title="Reject"
-                  variant="secondary"
-                  onClick={() => {
-                    setDecision("reject");
-                    void handleAcceptAndReject(false);
-                  }}
-                />
+            <div className="space-y-2 text-sm">
+              <div className="flex gap-2">
+                <span className="font-medium text-gray-600 dark:text-gray-400">
+                  Name:
+                </span>
+                <span className="font-semibold text-gray-800 dark:text-gray-200">
+                  {incidentMeta?.name ?? "N/A"}
+                </span>
               </div>
-            )}
 
-          {/* {(modalMode === "assign" || modalMode === "cancel") && (
-            <ModalBody className="max-w-2xl">
-              <div className="mt-4">
-                {modalMode === "assign" ? (
+              <div className="flex gap-2">
+                <span className="font-medium text-gray-600 dark:text-gray-400">
+                  Injured Part:
+                </span>
+                <span className="font-semibold text-gray-800 dark:text-gray-200">
+                  {incidentMeta?.injuredBodyPart ?? "N/A"}
+                </span>
+              </div>
+
+              <div className="flex gap-2">
+                <span className="font-medium text-gray-600 dark:text-gray-400">
+                  Treatment Type:
+                </span>
+                <span className="font-semibold text-gray-800 dark:text-gray-200">
+                  {incidentMeta?.treatmentType?.replaceAll("_", " ") ?? "N/A"}
+                </span>
+              </div>
+
+              <div className="flex gap-2">
+                <span className="font-medium text-gray-600 dark:text-gray-400">
+                  Treatment Desc:
+                </span>
+                <span className="font-semibold text-gray-800 dark:text-gray-200">
+                  {incidentMeta?.treatmentDescription || "Not Provided"}
+                </span>
+              </div>
+
+              <div className="flex gap-2">
+                <span className="font-medium text-gray-600 dark:text-gray-400">
+                  Created At:
+                </span>
+                <span className="font-semibold text-gray-800 dark:text-gray-200">
+                  {incidentMeta?.createdAt
+                    ? new Date(incidentMeta.createdAt).toLocaleString()
+                    : "N/A"}
+                </span>
+              </div>
+            </div>
+          </div>
+          <CommentsSection
+            comments={incident?.comments!}
+            reportId={incident?.report.id!}
+            onCommentAdded={() => void refetch()}
+          />
+          {incident?.report.followUp && incident.report.status !== "CLOSED" && (
+            <FollowUpsSection
+              followUps={incident?.followUps!}
+              reportId={incident?.report.id!}
+              onFollowUpAdded={() => void refetch()}
+            />
+          )}
+
+          {/* Role-based action buttons */}
+          <div className="mt-4 flex items-center gap-4">
+            {/* Pick Incident (for P_AND_C_OFFICER or any user who can self pick) */}
+            {user &&
+              hasPermission(user?.role, "assign:incidents") &&
+              !assignee && (
+                <Button
+                  title={"Pick Incident"}
+                  onClick={handleDone}
+                  // disabled={isAssigning}
+                />
+              )}
+            {modalMode == "assign-officer" && (
+              <ModalBody className="max-w-2xl">
+                <div className="mt-4">
                   <Select
-                    label={
-                      (assignees.length ?? 0) > 0 &&
-                      assignees.every(
-                        (assignee) => assignee.acceptanceStatus === false,
-                      )
-                        ? "Reassign Contractor"
-                        : "Assign Contractor"
-                    }
+                    label="Assign Officer"
                     className="mt-2 w-full rounded border p-2"
-                    onChange={(e) => setSelectedContractor(e.target.value)}
-                    value={selectedContractor}
+                    onChange={(e) => setSelectedOfficer(e.target.value)}
+                    value={selectedOfficer}
                     options={
-                      workers?.data?.map((contractor: User) => ({
-                        value: contractor.id,
-                        label: contractor.name,
+                      officers?.data?.map((o: User) => ({
+                        value: o.id,
+                        label: o.name,
                       })) ?? []
                     }
                   />
-                ) : modalMode === "cancel" ? (
-                  <div className="mt-4">
-                    <textarea
-                      className="mb-4 min-h-28 w-full rounded-lg border bg-gray-50 p-2 shadow focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 dark:bg-gray-700 dark:text-white"
-                      placeholder="Add rejection reason..."
-                      rows={3}
-                      onChange={(e) => setComment(e.target.value)}
+                  <div className="mt-4 flex justify-end">
+                    <Button
+                      title="Confirm"
+                      onClick={handleDone}
+                      loading={
+                        assignIncidentToOfficer.isPending ||
+                        updateIncidentStatus.isPending
+                      }
+                      disabled={!selectedOfficer}
                     />
                   </div>
-                ) : null}
-
-                <div className="mt-4 flex justify-end">
-                  <Button
-                    title="Confirm"
-                    onClick={handleDone}
-                    loading={
-                      assignIncidentToGroup.isPending ||
-                      updateIncidentStatus.isPending
-                    }
-                    disabled={!selectedContractor && !comment}
-                  />
                 </div>
-              </div>
-            </ModalBody>
-          )} */}
-          {modalMode == "assign-department" && (
-            <ModalBody className="max-w-2xl">
-              <div className="mt-4">
-                <Select
-                  label="Assign department"
-                  className="mt-2 w-full rounded border p-2"
-                  onChange={(e) => setSelectedDepartment(e.target.value)}
-                  value={selectedDepartment}
-                  options={
-                    departments?.data?.map((contractor: Group) => ({
-                      value: contractor.id,
-                      label: contractor.name,
-                    })) ?? []
-                  }
+              </ModalBody>
+            )}
+            {/* Capture / Upload (for staff when incident is completed but report not closed) */}
+            {user &&
+              user.role === "STAFF" &&
+              incidentMeta &&
+              incidentMeta.status === "COMPLETED" &&
+              report.status !== "CLOSED" && (
+                <Button
+                  title="Capture or Upload"
+                  onClick={() => {
+                    // for now, just a placeholder
+                    console.log("open upload");
+                  }}
                 />
-                <div className="mt-4 flex justify-end">
-                  <Button
-                    title="Confirm"
-                    onClick={handleDone}
-                    loading={
-                      assignIncidentToGroup.isPending ||
-                      updateIncidentStatus.isPending
-                    }
-                    disabled={!selectedDepartment && !comment}
-                  />
-                </div>
-              </div>
-            </ModalBody>
-          )}
+              )}
+
+            {/* Complete Incident - allowed roles & when assigned / in progress */}
+            {user &&
+              hasPermission(user.role ?? "", "complete:incident") &&
+              report.status === "IN_PROGRESS" && (
+                <Button
+                  title={"Complete"}
+                  onClick={() => void handleUpdateStatus("COMPLETED")}
+                  // disabled={isUpdatingStatus}
+                />
+              )}
+
+            {/* Close Incident - P_AND_C_MANAGER when incident completed */}
+            {user &&
+              hasPermission(user.role, "close:incident") &&
+              incidentMeta &&
+              incidentMeta.status === "COMPLETED" &&
+              report.status !== "CLOSED" && (
+                <Button
+                  title={"Close Incident"}
+                  onClick={() => void handleUpdateStatus("CLOSED")}
+                  // disabled={isUpdatingStatus}
+                  variant="secondary"
+                />
+              )}
+          </div>
         </div>
       </div>
     </div>

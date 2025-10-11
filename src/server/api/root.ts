@@ -11,6 +11,7 @@ import { mediaRouter } from "./routers/media";
 import { departmentRouter } from "./routers/department";
 import { groupRouter } from "./routers/groups";
 import { InspectionRouter } from "./routers/inspections";
+import { reportRouter } from "./routers/report";
 
 /**
  * This is the primary router for your server.
@@ -30,6 +31,7 @@ export const appRouter = createTRPCRouter({
   department: departmentRouter,
   groups: groupRouter,
   inspections: InspectionRouter,
+  reports: reportRouter,
 });
 
 // export type definition of API

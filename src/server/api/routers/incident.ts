@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "@/env";
 import { z } from "zod";
+import { ReportResponse } from "@/types/report";
 
 export const incidentRouter = createTRPCRouter({
   getIncidents: publicProcedure.query(async ({ ctx }) => {
@@ -47,57 +48,6 @@ export const incidentRouter = createTRPCRouter({
       };
     }
   }),
-  getIncidentById: publicProcedure
-    .input(
-      z.object({
-        incidentReportId: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      try {
-        const userToken = ctx.session?.user.token;
-        if (!userToken) {
-          throw new TRPCError({
-            code: "UNAUTHORIZED",
-            message: "Unauthorized",
-          });
-        }
-        const response = await fetch(
-          `${env.BASE_URL}/incident?id=${input.incidentReportId}&type=INCIDENT`,
-          {
-            method: "GET",
-            headers: {
-              authorization: `Bearer ${userToken}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-        console.log("response", response);
-        if (!response.ok) {
-          const errorData = (await response.json()) as { message: string };
-          console.error("incident getting error:", errorData);
-          return {
-            status: false,
-            error: errorData.message,
-          };
-        }
-        const incidentData =
-          (await response.json()) as SingleIncidentApiResponse;
-        return {
-          status: true,
-          data: incidentData.data,
-        };
-      } catch (error) {
-        console.error("Incident error:", error);
-        return {
-          status: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "An error occurred while logging in.",
-        };
-      }
-    }),
   assignIncident: publicProcedure
     .input(
       z.object({
@@ -150,6 +100,61 @@ export const incidentRouter = createTRPCRouter({
         };
       }
     }),
+  getIncidentById: publicProcedure
+    .input(
+      z.object({
+        incidentReportId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const userToken = ctx.session?.user.token;
+        if (!userToken) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Unauthorized",
+          });
+        }
+        const response = await fetch(
+          `${env.BASE_URL}/incident?id=${input.incidentReportId}&type=INCIDENT`,
+          {
+            method: "GET",
+            headers: {
+              authorization: `Bearer ${userToken}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+        console.log("response", response);
+        if (!response.ok) {
+          const errorData = (await response.json()) as { message: string };
+          console.error("incident getting error:", errorData);
+          return {
+            status: false,
+            error: errorData.message,
+          };
+        }
+        const incidentData = (await response.json()) as {
+          status: string;
+          message: string;
+          data: ReportResponse;
+        };
+        return {
+          status: true,
+          data: incidentData.data,
+        };
+      } catch (error) {
+        console.error("Incident error:", error);
+        return {
+          status: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "An error occurred while logging in.",
+        };
+      }
+    }),
+
   reportIncident: publicProcedure
     .input(
       z.object({
@@ -312,6 +317,63 @@ export const incidentRouter = createTRPCRouter({
             error instanceof Error
               ? error.message
               : "An error occurred while logging in.",
+        };
+      }
+    }),
+  addFollowUp: publicProcedure
+    .input(
+      z.object({
+        reportId: z.string(),
+        followUpDescription: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const userToken = ctx.session?.user.token;
+        console.log("userToken", userToken);
+        if (!userToken) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Unauthorized",
+          });
+        }
+        const response = await fetch(`${env.BASE_URL}/incident/follow-ups`, {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${userToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            reportId: input.reportId,
+            followUpDescription: input.followUpDescription,
+          }),
+        });
+        console.log("add comment response", response);
+        if (!response.ok) {
+          const errorData = (await response.json()) as { message: string };
+          console.error("adding comment error:", errorData);
+          return {
+            status: false,
+            error: errorData.message,
+          };
+        }
+
+        const incidentsData = (await response.json()) as {
+          message: string;
+          status: string;
+        };
+        return {
+          status: true,
+          message: incidentsData.message,
+        };
+      } catch (error) {
+        console.error("comments error:", error);
+        return {
+          status: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "An error occurred while adding comments.",
         };
       }
     }),
