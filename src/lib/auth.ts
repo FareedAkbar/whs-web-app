@@ -42,11 +42,11 @@ const ROLES = {
     "change:role",
   ],
   DEPARTMENT_MANAGER: ["view:homeCounters"],
-  FACILITY_MANAGER: ["view:homeCounters"],
+  FACILITY_MANAGER: ["view:homeCounters", "close:hazard", "assign:officer"],
   // P_AND_C_MEMBER: ["view:homeCounters", "create:incidents"],
   P_AND_C_MANAGER: ["view:homeCounters", "close:incident", "assign:officer"],
   P_AND_C_OFFICER: ["view:homeCounters", "pick:incident", "complete:incident"],
-  FACILITY_OFFICER: ["view:homeCounters"],
+  FACILITY_OFFICER: ["view:homeCounters", "pick:hazard", "complete:hazard"],
   UNDEFINED: [],
 } as const;
 

@@ -199,7 +199,7 @@ export interface NewHazardReport {
   status: "INITIATED" | "IN_PROGRESS" | "RESOLVED" | string;
 
   // Incident Data
-  // categoryType: string;
+  categoryType: string;
   hazardDescription: string;
 
   managerSignatureConfirmationDate: string | null;

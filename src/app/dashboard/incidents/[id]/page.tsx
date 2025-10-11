@@ -31,8 +31,9 @@ export default function IncidentDetailScreen() {
     data: incidentData,
     isLoading,
     refetch,
-  } = api.incidents.getIncidentById.useQuery({
-    incidentReportId: id,
+  } = api.incidents.getReportById.useQuery({
+    reportId: id,
+    type: "INCIDENT",
   });
   // const { data: workers } = api.workers.getWorkers.useQuery();
   // const { data: departments } = api.department.getDepartments.useQuery();

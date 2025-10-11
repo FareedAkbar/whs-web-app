@@ -36,11 +36,6 @@ const Sidebar = ({
   const user = session.data?.user;
   const navItems = [
     { name: "Home", icon: <IconHomeFilled size={20} />, path: "/dashboard" },
-    {
-      name: "Incidents",
-      icon: <IconAlertTriangle size={20} />,
-      path: "/dashboard/incidents",
-    },
   ];
 
   if (user) {
@@ -48,16 +43,16 @@ const Sidebar = ({
 
     if (role === "ADMIN") {
       navItems.push(
-        {
-          name: "Contractors",
-          icon: <IconUsers size={20} />,
-          path: "/dashboard/contractors",
-        },
-        {
-          name: "Employees",
-          icon: <IconTable size={20} />,
-          path: "/dashboard/employees",
-        },
+        // {
+        //   name: "Contractors",
+        //   icon: <IconUsers size={20} />,
+        //   path: "/dashboard/contractors",
+        // },
+        // {
+        //   name: "Employees",
+        //   icon: <IconTable size={20} />,
+        //   path: "/dashboard/employees",
+        // },
         {
           name: "Users",
           icon: <IconUser size={20} />,
@@ -68,12 +63,36 @@ const Sidebar = ({
           icon: <IconChecklist size={20} />,
           path: "/dashboard/inspections-checklist",
         },
-        {
-          name: "Departments",
-          icon: <IconTable size={20} />,
-          path: "/dashboard/departments",
-        },
+        // {
+        //   name: "Departments",
+        //   icon: <IconTable size={20} />,
+        //   path: "/dashboard/departments",
+        // },
       );
+    }
+    if (
+      role == "P_AND_C_MANAGER" ||
+      role === "P_AND_C_OFFICER" ||
+      role === "ADMIN" ||
+      role === "STAFF"
+    ) {
+      navItems.push({
+        name: "Incidents",
+        icon: <IconAlertTriangle size={20} />,
+        path: "/dashboard/incidents",
+      });
+    }
+    if (
+      role === "FACILITY_MANAGER" ||
+      role === "FACILITY_OFFICER" ||
+      role === "ADMIN" ||
+      role === "STAFF"
+    ) {
+      navItems.push({
+        name: "Hazards",
+        icon: <IconAlertTriangle size={20} />,
+        path: "/dashboard/hazards",
+      });
     }
 
     navItems.push({

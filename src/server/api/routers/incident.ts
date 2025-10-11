@@ -154,10 +154,11 @@ export const incidentRouter = createTRPCRouter({
         };
       }
     }),
-  getIncidentById: publicProcedure
+  getReportById: publicProcedure
     .input(
       z.object({
-        incidentReportId: z.string(),
+        reportId: z.string(),
+        type: z.enum(["INCIDENT", "HAZARD"]),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -170,7 +171,7 @@ export const incidentRouter = createTRPCRouter({
           });
         }
         const response = await fetch(
-          `${env.BASE_URL}/incident?id=${input.incidentReportId}&type=INCIDENT`,
+          `${env.BASE_URL}/incident?id=${input.reportId}&type=${input.type}`,
           {
             method: "GET",
             headers: {
@@ -310,7 +311,7 @@ export const incidentRouter = createTRPCRouter({
         mainType: z.literal("HAZARD"),
         status: z.string(),
 
-        // categoryType: z.string(),
+        categoryType: z.string(),
 
         managerSignatureConfirmationDate: z.string().nullable(),
         dynamicQuestion: z.array(
@@ -378,9 +379,10 @@ export const incidentRouter = createTRPCRouter({
   updateIncidentStatus: publicProcedure
     .input(
       z.object({
-        incidentId: z.string(),
+        incidentId: z.string().optional(),
         status: z.string(),
         comments: z.string().optional(),
+        hazardId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

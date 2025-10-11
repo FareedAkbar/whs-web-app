@@ -39,13 +39,12 @@ const HazardForm = () => {
       reportTitle: "",
       reportDescription: "",
       hazardDescription: "",
-      // categoryType: undefined,
+      categoryType: "",
       severity: undefined,
       coordinates: "",
     },
   });
-  const { control, handleSubmit, register, setValue, watch, formState } =
-    methods;
+  const { control, handleSubmit, formState } = methods;
   const severityKeys = useMemo(() => Object.keys(severityMapping), []);
 
   const { errors } = formState;
@@ -90,6 +89,7 @@ const HazardForm = () => {
       media: images.map((image) => image.id).filter(Boolean),
       managerSignatureConfirmationDate: null, // or a valid date if available
       dynamicQuestion: [], // or appropriate value if available
+      categoryType: data.categoryType,
     };
 
     console.log("Incident Data:", hazardData);
@@ -106,15 +106,15 @@ const HazardForm = () => {
           // });
         },
         onError: (error) => {
-          console.error("Error reporting incident:", error);
-          toast.error("Failed to report incident");
+          console.error("Error reporting hazard:", error);
+          toast.error("Failed to report hazard");
         },
       });
 
       // await reportIncident.mutateAsync(hazardData);
     } catch (error) {
-      console.error("Error reporting incident:", error);
-      toast.error("Failed to report incident");
+      console.error("Error reporting hazard:", error);
+      toast.error("Failed to report hazard");
     }
   };
 

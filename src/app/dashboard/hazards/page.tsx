@@ -254,7 +254,7 @@ export default function HazardsList() {
         {filteredHazards.length > 0 &&
           filteredHazards?.map((item) => (
             <div
-              key={item.report.id}
+              key={item.hazard?.id}
               className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg dark:border-gray-500 dark:bg-gray-800 dark:shadow-gray-700"
               // onClick={() => {
               //   setSelectedIncident(item);

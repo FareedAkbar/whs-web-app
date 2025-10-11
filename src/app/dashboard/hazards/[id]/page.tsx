@@ -16,12 +16,13 @@ import { type } from "os";
 import { User } from "@/types/user";
 import CommentsSection from "@/components/ui/CommentsSection";
 import FollowUpsSection from "@/components/ui/FollowUpsSection";
-export default function IncidentDetailScreen() {
+export default function HazardDetailScreen() {
   const params = useParams();
   // const { data: departments, isLoading: isLoadingDepartments } =
   //   api.groups.getGroupData.useQuery({ groupType: "DEPARTMENT" });
-  const { data: officers, isLoading: isLoadingOfficers } =
-    api.users.getUsersByRole.useQuery({ role: "P_AND_C_OFFICER" });
+  const { data: officers } = api.users.getUsersByRole.useQuery({
+    role: "FACILITY_OFFICER",
+  });
   const { setOpen } = useModal();
   const session = useSession();
   const router = useRouter();
@@ -31,8 +32,9 @@ export default function IncidentDetailScreen() {
     data: incidentData,
     isLoading,
     refetch,
-  } = api.incidents.getIncidentById.useQuery({
-    incidentReportId: id,
+  } = api.incidents.getReportById.useQuery({
+    reportId: id,
+    type: "HAZARD",
   });
   // const { data: workers } = api.workers.getWorkers.useQuery();
   // const { data: departments } = api.department.getDepartments.useQuery();
@@ -40,7 +42,7 @@ export default function IncidentDetailScreen() {
   const updateIncidentStatus = api.incidents.updateIncidentStatus.useMutation();
   const updateReportStatus = api.reports.updateReportStatus.useMutation();
   const incidentAcceptance = api.incidents.incidentAcceptance.useMutation();
-  const incident = incidentData?.data;
+  const hazard = incidentData?.data;
   const [selectedOfficer, setSelectedOfficer] = useState("");
   // const [selectedDepartment, setSelectedDepartment] = useState("");
   // const [comment, setComment] = useState("");
@@ -68,11 +70,11 @@ export default function IncidentDetailScreen() {
     "COMPLETED",
     "CANCELLED",
   ];
-  const handleAcceptAndReject = async (flag: boolean) => {
-    if (!incident) return;
-    await incidentAcceptance.mutateAsync(
+  const handleAcceptAndReject = (flag: boolean) => {
+    if (!hazard) return;
+    incidentAcceptance.mutate(
       {
-        incidentReportId: incident.report.id,
+        incidentReportId: hazard.report.id,
         acceptanceStatus: flag,
       },
       {
@@ -102,18 +104,18 @@ export default function IncidentDetailScreen() {
 
   const groupedImages = statusOrder.map((status) => ({
     status,
-    images: incident?.media?.filter((image) => image.status === status) ?? [],
+    images: hazard?.media?.filter((image) => image.status === status) ?? [],
   }));
-  const handleUpdateStatus = async (newStatus: string) => {
-    if (!incident) return;
-    await updateIncidentStatus.mutateAsync(
+  const handleUpdateStatus = (newStatus: string) => {
+    if (!hazard) return;
+    updateIncidentStatus.mutate(
       {
-        incidentId: incidentMeta?.id!,
+        hazardId: hazardMeta?.id!,
         status: newStatus,
       },
       {
         onSuccess: () => {
-          toast.success(`Incident ${newStatus.toLowerCase()} successfully`);
+          toast.success(`Hazard ${newStatus.toLowerCase()} successfully`);
           void refetch();
         },
         onError: (error) => {
@@ -122,16 +124,16 @@ export default function IncidentDetailScreen() {
       },
     );
   };
-  const closeIncident = async () => {
-    if (!incident) return;
-    await updateReportStatus.mutateAsync(
+  const closeIncident = () => {
+    if (!hazard) return;
+    updateReportStatus.mutate(
       {
-        incidentReportId: incident.report.id,
+        incidentReportId: hazard.report.id,
         status: "CLOSED",
       },
       {
         onSuccess: () => {
-          toast.success(`Incident report has been closed`);
+          toast.success(`Hazard report has been closed`);
           void refetch();
         },
         onError: (error) => {
@@ -140,17 +142,17 @@ export default function IncidentDetailScreen() {
       },
     );
   };
-  const handleDone = async () => {
-    if (!incident) return;
+  const handleDone = () => {
+    if (!hazard) return;
 
     try {
       // if (modalMode === "cancel") {
-      //   await updateIncidentStatus.mutateAsync({
-      //     incidentReportId: incident.report.id,
+      //    updateIncidentStatus.mutate({
+      //     incidentReportId: hazard.report.id,
       //     status: "CANCELLED",
       //     comments: comment,
       //   });
-      //   toast.success("Incident cancelled successfully");
+      //   toast.success("Hazard cancelled successfully");
       //   void refetch();
       // } else
       // if (
@@ -159,35 +161,40 @@ export default function IncidentDetailScreen() {
       //   // (assignees.length > 0 &&
       //   //   assignees.every((assignee) => assignee.acceptanceStatus === false))
       // ) {
-      (await assignIncidentToOfficer.mutateAsync({
-        assignedTo:
-          user?.role === "P_AND_C_MANAGER" ? selectedOfficer : user?.id!,
-        incidentId: incident.incident?.id!,
-        reportId: incident.report.id,
-      }),
+
+      assignIncidentToOfficer.mutate(
+        {
+          assignedTo:
+            user?.role === "FACILITY_MANAGER" ? selectedOfficer : user?.id!,
+          hazardId: hazard.hazard?.id!,
+          reportId: hazard.report.id,
+        },
         {
           onSuccess: () => {
-            void refetch();
-            console.log("close modal");
-
-            setOpen(false);
-            setModalMode("");
             toast.success(
-              `${user?.role == "P_AND_C_MANAGER" ? "Incident assigned successfully" : "Incident picked successfully"} `,
+              `${
+                user?.role === "FACILITY_MANAGER"
+                  ? "Hazard assigned successfully"
+                  : "Hazard picked successfully"
+              }`,
             );
+            setOpen(false); // ✅ This will now close the modal
+            setModalMode("");
+            void refetch();
           },
           onError: (error: ErrorResponse) => {
             toast.error(error.message ?? "Something went wrong");
           },
-        });
+        },
+      );
       // }
     } catch (error) {
-      toast.error("Failed to update incident");
+      toast.error("Failed to update hazard");
       console.error(error);
     }
   };
 
-  if (isLoading || !incident) {
+  if (isLoading || !hazard) {
     return (
       <div className="relative flex h-2/3 w-full items-center justify-center">
         <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
@@ -195,9 +202,9 @@ export default function IncidentDetailScreen() {
     );
   }
   // convenience getters
-  const report = incident.report;
-  const incidentMeta = incident.incident;
-  const assignee = incident.incidentAssignee ?? null;
+  const report = hazard.report;
+  const hazardMeta = hazard.hazard;
+  const assignee = hazard.incidentAssignee ?? null;
 
   return (
     <div className="flex w-full flex-col px-8 py-6">
@@ -238,7 +245,7 @@ export default function IncidentDetailScreen() {
           <div className="flex flex-row items-center gap-4">
             {/* Cancel (example) */}
             {hasPermission(user?.role!, "assign:officer") &&
-              !incident?.incidentAssignee && (
+              !hazard?.incidentAssignee && (
                 <Button
                   title="Assign Officer"
                   onClick={() => {
@@ -248,10 +255,10 @@ export default function IncidentDetailScreen() {
                   }}
                 />
               )}
-            {hasPermission(user?.role!, "pick:incident") &&
-              !incident?.incidentAssignee && (
+            {hasPermission(user?.role!, "pick:hazard") &&
+              !hazard?.incidentAssignee && (
                 <Button
-                  title="Pick Incident"
+                  title="Pick Hazard"
                   onClick={() => {
                     setSelectedOfficer(user?.id || "");
                     handleDone();
@@ -260,19 +267,19 @@ export default function IncidentDetailScreen() {
                   disabled={assignIncidentToOfficer.isPending}
                 />
               )}
-            {/* Complete Incident - allowed roles & when assigned / in progress */}
+            {/* Complete Hazard - allowed roles & when assigned / in progress */}
             {user &&
-              hasPermission(user.role, "complete:incident") &&
-              incidentMeta?.status === "ASSIGNED" && (
+              hasPermission(user.role, "complete:hazard") &&
+              hazardMeta?.status === "ASSIGNED" && (
                 <Button
-                  title={"Complete Incident"}
+                  title={"Complete Hazard"}
                   onClick={() => {
                     if (
                       report.followUp &&
-                      !incident.followUps?.some((f) => f.userId === user.id)
+                      !hazard.followUps?.some((f) => f.userId === user.id)
                     ) {
                       toast.error(
-                        "Please add a follow-up before completing the incident",
+                        "Please add a follow-up before completing the hazard",
                       );
                       return;
                     }
@@ -284,14 +291,14 @@ export default function IncidentDetailScreen() {
                 />
               )}
 
-            {/* Close Incident - P_AND_C_MANAGER when incident completed */}
+            {/* Close Hazard - P_AND_C_MANAGER when hazard completed */}
             {user &&
-              hasPermission(user.role, "close:incident") &&
-              incidentMeta &&
-              incidentMeta.status === "COMPLETED" &&
+              hasPermission(user.role, "close:hazard") &&
+              hazardMeta &&
+              hazardMeta.status === "COMPLETED" &&
               report.status !== "CLOSED" && (
                 <Button
-                  title={"Close Incident"}
+                  title={"Close Hazard"}
                   onClick={closeIncident}
                   loading={updateReportStatus.isPending}
                   disabled={updateReportStatus.isPending}
@@ -302,7 +309,7 @@ export default function IncidentDetailScreen() {
             {hasPermission(session.data?.user?.role!, "cancel:incidents") &&
               report.status === "INITIATED" && (
                 <Button
-                  title="Cancel Incident"
+                  title="Cancel Hazard"
                   variant="secondary"
                   onClick={() => {
                     setModalMode("cancel");
@@ -322,13 +329,13 @@ export default function IncidentDetailScreen() {
               {report.description}
             </p>
 
-            {/* Detailed description from incident object (if present) */}
-            {incidentMeta?.incidentDescription && (
+            {/* Detailed description from hazard object (if present) */}
+            {hazardMeta?.hazardDescription && (
               <p>
                 <span className="font-medium text-red-500">
-                  Incident Detailed Description:
+                  Hazard Detailed Description:
                 </span>
-                {incidentMeta.incidentDescription}
+                {hazardMeta.hazardDescription}
               </p>
             )}
 
@@ -353,7 +360,7 @@ export default function IncidentDetailScreen() {
           {groupedImages.length ? (
             <div className="mt-6">
               <h3 className="font-semibold text-gray-800 dark:text-gray-200">
-                Incident Gallery
+                Hazard Gallery
               </h3>
 
               {groupedImages.map(({ status, images }) =>
@@ -370,7 +377,7 @@ export default function IncidentDetailScreen() {
                         >
                           <img
                             src={image.url || "/images/n-img.jpg"}
-                            alt={`Incident Image ${index + 1}`}
+                            alt={`Hazard Image ${index + 1}`}
                             className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
                             onClick={() =>
                               image.url && window.open(image.url, "_blank")
@@ -393,77 +400,15 @@ export default function IncidentDetailScreen() {
             </div>
           ) : null}
 
-          {/* Medical Details */}
-          <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
-            <h4 className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">
-              Medical Details
-            </h4>
-
-            <div className="space-y-2 text-sm">
-              <div className="flex gap-2">
-                <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Name:
-                </span>
-                <span className="font-semibold text-gray-800 dark:text-gray-200">
-                  {incidentMeta?.name ?? "N/A"}
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Injured Part:
-                </span>
-                <span className="font-semibold text-gray-800 dark:text-gray-200">
-                  {incidentMeta?.injuredBodyPart ?? "N/A"}
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Treatment Type:
-                </span>
-                <span className="font-semibold text-gray-800 dark:text-gray-200">
-                  {incidentMeta?.treatmentType?.replaceAll("_", " ") ?? "N/A"}
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Treatment Desc:
-                </span>
-                <span className="font-semibold text-gray-800 dark:text-gray-200">
-                  {incidentMeta?.treatmentDescription || "Not Provided"}
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Created At:
-                </span>
-                <span className="font-semibold text-gray-800 dark:text-gray-200">
-                  {incidentMeta?.createdAt
-                    ? new Date(incidentMeta.createdAt).toLocaleString()
-                    : "N/A"}
-                </span>
-              </div>
-            </div>
-          </div>
           <CommentsSection
-            comments={incident?.comments!}
-            reportId={incident?.report.id!}
+            comments={hazard?.comments!}
+            reportId={hazard?.report.id!}
             onCommentAdded={() => void refetch()}
           />
-          {incident?.report.followUp && (
-            <FollowUpsSection
-              followUps={incident?.followUps!}
-              reportId={incident?.report.id!}
-              onFollowUpAdded={() => void refetch()}
-            />
-          )}
 
           {/* Role-based action buttons */}
           <div className="mt-4 flex items-center gap-4">
-            {/* Pick Incident (for P_AND_C_OFFICER or any user who can self pick) */}
+            {/* Pick Hazard (for P_AND_C_OFFICER or any user who can self pick) */}
 
             {modalMode == "assign-officer" && (
               <ModalBody className="max-w-2xl">
@@ -484,21 +429,18 @@ export default function IncidentDetailScreen() {
                     <Button
                       title="Confirm"
                       onClick={handleDone}
-                      loading={
-                        assignIncidentToOfficer.isPending ||
-                        updateIncidentStatus.isPending
-                      }
+                      loading={assignIncidentToOfficer.isPending}
                       disabled={!selectedOfficer}
                     />
                   </div>
                 </div>
               </ModalBody>
             )}
-            {/* Capture / Upload (for staff when incident is completed but report not closed) */}
+            {/* Capture / Upload (for staff when hazard is completed but report not closed) */}
             {user &&
               user.role === "STAFF" &&
-              incidentMeta &&
-              incidentMeta.status === "COMPLETED" &&
+              hazardMeta &&
+              hazardMeta.status === "COMPLETED" &&
               report.status !== "CLOSED" && (
                 <Button
                   title="Capture or Upload"
