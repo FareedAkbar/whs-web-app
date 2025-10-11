@@ -1,9 +1,28 @@
-import { MediaItem } from "./media";
-import { FormAnswer, FormQuestion } from "./questions";
+// import { MediaItem } from "./media";
 import { User } from "./user";
 
 // Define the type for the incident report
-// Main combined response type
+export interface FormQuestion {
+  id: string;
+  question: string;
+  questionType: string;
+  createdBy: string;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FormAnswer {
+  id: string;
+  questionId: string;
+  answer: string;
+  createdBy: string;
+  isDeleted: boolean;
+  incidentId?: string;
+  hazardId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 export interface IncidentLog {
   id: string;
   incidentId: string;
@@ -141,7 +160,7 @@ export interface NewIncidentReport {
   reportTitle: string;
   coordinates: string;
   reportDescription: string;
-  severity: "LOW" | "MEDIUM" | "HIGH"; // assuming possible values
+  severity: "LOW" | "MEDIUM" | "HIGH" | "EXTREME"; // assuming possible values
   mainType: "INCIDENT";
   status: "INITIATED" | "IN_PROGRESS" | "RESOLVED" | string;
   followUp: boolean;
@@ -191,15 +210,6 @@ export interface NewHazardReport {
   // Media (UUIDs or URLs)
   media: string[];
 }
-
-export enum treatmentType {
-  FIRST_AID = "FIRST_AID",
-  NO_TREATMENT_PROVIDED = "NO_TREATMENT_PROVIDED",
-  MONITORED = "MONITORED",
-  DOCTOR_GP = "DOCTOR_GP",
-  HOSPITAL = "HOSPITAL",
-  OTHER = "OTHER",
-}
 export enum IncidentCategoryType {
   BUMP = "BUMP",
   CUT = "CUT",
@@ -218,6 +228,15 @@ export enum IncidentCategoryType {
   TRIP = "TRIP",
   OTHER = "OTHER",
 }
+export enum treatmentType {
+  FIRST_AID = "FIRST_AID",
+  NO_TREATMENT_PROVIDED = "NO_TREATMENT_PROVIDED",
+  MONITORED = "MONITORED",
+  DOCTOR_GP = "DOCTOR_GP",
+  HOSPITAL = "HOSPITAL",
+  OTHER = "OTHER",
+}
+
 export enum severity {
   LOW = "LOW",
   MEDIUM = "MEDIUM",

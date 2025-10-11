@@ -138,7 +138,7 @@ export const authRouter = createTRPCRouter({
         name: z.string(),
         email: z.string().email(),
         password: z.string(),
-        phone: z.string(),
+        phoneNumber: z.string(),
         role: z.string(),
       }),
     )
@@ -149,7 +149,7 @@ export const authRouter = createTRPCRouter({
           name: input.name,
           email: input.email,
           password: input.password,
-          phoneNumber: input.phone,
+          phoneNumber: input.phoneNumber,
           role: input.role,
         };
 

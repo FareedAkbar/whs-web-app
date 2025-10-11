@@ -32,7 +32,11 @@ export const incidentRouter = createTRPCRouter({
         };
       }
 
-      const incidentsData = (await response.json()) as IncidentApiResponse;
+      const incidentsData = (await response.json()) as {
+        status: string;
+        message: string;
+        data: ReportResponse[];
+      };
       return {
         status: true,
         data: incidentsData.data,
@@ -83,8 +87,11 @@ export const incidentRouter = createTRPCRouter({
             error: errorData.message,
           };
         }
-        const incidentsData =
-          (await response.json()) as AssignIncidentApiResponse;
+        const incidentsData = (await response.json()) as {
+          status: string;
+          message: string;
+          data: ReportResponse;
+        };
         return {
           status: true,
           data: incidentsData.data,
@@ -154,19 +161,42 @@ export const incidentRouter = createTRPCRouter({
         };
       }
     }),
-
   reportIncident: publicProcedure
     .input(
       z.object({
-        incidentTitle: z.string(),
-        generalHazardDescription: z.string(),
-        incidentDescription: z.string(),
-        incidentReportDescription: z.string().optional(),
+        // Report Data
+        reportTitle: z.string(),
         coordinates: z.string(),
-        incidentType: z.string(),
-        hazardType: z.string(),
+        reportDescription: z.string(),
+        severity: z.enum(["LOW", "MEDIUM", "HIGH", "EXTREME"]),
+        mainType: z.literal("INCIDENT"),
         status: z.string(),
-        severity: z.string(),
+        followUp: z.boolean(),
+
+        // Incident Data
+        categoryType: z.string(),
+        incidentDescription: z.string(),
+        treatmentType: z.string(),
+        treatmentDescription: z.string(),
+        injuredBodyPart: z.string(),
+
+        // First Aider Details (optional)
+        firstAiderName: z.string().optional(),
+        firstAiderPhone: z.string().optional(),
+        firstAiderEmail: z.string().optional(),
+        firstAidDate: z.string().optional(),
+
+        // Injured Person Data
+        injuredPersonName: z.string(),
+        injuredPhoneNumber: z.string(),
+        injuredPersonEmail: z.string(),
+        managerSignatureConfirmationDate: z.string().nullable(),
+        dynamicQuestion: z.array(
+          z.object({
+            questionId: z.string(),
+            answer: z.string(),
+          }),
+        ),
         media: z.array(z.string()),
       }),
     )
@@ -200,7 +230,11 @@ export const incidentRouter = createTRPCRouter({
           });
         }
 
-        const responseData = (await response.json()) as IncidentApiResponse;
+        const responseData = (await response.json()) as {
+          status: string;
+          message: string;
+          data: ReportResponse;
+        };
         console.log("Incident Reported Successfully:", responseData);
 
         return {
@@ -218,6 +252,7 @@ export const incidentRouter = createTRPCRouter({
         };
       }
     }),
+
   updateStatus: publicProcedure
     .input(
       z.object({
@@ -252,8 +287,11 @@ export const incidentRouter = createTRPCRouter({
             error: errorData.message,
           };
         }
-        const incidentsData =
-          (await response.json()) as AssignIncidentApiResponse;
+        const incidentsData = (await response.json()) as {
+          status: string;
+          message: string;
+          data: ReportResponse;
+        };
         return {
           status: true,
           data: incidentsData.data,
@@ -303,8 +341,11 @@ export const incidentRouter = createTRPCRouter({
             error: errorData.message,
           };
         }
-        const incidentsData =
-          (await response.json()) as AssignIncidentApiResponse;
+        const incidentsData = (await response.json()) as {
+          status: string;
+          message: string;
+          data: ReportResponse;
+        };
         return {
           status: true,
           data: incidentsData.data,

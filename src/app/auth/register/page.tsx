@@ -16,7 +16,9 @@ import { userRoles } from "@/types/roles";
 const inputs = z.object({
   fName: z.string().min(4, "First name must be at least 4 characters"),
   lName: z.string().min(4, "Last name must be at least 4 characters"),
-  phone: z.string().min(10, "Phone number must be at least 10 characters"),
+  phoneNumber: z
+    .string()
+    .min(10, "Phone number must be at least 10 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z
@@ -48,7 +50,7 @@ export default function Register() {
     toast.loading("Creating account...");
     await registerUser.mutateAsync(
       {
-        phone: data.phone,
+        phoneNumber: data.phoneNumber,
         name: data.fName + " " + data.lName,
         email: data.email.toLowerCase(),
         password: data.password,
@@ -127,7 +129,7 @@ export default function Register() {
         />
         <div className="flex gap-2">
           <Controller
-            name="phone"
+            name="phoneNumber"
             control={control}
             rules={{
               required: "Phone number is required",
@@ -143,7 +145,7 @@ export default function Register() {
                 type="text"
                 label="Phone Number"
                 required
-                error={errors.phone?.message}
+                error={errors.phoneNumber?.message}
               />
             )}
           />

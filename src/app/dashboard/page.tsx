@@ -74,7 +74,7 @@ const Dashboard = () => {
       <DashboardCounters />
 
       {/* Bottom buttons aligned at the end */}
-      <div className="flex w-full justify-between gap-4 pt-6">
+      <div className="flex w-full justify-between gap-4 p-6">
         {/* {user && hasPermission(user.role, "fill:checklist") && (
           <Button
             title="WHS Inspection Checklist"
@@ -83,17 +83,17 @@ const Dashboard = () => {
             variant="secondary"
           />
         )} */}
-        {/* {user && hasPermission(user.role, "create:checklist") && (
-          <Button
-            title="WHS Inspection Checklist"
-            onClick={() => router.push("/dashboard/inspections-checklist")}
-            icon={<IconClipboardList size={18} />}
-            variant="secondary"
-          />
-        )} */}
+
         {user && hasPermission(user.role, "create:incidents") && (
           <Button
             title="Report an Incident"
+            onClick={() => router.push("/dashboard/incident-form")}
+            icon={<IconAlertCircle size={18} />}
+          />
+        )}
+        {user && hasPermission(user.role, "create:incidents") && (
+          <Button
+            title="Report a Hazard"
             onClick={() => router.push("/dashboard/hazard-form")}
             icon={<IconAlertCircle size={18} />}
           />

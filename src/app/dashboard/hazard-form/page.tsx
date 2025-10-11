@@ -143,7 +143,7 @@ const HazardForm = () => {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
               <Controller
-                name="incidentTitle"
+                name="reportTitle"
                 control={control}
                 rules={{ required: "Incident title is required" }}
                 render={({ field }) => (
@@ -151,7 +151,7 @@ const HazardForm = () => {
                     type="text"
                     label="Incident Title"
                     placeholder="Enter incident title"
-                    error={errors.incidentTitle?.message}
+                    error={errors.reportTitle?.message}
                     {...field} // includes value, onChange, ref
                   />
                 )}
@@ -175,7 +175,7 @@ const HazardForm = () => {
             </div>
 
             <div>
-              <Select
+              {/* <Select
                 label="Hazard Type"
                 options={
                   enums?.data?.GeneralHazardTypes.map((hazard) => ({
@@ -188,7 +188,7 @@ const HazardForm = () => {
                 {...register("hazardType", {
                   required: "Hazard type is required",
                 })}
-              />
+              /> */}
               {/* <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                 Hazard Type
               </label>
@@ -215,14 +215,14 @@ const HazardForm = () => {
               <Select
                 label="Incident Type"
                 options={
-                  enums?.data?.IncidentTypes.map((incident) => ({
+                  Object.values(IncidentCategoryType).map((incident) => ({
                     label: incident,
                     value: incident,
                   })) ?? []
                 }
                 // placeholder="Select an incident type"
-                error={errors.incidentType?.message}
-                {...register("incidentType", {
+                error={errors.categoryType?.message}
+                {...register("categoryType", {
                   required: "Incident type is required",
                 })}
               />
@@ -265,24 +265,6 @@ const HazardForm = () => {
               {errors.incidentDescription && (
                 <p className="text-sm text-red-500">
                   {errors.incidentDescription?.message ?? ""}
-                </p>
-              )}
-            </div>
-            {/* Description */}
-            <div>
-              <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                General Hazard Description
-              </label>
-              <textarea
-                {...register("generalHazardDescription", {
-                  required: "Incident Description is required",
-                })}
-                className={`shadow-input dark:placeholder-text-neutral-600 duration-400 flex w-full rounded-md border bg-gray-50 p-3 text-black transition file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white`}
-                placeholder="Describe the hazard"
-              />
-              {errors.generalHazardDescription && (
-                <p className="text-sm text-red-500">
-                  {errors.generalHazardDescription?.message ?? ""}
                 </p>
               )}
             </div>

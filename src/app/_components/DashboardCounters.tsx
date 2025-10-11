@@ -55,62 +55,58 @@ const DashboardCounters: React.FC = () => {
     dashboard.hazards && Object.keys(dashboard.hazards).length > 0;
 
   return (
-    <div className="grid grid-cols-1 gap-6 p-6 xl:grid-cols-3">
-      {/* USERS */}
-      {dashboard.users && Object.keys(dashboard.users).length > 0 && (
-        <UsersCard
-          users={dashboard.users}
-          onClick={() => router.push("/users")}
-        />
-      )}
-
-      {/* INCIDENTS + HAZARDS SECTION */}
-      {(hasIncidents || hasHazards) && (
-        <div
-          className={`grid gap-6 xl:col-span-2 ${
-            hasIncidents && hasHazards
-              ? "grid-cols-1 lg:grid-cols-2"
-              : "grid-cols-1"
-          }`}
-        >
-          {hasIncidents && (
-            <StatCard
-              title="Incidents"
-              icon={<IconFirstAidKit size={20} className="text-primary" />}
-              data={dashboard.incidents}
-              onClick={() => router.push("/incidents")}
-            />
-          )}
-
-          {hasHazards && (
-            <StatCard
-              title="Hazards"
-              icon={<IconAlertTriangle size={20} className="text-primary" />}
-              data={dashboard.hazards}
-              onClick={() => router.push("/hazards")}
-            />
-          )}
-        </div>
-      )}
-
-      {/* INSPECTIONS */}
-      {dashboard.inspections &&
-        Object.keys(dashboard.inspections).length > 0 && (
-          <Card onClick={() => router.push("/inspections")}>
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-lg font-semibold dark:text-white">
-                Inspections
-              </h3>
-              <IconChecklist size={20} className="text-primary" />
-            </div>
-            {Object.entries(dashboard.inspections).map(([key, value]) => (
-              <div key={key} className="mb-2 flex justify-between">
-                <p className="text-sm capitalize dark:text-gray-200">{key}</p>
-                <p className="text-sm font-bold dark:text-white">{value}</p>
-              </div>
-            ))}
-          </Card>
-        )}
+    <div className="flex flex-wrap gap-6 p-6">
+      {/* Dynamically render available cards in equal space */}
+      {[
+        dashboard.users && Object.keys(dashboard.users).length > 0 && (
+          <UsersCard
+            key="users"
+            users={dashboard.users}
+            onClick={() => router.push("/users")}
+          />
+        ),
+        hasIncidents && (
+          <StatCard
+            key="incidents"
+            title="Incidents"
+            icon={<IconFirstAidKit size={20} className="text-primary" />}
+            data={dashboard.incidents}
+            onClick={() => router.push("/dashboard/incidents")}
+          />
+        ),
+        hasHazards && (
+          <StatCard
+            key="hazards"
+            title="Hazards"
+            icon={<IconAlertTriangle size={20} className="text-primary" />}
+            data={dashboard.hazards}
+            onClick={() => router.push("/dashboard/hazards")}
+          />
+        ),
+        // dashboard.inspections &&
+        //   Object.keys(dashboard.inspections).length > 0 && (
+        //     <Card key="inspections" onClick={() => router.push("/inspections")}>
+        //       <div className="mb-3 flex items-center justify-between">
+        //         <h3 className="text-lg font-semibold dark:text-white">
+        //           Inspections
+        //         </h3>
+        //         <IconChecklist size={20} className="text-primary" />
+        //       </div>
+        //       {Object.entries(dashboard.inspections).map(([key, value]) => (
+        //         <div key={key} className="mb-2 flex justify-between">
+        //           <p className="text-sm capitalize dark:text-gray-200">{key}</p>
+        //           <p className="text-sm font-bold dark:text-white">{value}</p>
+        //         </div>
+        //       ))}
+        //     </Card>
+        //   ),
+      ]
+        .filter(Boolean)
+        .map((card, index, arr) => (
+          <div key={index} className={`min-w-[280px] flex-1`}>
+            {card}
+          </div>
+        ))}
     </div>
   );
 };
@@ -210,9 +206,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, icon, data, onClick }) => {
           <div key={key} className="mb-3">
             <div className="flex justify-between">
               <p className="text-sm capitalize dark:text-gray-200">{key}</p>
-              <p className="text-sm font-semibold dark:text-white">
-                {percentage}%
-              </p>
+              <p className="text-sm font-semibold dark:text-white">{count}</p>
             </div>
             <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
               <div
