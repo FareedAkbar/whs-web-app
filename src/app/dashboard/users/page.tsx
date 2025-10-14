@@ -280,7 +280,7 @@ const UserPage = () => {
                 </td> */}
                 <td className="p-4">{user.name}</td>
                 <td className="p-4">{user.email}</td>
-                <td className="p-4">{user.role}</td>
+                <td className="p-4">{user.role.replaceAll("_", " ")}</td>
                 <td className="p-4">
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerifiedByAdmin ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:bg-opacity-50"}`}
@@ -291,7 +291,7 @@ const UserPage = () => {
                 </td>
                 <td className="space-x-2 p-4 text-center">
                   <button
-                    className="text-blue-600 hover:text-blue-800"
+                    className="text-primary"
                     onClick={() => {
                       setSelectedUser(user);
                       setViewModalOpen(true);

@@ -5,8 +5,7 @@ import { useState } from "react";
 import { Download, DownloadIcon, UserPlus } from "lucide-react";
 import { api } from "@/trpc/react";
 import { toast } from "react-toastify";
-import { useParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { useParams, useRouter } from "next/navigation";
 import { severityMapping } from "@/constants/severity";
 import Button from "@/components/ui/Button";
 import { ModalBody, useModal } from "@/components/ui/animated-modal";
@@ -238,11 +237,12 @@ export default function HazardDetailScreen() {
             <span
               className={`rounded-full px-3 py-1 text-xs ${
                 // try to use statusMapping constant, otherwise fallback styles
-                statusMapping[report.status as keyof typeof statusMapping] ??
-                "bg-gray-100 text-gray-700"
+                statusMapping[
+                  hazardMeta?.status as keyof typeof statusMapping
+                ] ?? "bg-gray-100 text-gray-700"
               }`}
             >
-              {report.status.replaceAll("_", " ")}
+              {hazardMeta?.status.replaceAll("_", " ")}
             </span>
           </div>
 
@@ -259,7 +259,6 @@ export default function HazardDetailScreen() {
                   }}
                 />
               )}
-            severu
             {hasPermission(user?.role!, "pick:hazard") &&
               !hazard?.incidentAssignee && (
                 <Button
@@ -390,6 +389,8 @@ export default function HazardDetailScreen() {
                               onClick={() =>
                                 image.url && window.open(image.url, "_blank")
                               }
+                              width={112}
+                              height={112}
                             />
                             <button
                               onClick={() =>

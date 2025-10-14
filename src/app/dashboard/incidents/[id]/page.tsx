@@ -230,12 +230,9 @@ export default function IncidentDetailScreen() {
             </h2>
 
             <span
-              className={`rounded-full px-3 py-1 text-xs ${
-                // try to use statusMapping constant, otherwise fallback styles
-                severityMapping[report.priority] ?? "bg-gray-100 text-gray-700"
-              }`}
+              className={`rounded-full px-3 py-1 text-xs ${statusMapping[incidentMeta?.status as keyof typeof statusMapping]}`}
             >
-              {report.status.replaceAll("_", " ")}
+              {incidentMeta?.status.replaceAll("_", " ")}
             </span>
           </div>
 

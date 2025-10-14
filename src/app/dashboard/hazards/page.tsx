@@ -5,10 +5,8 @@ import { AlertTriangle, ChevronDown, Filter, Search } from "lucide-react";
 import { api } from "@/trpc/react";
 import Dropdown from "@/components/ui/Dropdown";
 import Button from "@/components/ui/Button";
-import { set } from "zod";
-import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { severityMapping } from "@/constants/severity";
-import { useRouter } from "next/router";
 import { ReportResponse } from "@/types/report";
 
 export default function HazardsList() {
@@ -250,7 +248,7 @@ export default function HazardsList() {
           <Search className="" size={16} color="white" />
         </div>
       </div>
-      <div className="custom-scrollbar grid flex-1 grid-cols-1 gap-4 overflow-y-auto pb-4 lg:grid-cols-2 lg:px-8">
+      <div className="custom-scrollbar grid flex-1 grid-cols-1 gap-4 overflow-y-auto pb-4 lg:grid-cols-2">
         {filteredHazards.length > 0 &&
           filteredHazards?.map((item) => (
             <div
