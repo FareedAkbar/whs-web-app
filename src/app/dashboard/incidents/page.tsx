@@ -76,12 +76,12 @@ export default function IncidentsList() {
     if (!incidents?.data) return;
 
     setFilteredIncidents(
-      incidents?.data?.filter((item) => {
+      incidents?.data?.filter((item: ReportResponse) => {
         return (
           (!dateFrom || item.report.createdAt >= dateFrom) &&
           (!dateTo || item.report.createdAt <= dateTo) &&
           (!priority.length || priority.includes(item.report.priority)) &&
-          (!status.length || status.includes(item.incident?.status!)) &&
+          (!status.length || status.includes(item.incident?.status! ?? "")) &&
           // (!status.length || status.includes(item.report.status)) &&
           // (!assignedTo ||
           //   (Array.isArray(item.incidentAssignee) &&

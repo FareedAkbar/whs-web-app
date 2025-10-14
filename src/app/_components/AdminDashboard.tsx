@@ -47,9 +47,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     labels: userKeys,
     datasets: [
       {
-        data: userKeys.map(
-          (key) => data.users[key as keyof typeof data.users] as number,
-        ),
+        data: userKeys.map((key) => data.users[key]),
         backgroundColor: COLORS,
         borderWidth: 1,
       },
@@ -80,7 +78,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
               <p className="text-sm dark:text-gray-200">
                 {key}:{" "}
                 <span className="font-bold">
-                  {String(data.users[key as keyof typeof data.users])}
+                  {Object.values(data.users).join(", ")}
                 </span>
               </p>
             </div>

@@ -5,7 +5,8 @@ import { useState } from "react";
 import { Download, DownloadIcon, UserPlus } from "lucide-react";
 import { api } from "@/trpc/react";
 import { toast } from "react-toastify";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "next/router";
 import { severityMapping } from "@/constants/severity";
 import Button from "@/components/ui/Button";
 import { ModalBody, useModal } from "@/components/ui/animated-modal";
@@ -16,6 +17,8 @@ import { type } from "os";
 import { User } from "@/types/user";
 import CommentsSection from "@/components/ui/CommentsSection";
 import FollowUpsSection from "@/components/ui/FollowUpsSection";
+import { Comment, IncidentMedia } from "@/types/report";
+import Image from "next/image";
 export default function HazardDetailScreen() {
   const params = useParams();
   // const { data: departments, isLoading: isLoadingDepartments } =
@@ -95,7 +98,7 @@ export default function HazardDetailScreen() {
     // open in new tab (user can right click -> save) and also force download
     const a = document.createElement("a");
     a.href = url;
-    a.download = filename || "image";
+    a.download = filename ?? "image";
     a.target = "_blank";
     document.body.appendChild(a);
     a.click();
@@ -104,13 +107,16 @@ export default function HazardDetailScreen() {
 
   const groupedImages = statusOrder.map((status) => ({
     status,
-    images: hazard?.media?.filter((image) => image.status === status) ?? [],
+    images:
+      hazard?.media?.filter(
+        (image: IncidentMedia) => image.status === status,
+      ) ?? [],
   }));
   const handleUpdateStatus = (newStatus: string) => {
     if (!hazard) return;
     updateIncidentStatus.mutate(
       {
-        hazardId: hazardMeta?.id!,
+        hazardId: hazardMeta?.id! ?? "",
         status: newStatus,
       },
       {
@@ -165,8 +171,10 @@ export default function HazardDetailScreen() {
       assignIncidentToOfficer.mutate(
         {
           assignedTo:
-            user?.role === "FACILITY_MANAGER" ? selectedOfficer : user?.id!,
-          hazardId: hazard.hazard?.id!,
+            user?.role === "FACILITY_MANAGER"
+              ? selectedOfficer
+              : (user?.id! ?? ""),
+          hazardId: hazard.hazard?.id! ?? "",
           reportId: hazard.report.id,
         },
         {
@@ -221,10 +229,7 @@ export default function HazardDetailScreen() {
             <h2
               className="text-xl font-semibold capitalize"
               style={{
-                color:
-                  severityMapping[
-                    report.priority as keyof typeof severityMapping
-                  ] ?? "black",
+                color: severityMapping[report.priority] ?? "black",
               }}
             >
               {report.title}
@@ -233,8 +238,7 @@ export default function HazardDetailScreen() {
             <span
               className={`rounded-full px-3 py-1 text-xs ${
                 // try to use statusMapping constant, otherwise fallback styles
-                (statusMapping &&
-                  statusMapping[report.status as keyof typeof statusMapping]) ||
+                statusMapping[report.status as keyof typeof statusMapping] ??
                 "bg-gray-100 text-gray-700"
               }`}
             >
@@ -255,12 +259,13 @@ export default function HazardDetailScreen() {
                   }}
                 />
               )}
+            severu
             {hasPermission(user?.role!, "pick:hazard") &&
               !hazard?.incidentAssignee && (
                 <Button
                   title="Pick Hazard"
                   onClick={() => {
-                    setSelectedOfficer(user?.id || "");
+                    setSelectedOfficer(user?.id ?? "");
                     handleDone();
                   }}
                   loading={assignIncidentToOfficer.isPending}
@@ -276,7 +281,9 @@ export default function HazardDetailScreen() {
                   onClick={() => {
                     if (
                       report.followUp &&
-                      !hazard.followUps?.some((f) => f.userId === user.id)
+                      !hazard.followUps?.some(
+                        (f: Comment) => f.userId === user.id,
+                      )
                     ) {
                       toast.error(
                         "Please add a follow-up before completing the hazard",
@@ -290,12 +297,9 @@ export default function HazardDetailScreen() {
                   // disabled={isUpdatingStatus}
                 />
               )}
-
             {/* Close Hazard - P_AND_C_MANAGER when hazard completed */}
-            {user &&
-              hasPermission(user.role, "close:hazard") &&
-              hazardMeta &&
-              hazardMeta.status === "COMPLETED" &&
+            {hasPermission(user?.role!, "close:hazard") &&
+              hazardMeta?.status === "COMPLETED" &&
               report.status !== "CLOSED" && (
                 <Button
                   title={"Close Hazard"}
@@ -370,29 +374,37 @@ export default function HazardDetailScreen() {
                       {status.toLocaleLowerCase().replaceAll("_", " ")} images
                     </p> */}
                     <div className="mt-2 flex flex-wrap gap-2">
-                      {images.map((image, index) => (
-                        <div
-                          key={image.id || index}
-                          className="relative cursor-pointer rounded-lg"
-                        >
-                          <img
-                            src={image.url || "/images/n-img.jpg"}
-                            alt={`Hazard Image ${index + 1}`}
-                            className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
-                            onClick={() =>
-                              image.url && window.open(image.url, "_blank")
-                            }
-                          />
-                          <button
-                            onClick={() =>
-                              handleDownload(image.url, `incident_${index}.jpg`)
-                            }
-                            className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
+                      {images.map(
+                        (
+                          image: { id?: string; url?: string; status?: string },
+                          index: number,
+                        ) => (
+                          <div
+                            key={image.id ?? index}
+                            className="relative cursor-pointer rounded-lg"
                           >
-                            <DownloadIcon className="h-3 w-3" color="red" />
-                          </button>
-                        </div>
-                      ))}
+                            <Image
+                              src={image.url ?? "/images/n-img.jpg"}
+                              alt={`Hazard Image ${index + 1}`}
+                              className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
+                              onClick={() =>
+                                image.url && window.open(image.url, "_blank")
+                              }
+                            />
+                            <button
+                              onClick={() =>
+                                handleDownload(
+                                  image.url,
+                                  `incident_${index}.jpg`,
+                                )
+                              }
+                              className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
+                            >
+                              <DownloadIcon className="h-3 w-3" color="red" />
+                            </button>
+                          </div>
+                        ),
+                      )}
                     </div>
                   </div>
                 ) : null,
@@ -401,8 +413,8 @@ export default function HazardDetailScreen() {
           ) : null}
 
           <CommentsSection
-            comments={hazard?.comments!}
-            reportId={hazard?.report.id!}
+            comments={hazard?.comments}
+            reportId={hazard?.report.id}
             onCommentAdded={() => void refetch()}
           />
 
@@ -437,10 +449,8 @@ export default function HazardDetailScreen() {
               </ModalBody>
             )}
             {/* Capture / Upload (for staff when hazard is completed but report not closed) */}
-            {user &&
-              user.role === "STAFF" &&
-              hazardMeta &&
-              hazardMeta.status === "COMPLETED" &&
+            {user?.role === "STAFF" &&
+              hazardMeta?.status === "COMPLETED" &&
               report.status !== "CLOSED" && (
                 <Button
                   title="Capture or Upload"

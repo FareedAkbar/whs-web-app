@@ -1,3 +1,5 @@
+import { UserRole } from "@/types/roles";
+
 // ✅ Roles type aur permission helper same rehenga
 type Role = keyof typeof ROLES;
 type Permission = (typeof ROLES)[Role][number];
@@ -50,7 +52,7 @@ const ROLES = {
   UNDEFINED: [],
 } as const;
 
-export function hasPermission(role: Role, permission: Permission) {
+export function hasPermission(role: UserRole, permission: Permission) {
   if (!role) {
     console.warn("User or roles are undefined:", role);
     return false;

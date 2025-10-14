@@ -27,12 +27,16 @@ export interface IncidentLog {
   id: string;
   incidentId: string;
   hazardId: string | null;
-  status: "ASSIGNED" | "COMPLETED" | "PENDING" | "IN_PROGRESS" | string; // extend as needed
+  status:
+    | ("ASSIGNED" | "COMPLETED" | "PENDING" | "IN_PROGRESS")
+    | (string & {});
   userId: string;
   comment: string;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
 }
+
+enum status {}
 export interface Comment {
   id: string;
   comment?: string;
@@ -68,8 +72,8 @@ export interface Report {
   title: string;
   description: string;
   mainType: "INCIDENT" | "HAZARD";
-  status: "INITIATED" | "IN_PROGRESS" | "RESOLVED" | string;
-  priority: "LOW" | "MEDIUM" | "HIGH" | "EXTREME" | string;
+  status: ("INITIATED" | "IN_PROGRESS" | "RESOLVED") | (string & {});
+  priority: ("LOW" | "MEDIUM" | "HIGH" | "EXTREME") | (string & {});
   hazardId: string | null;
   incidentId: string;
   incident_coordinates: string;
@@ -85,8 +89,12 @@ export interface Incident {
   id: string;
   name: string;
   incidentDescription: string;
-  status: "INITIATED" | "IN_PROGRESS" | "RESOLVED" | string;
-  treatmentType: "FIRST_AID" | "NO_TREATMENT_PROVIDED" | "OTHER" | string;
+  status: ("INITIATED" | "IN_PROGRESS" | "RESOLVED") | (string & {});
+  treatmentType:
+    | "FIRST_AID"
+    | "NO_TREATMENT_PROVIDED"
+    | "OTHER"
+    | (string & {});
   treatmentDescription: string;
   injuredBodyPart: string;
   groupId: string | null;
@@ -97,7 +105,7 @@ export interface Hazard {
   id: string;
   name: string;
   hazardDescription: string;
-  status: "INITIATED" | "IN_PROGRESS" | "RESOLVED" | string;
+  status: ("INITIATED" | "IN_PROGRESS" | "RESOLVED") | (string & {});
   groupId: string | null;
   createdAt: string;
   updatedAt: string;
@@ -110,7 +118,7 @@ export interface IncidentMedia {
   incidentStatusLogId: string;
   createdAt: string;
   updatedAt: string;
-  status: "INITIATED" | "IN_PROGRESS" | "RESOLVED" | string;
+  status: ("INITIATED" | "IN_PROGRESS" | "RESOLVED") | (string & {});
   comment: string;
   url: string;
 }
@@ -130,7 +138,7 @@ export interface GroupData {
   id: string;
   name: string;
   description: string;
-  groupType: "DEPARTMENT" | string; // Add other types if applicable
+  groupType: "DEPARTMENT" | (string & {}); // Add other types if applicable
   createdAt: string;
   updatedAt: string;
 }
@@ -162,7 +170,7 @@ export interface NewIncidentReport {
   reportDescription: string;
   severity: "LOW" | "MEDIUM" | "HIGH" | "EXTREME"; // assuming possible values
   mainType: "INCIDENT";
-  status: "INITIATED" | "IN_PROGRESS" | "RESOLVED" | string;
+  status: ("INITIATED" | "IN_PROGRESS" | "RESOLVED") | (string & {});
   followUp: boolean;
   // Incident Data
   categoryType: IncidentCategoryType;
@@ -196,7 +204,7 @@ export interface NewHazardReport {
   reportDescription: string;
   severity: "LOW" | "MEDIUM" | "HIGH" | "EXTREME"; // assuming possible values
   mainType: "HAZARD";
-  status: "INITIATED" | "IN_PROGRESS" | "RESOLVED" | string;
+  status: ("INITIATED" | "IN_PROGRESS" | "RESOLVED") | (string & {});
 
   // Incident Data
   categoryType: string;

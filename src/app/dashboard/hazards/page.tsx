@@ -8,7 +8,7 @@ import Button from "@/components/ui/Button";
 import { set } from "zod";
 import { useSession } from "next-auth/react";
 import { severityMapping } from "@/constants/severity";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { ReportResponse } from "@/types/report";
 
 export default function HazardsList() {
@@ -70,12 +70,12 @@ export default function HazardsList() {
     if (!hazards?.data) return;
 
     setFilteredHazards(
-      hazards?.data?.filter((item) => {
+      hazards?.data?.filter((item: ReportResponse) => {
         return (
           (!dateFrom || item.report.createdAt >= dateFrom) &&
           (!dateTo || item.report.createdAt <= dateTo) &&
           (!priority.length || priority.includes(item.report.priority)) &&
-          (!status.length || status.includes(item.hazard?.status!)) &&
+          (!status.length || status.includes(item.hazard?.status ?? "")) &&
           // (!status.length || status.includes(item.report.status)) &&
           // (!assignedTo ||
           //   (Array.isArray(item.incidentAssignee) &&

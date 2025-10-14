@@ -23,7 +23,7 @@ const ContractorPage = () => {
 
   useEffect(() => {
     const result = workers?.data?.filter(
-      (contractor) =>
+      (contractor: User) =>
         contractor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         contractor.email.toLowerCase().includes(searchTerm.toLowerCase()),
     );

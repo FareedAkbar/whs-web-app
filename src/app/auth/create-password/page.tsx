@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,10 +25,13 @@ type CreatePasswordInput = z.infer<typeof schema>;
 
 export default function CreatePasswordScreen() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : null;
 
-  const email = searchParams.get("email") || "";
-  const code = searchParams.get("from") || ""; // if sent from verify page
+  const email = searchParams?.get("email") ?? "";
+  const code = searchParams?.get("from") ?? ""; // if sent from verify page
 
   const {
     control,
@@ -55,9 +58,15 @@ export default function CreatePasswordScreen() {
         code,
       });
       toast.success("Password created successfully!");
-      router.push("/auth/login");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to create password");
+      await router.push("/auth/login");
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "message" in err) {
+        toast.error(
+          (err as { message?: string }).message ?? "Failed to create password",
+        );
+      } else {
+        toast.error("Failed to create password");
+      }
     } finally {
       setLoading(false);
     }
@@ -75,7 +84,7 @@ export default function CreatePasswordScreen() {
         <div>
           <label className="text-sm text-gray-500">Email</label>
           <div className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 p-2 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-            {email || "No email found"}
+            {email ?? "No email found"}
           </div>
         </div>
 

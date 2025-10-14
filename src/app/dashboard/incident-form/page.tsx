@@ -109,7 +109,7 @@ const HazardForm = () => {
       followUp: data.followUp,
       mainType: "INCIDENT",
       coordinates:
-        location && location.latitude && location.longitude
+        location?.latitude && location?.longitude
           ? `${location.latitude},${location.longitude}`
           : "",
       media: images.map((image) => image.id).filter(Boolean),
@@ -399,7 +399,7 @@ const HazardForm = () => {
             </div>
 
             {/* Conditional: First aider fields when treatmentType === FIRST_AID */}
-            {treatmentTypeValue === "FIRST_AID" && (
+            {treatmentTypeValue === treatmentType.FIRST_AID && (
               <div className="flex flex-wrap gap-4">
                 <div className="min-w-[220px] flex-1">
                   <Controller
@@ -567,7 +567,7 @@ const HazardForm = () => {
                         accept="image/*"
                         multiple
                         onChange={(e) => {
-                          handleFileChange(e);
+                          void handleFileChange(e);
                           // update field value for validation sync
                           const files = Array.from(e.target.files ?? []);
                           if (files.length > 0) {

@@ -19,8 +19,9 @@ declare module "next-auth" {
       id: string;
       imageUrl: string;
       token: string;
-      role: string;
+      role: UserRole | "ADMIN";
       isVerifiedByAdmin?: boolean;
+      name?: string | null;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];

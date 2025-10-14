@@ -20,7 +20,7 @@ const DateField: React.FC<DateFieldProps> = ({
     formState: { errors },
   } = useFormContext();
 
-  const date = watch(name);
+  const date = watch(name) as string;
 
   return (
     <div className="flex w-full flex-col">

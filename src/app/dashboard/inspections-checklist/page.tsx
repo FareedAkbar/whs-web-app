@@ -55,7 +55,7 @@ const InspectionChecklist = () => {
   const deleteInspection = api.inspections.deleteInspection.useMutation({
     onSuccess: () => {
       setConfirmDelete(null);
-      refetch();
+      void refetch();
     },
   });
   const assignMutation = api.inspections.assignInspection.useMutation({
@@ -63,7 +63,7 @@ const InspectionChecklist = () => {
       setAssignInspection(null);
       setSelectedUser(null);
       setDueDate("");
-      refetch();
+      void refetch();
     },
   });
   const session = useSession();

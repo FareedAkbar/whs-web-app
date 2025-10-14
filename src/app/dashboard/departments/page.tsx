@@ -91,8 +91,12 @@ export default function DepartmentsScreen() {
       toast.success("Manager and Staff assigned");
       setOpen(false);
       setModalType(null);
-    } catch (error: any) {
-      toast.error(error.message || "Assigning failed");
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "message" in err) {
+        toast.error(
+          (err as { message?: string }).message ?? "Failed to create password",
+        );
+      }
     }
   };
 
@@ -106,8 +110,13 @@ export default function DepartmentsScreen() {
       toast.success("Manager updated");
       setOpen(false);
       setModalType(null);
-    } catch (error: any) {
-      toast.error(error.message || "Updating manager failed");
+    } catch (error: unknown) {
+      toast.error(
+        error && typeof error === "object" && "message" in error
+          ? ((error as { message?: string }).message ??
+              "Updating manager failed")
+          : "Updating manager failed",
+      );
     }
   };
 
@@ -121,8 +130,12 @@ export default function DepartmentsScreen() {
       toast.success("Staff updated");
       setOpen(false);
       setModalType(null);
-    } catch (error: any) {
-      toast.error(error.message || "Updating staff failed");
+    } catch (error: unknown) {
+      toast.error(
+        error && typeof error === "object" && "message" in error
+          ? ((error as { message?: string }).message ?? "Updating staff failed")
+          : "Updating staff failed",
+      );
     }
   };
 
@@ -234,8 +247,8 @@ export default function DepartmentsScreen() {
                         onClick={() => {
                           setSelectedDepartment(dept);
                           setModalType("updateStaff");
-                          setCurrentStaff(dept.staff?.map((s) => s.id) || []);
-                          setSelectedStaff(dept.staff?.map((s) => s.id) || []);
+                          setCurrentStaff(dept.staff?.map((s) => s.id) ?? []);
+                          setSelectedStaff(dept.staff?.map((s) => s.id) ?? []);
                           setOpen(true);
                         }}
                       />
@@ -291,12 +304,12 @@ export default function DepartmentsScreen() {
                     />
                     <div className="max-h-40 overflow-y-auto rounded border p-2 dark:bg-gray-700 dark:text-white">
                       {managers?.data
-                        ?.filter((m) =>
+                        ?.filter((m: User) =>
                           m.name
                             .toLowerCase()
                             .includes(selectedManager.toLowerCase()),
                         )
-                        .map((m) => (
+                        .map((m: User) => (
                           <div
                             key={m.id}
                             onClick={() => setSelectedManager(m.id)}
@@ -316,7 +329,7 @@ export default function DepartmentsScreen() {
                       placeholder="Search staff..."
                       onChange={(e) => {
                         const value = e.target.value.toLowerCase();
-                        const filtered = staff?.data?.filter((s) =>
+                        const filtered = staff?.data?.filter((s: User) =>
                           s.name.toLowerCase().includes(value),
                         );
                         setFilteredStaff(filtered ?? []);
@@ -326,7 +339,7 @@ export default function DepartmentsScreen() {
                       {(filteredStaff.length
                         ? filteredStaff
                         : staff?.data
-                      )?.map((s) => (
+                      )?.map((s: User) => (
                         <div
                           key={s.id}
                           onClick={() => {
@@ -345,7 +358,7 @@ export default function DepartmentsScreen() {
                       <div className="mt-3 flex flex-wrap gap-2">
                         {selectedStaff.map((id) => {
                           const staffUser = staff?.data?.find(
-                            (u) => u.id === id,
+                            (u: User) => u.id === id,
                           );
                           return (
                             <span
@@ -383,12 +396,12 @@ export default function DepartmentsScreen() {
                     />
                     <div className="max-h-40 overflow-y-auto rounded border p-2 dark:bg-gray-700 dark:text-white">
                       {managers?.data
-                        ?.filter((m) =>
+                        ?.filter((m: User) =>
                           m.name
                             .toLowerCase()
                             .includes(selectedManager.toLowerCase()),
                         )
-                        .map((m) => (
+                        .map((m: User) => (
                           <div
                             key={m.id}
                             onClick={() => setSelectedManager(m.id)}
@@ -422,7 +435,7 @@ export default function DepartmentsScreen() {
                       placeholder="Search staff..."
                       onChange={(e) => {
                         const value = e.target.value.toLowerCase();
-                        const filtered = staff?.data?.filter((s) =>
+                        const filtered = staff?.data?.filter((s: User) =>
                           s.name.toLowerCase().includes(value),
                         );
                         setFilteredStaff(filtered ?? []);
@@ -432,7 +445,7 @@ export default function DepartmentsScreen() {
                       {(filteredStaff.length
                         ? filteredStaff
                         : staff?.data
-                      )?.map((s) => (
+                      )?.map((s: User) => (
                         <div
                           key={s.id}
                           onClick={() => {
@@ -451,7 +464,7 @@ export default function DepartmentsScreen() {
                       <div className="mt-3 flex flex-wrap gap-2">
                         {selectedStaff.map((id) => {
                           const staffUser = staff?.data?.find(
-                            (u) => u.id === id,
+                            (u: User) => u.id === id,
                           );
                           return (
                             <span

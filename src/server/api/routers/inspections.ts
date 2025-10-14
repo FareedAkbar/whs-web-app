@@ -82,7 +82,12 @@ export const InspectionRouter = createTRPCRouter({
             status: input.status,
           }),
         });
-        const responseData = await response.json();
+        const responseData = (await response.json()) as {
+          data?: Inspection[];
+          message?: string;
+          status?: string;
+        };
+
         console.log("response create inspection", responseData);
 
         if (!response.ok) {
@@ -96,7 +101,7 @@ export const InspectionRouter = createTRPCRouter({
 
         return {
           status: true,
-          data: (responseData as getInspectionsResponse).data,
+          data: responseData.data,
         };
       } catch (error) {
         console.error("Error creating inspections:", error);
@@ -129,7 +134,11 @@ export const InspectionRouter = createTRPCRouter({
           },
           body: JSON.stringify({ id: input.id }),
         });
-        const responseData = await response.json();
+        const responseData = (await response.json()) as {
+          message?: string;
+          status?: string;
+        };
+
         console.log("response delete inspection", responseData);
 
         if (!response.ok) {
@@ -143,7 +152,7 @@ export const InspectionRouter = createTRPCRouter({
 
         return {
           status: true,
-          data: (responseData as getInspectionsResponse).data,
+          // data: responseData?.data ? [responseData?.data] : [],
         };
       } catch (error) {
         console.error("Error deleting inspections:", error);
@@ -182,7 +191,12 @@ export const InspectionRouter = createTRPCRouter({
             dueDate: input.dueDate,
           }),
         });
-        const responseData = await response.json();
+        const responseData = (await response.json()) as {
+          data?: Inspection[];
+          message?: string;
+          status?: string;
+        };
+
         console.log("response assign inspection", responseData);
 
         if (!response.ok) {
@@ -196,7 +210,7 @@ export const InspectionRouter = createTRPCRouter({
 
         return {
           status: true,
-          data: (responseData as getInspectionsResponse).data,
+          // data: (responseData as getInspectionsResponse).data,
         };
       } catch (error) {
         console.error("Error assigning inspections:", error);

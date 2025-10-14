@@ -5,7 +5,6 @@ import { Pencil, PlusIcon, UserPlus } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
 import {
   ModalBody,
   ModalContent,
@@ -97,8 +96,12 @@ export default function FacilityScreen() {
     try {
       await addUser.mutateAsync({ groupId: facilityId, userIds: [userId] });
       toast.success(`${role} assigned`);
-    } catch (error: any) {
-      toast.error(error.message || "Error assigning user");
+    } catch (error: unknown) {
+      toast.error(
+        error && typeof error === "object" && "message" in error
+          ? (error as { message: string }).message
+          : "Error assigning user",
+      );
     }
   };
 
@@ -109,8 +112,12 @@ export default function FacilityScreen() {
     try {
       await addUser.mutateAsync({ groupId: facilityId, userIds });
       toast.success("Staff assigned");
-    } catch (error: any) {
-      toast.error(error.message || "Error assigning staff");
+    } catch (error: unknown) {
+      toast.error(
+        error && typeof error === "object" && "message" in error
+          ? (error as { message: string }).message
+          : "Error assigning staff",
+      );
     }
   };
 
@@ -229,7 +236,7 @@ export default function FacilityScreen() {
                 value=""
               >
                 <option value="">Select Manager</option>
-                {managers?.data?.map((m) => (
+                {managers?.data?.map((m: User) => (
                   <option key={m.id} value={m.id}>
                     {m.name}
                   </option>
@@ -249,7 +256,7 @@ export default function FacilityScreen() {
                   )
                 }
               >
-                {staff?.data?.map((s) => (
+                {staff?.data?.map((s: User) => (
                   <option key={s.id} value={s.id}>
                     {s.name}
                   </option>

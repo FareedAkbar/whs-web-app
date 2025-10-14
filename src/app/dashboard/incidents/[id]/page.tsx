@@ -16,6 +16,7 @@ import { type } from "os";
 import { User } from "@/types/user";
 import CommentsSection from "@/components/ui/CommentsSection";
 import FollowUpsSection from "@/components/ui/FollowUpsSection";
+import { Comment, IncidentMedia } from "@/types/report";
 export default function IncidentDetailScreen() {
   const params = useParams();
   // const { data: departments, isLoading: isLoadingDepartments } =
@@ -94,7 +95,7 @@ export default function IncidentDetailScreen() {
     // open in new tab (user can right click -> save) and also force download
     const a = document.createElement("a");
     a.href = url;
-    a.download = filename || "image";
+    a.download = filename ?? "image";
     a.target = "_blank";
     document.body.appendChild(a);
     a.click();
@@ -103,13 +104,16 @@ export default function IncidentDetailScreen() {
 
   const groupedImages = statusOrder.map((status) => ({
     status,
-    images: incident?.media?.filter((image) => image.status === status) ?? [],
+    images:
+      incident?.media?.filter(
+        (image: IncidentMedia) => image.status === status,
+      ) ?? [],
   }));
   const handleUpdateStatus = async (newStatus: string) => {
     if (!incident) return;
     await updateIncidentStatus.mutateAsync(
       {
-        incidentId: incidentMeta?.id!,
+        incidentId: incidentMeta?.id! ?? "",
         status: newStatus,
       },
       {
@@ -160,12 +164,15 @@ export default function IncidentDetailScreen() {
       //   // (assignees.length > 0 &&
       //   //   assignees.every((assignee) => assignee.acceptanceStatus === false))
       // ) {
-      (await assignIncidentToOfficer.mutateAsync({
-        assignedTo:
-          user?.role === "P_AND_C_MANAGER" ? selectedOfficer : user?.id!,
-        incidentId: incident.incident?.id!,
-        reportId: incident.report.id,
-      }),
+      assignIncidentToOfficer.mutate(
+        {
+          assignedTo:
+            user?.role === "P_AND_C_MANAGER"
+              ? selectedOfficer
+              : (user?.id! ?? ""),
+          incidentId: incident.incident?.id! ?? "",
+          reportId: incident.report.id,
+        },
         {
           onSuccess: () => {
             void refetch();
@@ -180,7 +187,8 @@ export default function IncidentDetailScreen() {
           onError: (error: ErrorResponse) => {
             toast.error(error.message ?? "Something went wrong");
           },
-        });
+        },
+      );
       // }
     } catch (error) {
       toast.error("Failed to update incident");
@@ -215,10 +223,7 @@ export default function IncidentDetailScreen() {
             <h2
               className="text-xl font-semibold capitalize"
               style={{
-                color:
-                  severityMapping[
-                    report.priority as keyof typeof severityMapping
-                  ] ?? "black",
+                color: severityMapping[report.priority] ?? "black",
               }}
             >
               {report.title}
@@ -227,9 +232,7 @@ export default function IncidentDetailScreen() {
             <span
               className={`rounded-full px-3 py-1 text-xs ${
                 // try to use statusMapping constant, otherwise fallback styles
-                (statusMapping &&
-                  statusMapping[report.status as keyof typeof statusMapping]) ||
-                "bg-gray-100 text-gray-700"
+                severityMapping[report.priority] ?? "bg-gray-100 text-gray-700"
               }`}
             >
               {report.status.replaceAll("_", " ")}
@@ -254,8 +257,8 @@ export default function IncidentDetailScreen() {
                 <Button
                   title="Pick Incident"
                   onClick={() => {
-                    setSelectedOfficer(user?.id || "");
-                    handleDone();
+                    setSelectedOfficer(user?.id ?? "");
+                    void handleDone();
                   }}
                   loading={assignIncidentToOfficer.isPending}
                   disabled={assignIncidentToOfficer.isPending}
@@ -270,7 +273,9 @@ export default function IncidentDetailScreen() {
                   onClick={() => {
                     if (
                       report.followUp &&
-                      !incident.followUps?.some((f) => f.userId === user.id)
+                      !incident.followUps?.some(
+                        (f: Comment) => f.userId === user.id,
+                      )
                     ) {
                       toast.error(
                         "Please add a follow-up before completing the incident",
@@ -286,10 +291,8 @@ export default function IncidentDetailScreen() {
               )}
 
             {/* Close Incident - P_AND_C_MANAGER when incident completed */}
-            {user &&
-              hasPermission(user.role, "close:incident") &&
-              incidentMeta &&
-              incidentMeta.status === "COMPLETED" &&
+            {hasPermission(user?.role!, "close:incident") &&
+              incidentMeta?.status === "COMPLETED" &&
               report.status !== "CLOSED" && (
                 <Button
                   title={"Close Incident"}
@@ -364,13 +367,13 @@ export default function IncidentDetailScreen() {
                       {status.toLocaleLowerCase().replaceAll("_", " ")} images
                     </p> */}
                     <div className="mt-2 flex flex-wrap gap-2">
-                      {images.map((image, index) => (
+                      {images.map((image: IncidentMedia, index: number) => (
                         <div
-                          key={image.id || index}
+                          key={image.id ?? index}
                           className="relative cursor-pointer rounded-lg"
                         >
                           <img
-                            src={image.url || "/images/n-img.jpg"}
+                            src={image.url ?? "/images/n-img.jpg"}
                             alt={`Incident Image ${index + 1}`}
                             className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
                             onClick={() =>
@@ -433,7 +436,7 @@ export default function IncidentDetailScreen() {
                   Treatment Desc:
                 </span>
                 <span className="font-semibold text-gray-800 dark:text-gray-200">
-                  {incidentMeta?.treatmentDescription || "Not Provided"}
+                  {incidentMeta?.treatmentDescription ?? "Not Provided"}
                 </span>
               </div>
 
@@ -450,14 +453,14 @@ export default function IncidentDetailScreen() {
             </div>
           </div>
           <CommentsSection
-            comments={incident?.comments!}
-            reportId={incident?.report.id!}
+            comments={incident?.comments}
+            reportId={incident?.report.id}
             onCommentAdded={() => void refetch()}
           />
           {incident?.report.followUp && (
             <FollowUpsSection
-              followUps={incident?.followUps!}
-              reportId={incident?.report.id!}
+              followUps={incident?.followUps ?? []}
+              reportId={incident?.report.id}
               onFollowUpAdded={() => void refetch()}
             />
           )}
@@ -496,10 +499,8 @@ export default function IncidentDetailScreen() {
               </ModalBody>
             )}
             {/* Capture / Upload (for staff when incident is completed but report not closed) */}
-            {user &&
-              user.role === "STAFF" &&
-              incidentMeta &&
-              incidentMeta.status === "COMPLETED" &&
+            {user?.role === "STAFF" &&
+              incidentMeta?.status === "COMPLETED" &&
               report.status !== "CLOSED" && (
                 <Button
                   title="Capture or Upload"

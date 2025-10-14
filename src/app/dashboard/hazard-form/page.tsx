@@ -83,9 +83,10 @@ const HazardForm = () => {
       severity: data.severity,
       mainType: "HAZARD",
       coordinates:
-        location && location.latitude && location.longitude
+        location?.latitude && location?.longitude
           ? `${location.latitude},${location.longitude}`
           : "",
+
       media: images.map((image) => image.id).filter(Boolean),
       managerSignatureConfirmationDate: null, // or a valid date if available
       dynamicQuestion: [], // or appropriate value if available
@@ -332,7 +333,7 @@ const HazardForm = () => {
                         accept="image/*"
                         multiple
                         onChange={(e) => {
-                          handleFileChange(e);
+                          void handleFileChange(e);
                           // update field value for validation sync
                           const files = Array.from(e.target.files ?? []);
                           if (files.length > 0) {

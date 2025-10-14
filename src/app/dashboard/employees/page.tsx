@@ -23,7 +23,7 @@ const EmployeePage = () => {
 
   useEffect(() => {
     const result = employees?.data?.filter(
-      (emp) =>
+      (emp: User) =>
         emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.email.toLowerCase().includes(searchTerm.toLowerCase()),
     );

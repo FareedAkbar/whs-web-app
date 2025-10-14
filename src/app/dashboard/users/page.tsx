@@ -280,9 +280,7 @@ const UserPage = () => {
                 </td> */}
                 <td className="p-4">{user.name}</td>
                 <td className="p-4">{user.email}</td>
-                <td className="p-4">
-                  {user.role === "WORKER" ? "CONTRACTOR" : user.role}
-                </td>
+                <td className="p-4">{user.role}</td>
                 <td className="p-4">
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerifiedByAdmin ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:bg-opacity-50"}`}
