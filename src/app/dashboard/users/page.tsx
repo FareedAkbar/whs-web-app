@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/trpc/react";
 import {
+  Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
@@ -19,6 +20,10 @@ import { set } from "zod";
 import Pagination from "@/app/_components/Pagination";
 import { userRoles } from "@/types/roles";
 import { User } from "@/types/user";
+import CreateUserModal from "@/components/ui/CreateUserModal";
+import { Controller, FormProvider, useForm } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const UserPage = () => {
   const { data: users, isLoading, refetch } = api.users.getUsers.useQuery();
@@ -34,8 +39,44 @@ const UserPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [isViewModalOpen, setViewModalOpen] = useState(false);
+  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isFilterModalOpen, setFilterModalOpen] = useState(false);
+  const methods = useForm({
+    defaultValues: {
+      name: "",
+      email: "",
+      phoneNumber: "",
+      role: "",
+      isVerified: true,
+      isVerifiedByAdmin: true,
+      onboardingCompleted: true,
+    },
+  });
+  const createUser = api.users.createUser.useMutation();
+  const {
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+    reset,
+  } = methods;
 
+  const onSubmitCreateUser = async (data: any) => {
+    try {
+      createUser.mutate(data, {
+        onSuccess: () => {
+          toast.success("User created successfully!");
+          reset();
+        },
+        onError: (error) => {
+          console.error("Error creating user:", error);
+          toast.error((error as any)?.message || "Something went wrong.");
+        },
+      });
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      toast.error(error.message || "Something went wrong.");
+    }
+  };
   const pageSize = 10;
   const paginatedUsers = filteredUsers.slice(
     (page - 1) * pageSize,
@@ -215,14 +256,14 @@ const UserPage = () => {
 
   return (
     <div className="flex w-full flex-col px-8">
-      <div className="sticky top-0 z-10 my-2 mb-4 flex items-center justify-between gap-2 backdrop-blur md:gap-0">
+      <div className="sticky top-0 z-10 my-2 mb-4 flex items-center justify-between backdrop-blur md:gap-0">
         <input
           type="text"
           placeholder="Search by name or email"
-          className="w-full rounded-md border border-gray-300 px-2 py-3 text-sm shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white md:rounded-r-none"
+          className="w-full rounded-md border border-gray-300 px-2 py-3 text-sm shadow-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:border-gray-600 dark:bg-gray-700 dark:text-white md:rounded-r-none"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <div className="hidden md:block">
+        <div className="">
           <Dropdown
             button={
               <button className="flex w-full flex-row items-center border border-gray-300 bg-[#F9F9F9] px-4 py-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
@@ -238,18 +279,23 @@ const UserPage = () => {
             <FilterComponent />
           </Dropdown>
         </div>
-        <button
-          className="block self-end rounded p-3.5 dark:border-gray-600 dark:bg-gray-700 md:hidden"
+        {/* <button
+          className="self-end rounded p-3.5 dark:border-gray-600 dark:bg-gray-700"
           onClick={() => {
             setFilterModalOpen(true);
             setOpen(true);
           }}
         >
           <Filter size={18} color="white" />
-        </button>
-        <div className="hidden rounded-r-md bg-primary p-[15px] md:block">
+        </button> */}
+        <div className="rounded-r-md bg-primary p-[15px]">
           <Search className="" size={16} color="white" />
         </div>
+        <Button
+          title="Add User"
+          className="ml-2 p-3"
+          onClick={() => setCreateModalOpen(true)}
+        />
       </div>
       <div className="custom-scrollbar mb-3 flex-1 overflow-auto overflow-x-scroll rounded-lg border bg-white shadow dark:border-gray-500 dark:bg-gray-800">
         <table className="min-w-full table-auto text-sm">
@@ -436,13 +482,112 @@ const UserPage = () => {
           </ModalFooter>
         </ModalBody>
       )}
-      {isFilterModalOpen && (
+      {isCreateModalOpen && (
+        <ModalBody>
+          <ModalContent className="max-w-lg rounded-2xl bg-white shadow-lg dark:bg-gray-950">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+              Create User
+            </h2>
+
+            <FormProvider {...methods}>
+              <form onSubmit={handleSubmit(onSubmitCreateUser)}>
+                {/* <ModalBody> */}
+                <div className="flex flex-col space-y-4">
+                  {/* Name Field */}
+
+                  <Controller
+                    control={control}
+                    name="name"
+                    render={({ field }) => (
+                      <Input
+                        placeholder="Enter full name"
+                        {...field}
+                        label="Full Name"
+                        required
+                        error={errors.name?.message}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="name"
+                    render={({ field }) => (
+                      <Input
+                        placeholder="Enter email address"
+                        {...field}
+                        label="Email"
+                        required
+                        error={errors.email?.message}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <Input
+                        placeholder="Enter phone number"
+                        {...field}
+                        label="Phone Number"
+                        required
+                        error={errors.phoneNumber?.message}
+                      />
+                    )}
+                  />
+
+                  {/* Role Select */}
+
+                  <Controller
+                    control={control}
+                    name="role"
+                    render={({ field }) => (
+                      <Select
+                        id="role"
+                        {...field}
+                        label="Select Role"
+                        required
+                        error={errors.role?.message}
+                        options={Array.from(Object.values(userRoles)).map(
+                          (role) => ({
+                            value: role,
+                            label: role.replaceAll("_", " "),
+                          }),
+                        )}
+                      />
+                    )}
+                  />
+                </div>
+                {/* </ModalBody> */}
+
+                <ModalFooter className="flex justify-end gap-3 border-t pt-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      reset();
+                      setCreateModalOpen(false);
+                    }}
+                    title="Cancel"
+                  />
+
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    title="Create User"
+                  />
+                </ModalFooter>
+              </form>
+            </FormProvider>
+          </ModalContent>
+        </ModalBody>
+      )}
+      {/* {isFilterModalOpen && (
         <div ref={modalRef} onClick={(e) => e.stopPropagation()}>
           <ModalBody>
             <FilterComponent />
           </ModalBody>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

@@ -79,13 +79,14 @@ const FollowUpsSection: React.FC<FollowUpsSectionProps> = ({
               key={item.id}
               className="border-b border-gray-200 pb-3 dark:border-gray-700"
             >
-              <div className="mb-1 flex items-center justify-between">
-                <p className="font-medium text-gray-800 dark:text-gray-200">
+              <div className="mb-1 flex items-start justify-between">
+                <p className="flex flex-col items-start font-medium text-gray-800 dark:text-gray-200 sm:flex-row sm:items-baseline sm:gap-2">
                   {item.name}{" "}
                   <span className="text-xs uppercase text-gray-500 dark:text-gray-400">
                     ({item.role.replaceAll("_", " ")})
                   </span>
                 </p>
+
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {formatDate(item.createdAt)}
                 </p>

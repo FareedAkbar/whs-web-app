@@ -7,6 +7,7 @@ import {
   UserResponseData,
   UsersResponseData,
 } from "@/types/user";
+import { create } from "domain";
 
 export const userRouter = createTRPCRouter({
   getUsers: publicProcedure.query(async ({ ctx }) => {
@@ -290,6 +291,51 @@ export const userRouter = createTRPCRouter({
             error instanceof Error
               ? error.message
               : "An error occurred while fetching verified users.",
+        };
+      }
+    }),
+  createUser: publicProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        email: z.string().email(),
+        phoneNumber: z.string(),
+        role: z.string(),
+        isVerifiedByAdmin: z.boolean().optional().default(true),
+        isVerified: z.boolean().optional().default(true),
+        onboardingCompleted: z.boolean().optional().default(false),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const response = await fetch(`${env.BASE_URL}/user/add-user-by-admin`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(input),
+        });
+        console.log(response);
+        if (!response.ok) {
+          const error = (await response.json()) as { error: string };
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: error.error,
+          });
+        }
+        const userData = (await response.json()) as LoginResponseData;
+        return {
+          status: true,
+          data: userData.user,
+        };
+      } catch (error) {
+        console.error("user error:", error);
+        return {
+          status: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "An error occurred while logging in.",
         };
       }
     }),
