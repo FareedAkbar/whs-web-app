@@ -306,12 +306,20 @@ export const userRouter = createTRPCRouter({
         onboardingCompleted: z.boolean().optional().default(false),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
+        const userToken = ctx.session?.user.token;
+        if (!userToken) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Unauthorized",
+          });
+        }
         const response = await fetch(`${env.BASE_URL}/user/add-user-by-admin`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
           },
           body: JSON.stringify(input),
         });

@@ -62,7 +62,7 @@ const DashboardCounters: React.FC = () => {
           <UsersCard
             key="users"
             users={dashboard.users}
-            onClick={() => router.push("/users")}
+            onClick={() => router.push("/dashboard/users")}
           />
         ),
         hasIncidents && (

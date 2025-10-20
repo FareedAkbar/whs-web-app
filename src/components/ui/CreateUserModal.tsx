@@ -85,7 +85,7 @@ export default function CreateUserModal({ onClose }: CreateUserModalProps) {
         </h2>
 
         <FormProvider {...methods}>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmitCreateUser)}>
             <ModalBody>
               <div className="flex flex-col space-y-4">
                 {/* Name Field */}
