@@ -7,7 +7,10 @@ import {
   IconAlertTriangle,
   IconUsers,
   IconUser,
-  IconTable,
+  IconInfoCircle,
+  IconDeviceMobileCog,
+  IconLock,
+  IconFileText,
   IconLogout,
   IconChevronLeft,
   IconChevronRight,
@@ -95,11 +98,33 @@ const Sidebar = ({
       });
     }
 
-    navItems.push({
-      name: "Profile",
-      icon: <IconUserCircle size={20} />,
-      path: "/dashboard/profile",
-    });
+    navItems.push(
+      {
+        name: "Profile",
+        icon: <IconUserCircle size={20} />,
+        path: "/dashboard/profile",
+      },
+      {
+        name: "About",
+        icon: <IconInfoCircle size={20} />,
+        path: "/dashboard/about",
+      },
+      {
+        name: "App Usage",
+        icon: <IconDeviceMobileCog size={20} />,
+        path: "/dashboard/app-usage",
+      },
+      {
+        name: "Privacy Policy",
+        icon: <IconLock size={20} />,
+        path: "/dashboard/policy",
+      },
+      {
+        name: "Terms and Conditions",
+        icon: <IconFileText size={20} />,
+        path: "/dashboard/terms",
+      },
+    );
   }
 
   return (
