@@ -204,7 +204,7 @@ const Sidebar = ({
 
         <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent" />
 
-        <nav className="mt-4 flex flex-col gap-2">
+        <nav className="mt-4 flex max-h-[70vh] flex-col gap-2 overflow-y-auto">
           {navItems.map((item, index) => (
             <Link
               key={index}

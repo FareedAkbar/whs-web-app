@@ -5,7 +5,7 @@ export default function InfoLayout({
 }) {
   return (
     <div>
-      <div className="mx-auto max-w-4xl py-5">
+      <div className="mx-auto max-w-4xl px-3 py-5">
         {/* <h1 className="mb-10 text-center text-3xl font-bold text-primary">
           Information Center
         </h1> */}
