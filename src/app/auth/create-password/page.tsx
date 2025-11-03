@@ -58,7 +58,7 @@ export default function CreatePasswordScreen() {
         code,
       });
       toast.success("Password created successfully!");
-      await router.push("/auth/login");
+      router.push("/auth/login");
     } catch (err: unknown) {
       if (err && typeof err === "object" && "message" in err) {
         toast.error(

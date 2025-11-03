@@ -68,12 +68,12 @@ export default function CreateUserModal({ onClose }: CreateUserModalProps) {
         },
         onError: (error) => {
           console.error("Error creating user:", error);
-          toast.error((error as any)?.message || "Something went wrong.");
+          toast.error("Something went wrong.");
         },
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error creating user:", error);
-      toast.error(error.message || "Something went wrong.");
+      toast.error("Something went wrong.");
     }
   };
 

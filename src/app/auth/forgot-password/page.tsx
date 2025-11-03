@@ -24,7 +24,7 @@ export default function ForgotPasswordScreen() {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = (data: ForgotPasswordInput) => {
+  const onSubmit = () => {
     // Trigger OTP email here
     router.push("/auth/verify-otp");
   };

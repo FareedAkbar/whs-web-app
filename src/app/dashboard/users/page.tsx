@@ -24,6 +24,15 @@ import CreateUserModal from "@/components/ui/CreateUserModal";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+type CreateUserFormData = {
+  name: string;
+  email: string;
+  phoneNumber: string;
+  role: string;
+  isVerified: boolean;
+  isVerifiedByAdmin: boolean;
+  onboardingCompleted: boolean;
+};
 
 const UserPage = () => {
   const { data: users, isLoading, refetch } = api.users.getUsers.useQuery();
@@ -41,7 +50,8 @@ const UserPage = () => {
   const [isViewModalOpen, setViewModalOpen] = useState(false);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isFilterModalOpen, setFilterModalOpen] = useState(false);
-  const methods = useForm({
+
+  const methods = useForm<CreateUserFormData>({
     defaultValues: {
       name: "",
       email: "",
@@ -60,7 +70,7 @@ const UserPage = () => {
     reset,
   } = methods;
 
-  const onSubmitCreateUser = async (data: any) => {
+  const onSubmitCreateUser = async (data: CreateUserFormData) => {
     try {
       createUser.mutate(data, {
         onSuccess: () => {
@@ -68,16 +78,16 @@ const UserPage = () => {
           reset();
           setCreateModalOpen(false);
           setOpen(false);
-          refetch();
+          void refetch();
         },
         onError: (error) => {
           console.error("Error creating user:", error);
-          toast.error((error as any)?.message || "Something went wrong.");
+          toast.error("Something went wrong.");
         },
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error creating user:", error);
-      toast.error(error.message || "Something went wrong.");
+      toast.error("Something went wrong.");
     }
   };
   const pageSize = 10;
@@ -518,8 +528,12 @@ const UserPage = () => {
                 onSubmit={handleSubmit(onSubmitCreateUser, (errors) => {
                   // If validation fails, show first error in toast
                   const firstError = Object.values(errors)[0];
+
                   if (firstError && "message" in firstError) {
-                    toast.error((firstError as any).message);
+                    toast.error(
+                      (firstError as { message?: string }).message ??
+                        "Validation error",
+                    );
                   } else {
                     toast.error("Please fill all required fields correctly.");
                   }
