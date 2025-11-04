@@ -433,7 +433,9 @@ export default function IncidentDetailScreen() {
                   Treatment Desc:
                 </span>
                 <span className="font-semibold text-gray-800 dark:text-gray-200">
-                  {incidentMeta?.treatmentDescription ?? "Not Provided"}
+                  {incidentMeta?.treatmentDescription != ""
+                    ? incidentMeta?.treatmentDescription
+                    : "Not Provided"}
                 </span>
               </div>
 

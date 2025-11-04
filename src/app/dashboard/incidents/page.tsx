@@ -74,12 +74,18 @@ export default function IncidentsList() {
   };
   const handleFilter = () => {
     if (!incidents?.data) return;
-
+    const from = dateFrom ? new Date(dateFrom) : null;
+    const to = dateTo ? new Date(dateTo) : null;
+    if (to) {
+      // Ensure "to" includes the entire day till midnight
+      to.setHours(23, 59, 59, 999);
+    }
     setFilteredIncidents(
       incidents?.data?.filter((item: ReportResponse) => {
+        const createdAt = new Date(item.report.createdAt);
         return (
-          (!dateFrom || item.report.createdAt >= dateFrom) &&
-          (!dateTo || item.report.createdAt <= dateTo) &&
+          (!from || createdAt >= from) &&
+          (!to || createdAt <= to) &&
           (!priority.length || priority.includes(item.report.priority)) &&
           (!status.length || status.includes(item.incident?.status! ?? "")) &&
           // (!status.length || status.includes(item.report.status)) &&

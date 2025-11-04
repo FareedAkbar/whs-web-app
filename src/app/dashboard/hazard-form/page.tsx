@@ -25,12 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/Select";
 import { ThemeContext } from "@/providers/ThemeContext";
 import dynamic from "next/dynamic";
-import {
-  IncidentCategoryType,
-  NewHazardReport,
-  NewIncidentReport,
-  treatmentType,
-} from "@/types/report";
+import { NewHazardReport } from "@/types/report";
 
 const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 const HazardForm = () => {

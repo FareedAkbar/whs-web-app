@@ -24,6 +24,7 @@ import { useEffect, useState } from "react";
 import { hasPermission } from "@/lib/auth";
 import { cn } from "@/lib/utils"; // optional: Tailwind class helper
 import Button from "@/components/ui/Button";
+import Image from "next/image";
 
 const Sidebar = ({
   isDrawerOpen = false,
@@ -156,7 +157,7 @@ const Sidebar = ({
           isDrawerOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
       >
-        <div className="absolute -right-3 top-10 hidden justify-end rounded-full border bg-white p-1 dark:border-gray-500 dark:bg-gray-950 md:flex">
+        <div className="absolute -right-3 top-20 hidden justify-end rounded-full border bg-white p-1 dark:border-gray-500 dark:bg-gray-950 md:flex">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="text-gray-600 dark:text-gray-300"
@@ -170,7 +171,7 @@ const Sidebar = ({
         </div>
 
         {/* Logo */}
-        {isOpen ? (
+        {/* {isOpen ? (
           <div className="flex text-3xl">
             <span className="font-nulshock text-black dark:text-white">
               WHS
@@ -179,7 +180,16 @@ const Sidebar = ({
           </div>
         ) : (
           <span className="font-nulshock text-primary">WHS</span>
-        )}
+        )} */}
+        <div className="flex items-center justify-center py-6">
+          <Image
+            src="/images/logo.png"
+            alt="WHS Logo"
+            width={isOpen ? 110 : 50} // bigger size when open
+            height={isOpen ? 110 : 50}
+            className="rounded-full object-contain"
+          />
+        </div>
 
         {/* User Info */}
         {isOpen && session.status === "authenticated" && (
