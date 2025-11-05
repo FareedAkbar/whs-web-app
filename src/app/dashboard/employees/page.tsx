@@ -5,6 +5,7 @@ import { api } from "@/trpc/react";
 import { useModal } from "@/components/ui/animated-modal";
 import { useSession } from "next-auth/react";
 import Pagination from "@/app/_components/Pagination";
+import { User } from "@/types/user";
 
 const EmployeePage = () => {
   const { data: employees, isLoading } = api.employees.getEmployees.useQuery();
@@ -22,7 +23,7 @@ const EmployeePage = () => {
 
   useEffect(() => {
     const result = employees?.data?.filter(
-      (emp) =>
+      (emp: User) =>
         emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.email.toLowerCase().includes(searchTerm.toLowerCase()),
     );

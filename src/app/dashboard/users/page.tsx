@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/trpc/react";
 import {
+  Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
@@ -17,6 +18,21 @@ import Dropdown from "@/components/ui/Dropdown";
 import { ChevronDown, Eye, Filter, Search } from "lucide-react";
 import { set } from "zod";
 import Pagination from "@/app/_components/Pagination";
+import { userRoles } from "@/types/roles";
+import { User } from "@/types/user";
+import CreateUserModal from "@/components/ui/CreateUserModal";
+import { Controller, FormProvider, useForm } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+type CreateUserFormData = {
+  name: string;
+  email: string;
+  phoneNumber: string;
+  role: string;
+  isVerified: boolean;
+  isVerifiedByAdmin: boolean;
+  onboardingCompleted: boolean;
+};
 
 const UserPage = () => {
   const { data: users, isLoading, refetch } = api.users.getUsers.useQuery();
@@ -32,8 +48,48 @@ const UserPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [isViewModalOpen, setViewModalOpen] = useState(false);
+  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isFilterModalOpen, setFilterModalOpen] = useState(false);
 
+  const methods = useForm<CreateUserFormData>({
+    defaultValues: {
+      name: "",
+      email: "",
+      phoneNumber: "",
+      role: "",
+      isVerified: true,
+      isVerifiedByAdmin: true,
+      onboardingCompleted: true,
+    },
+  });
+  const createUser = api.users.createUser.useMutation();
+  const {
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting, isValid },
+    reset,
+  } = methods;
+
+  const onSubmitCreateUser = async (data: CreateUserFormData) => {
+    try {
+      createUser.mutate(data, {
+        onSuccess: () => {
+          toast.success("User created successfully!");
+          reset();
+          setCreateModalOpen(false);
+          setOpen(false);
+          void refetch();
+        },
+        onError: (error) => {
+          console.error("Error creating user:", error);
+          toast.error("Something went wrong.");
+        },
+      });
+    } catch (error) {
+      console.error("Error creating user:", error);
+      toast.error("Something went wrong.");
+    }
+  };
   const pageSize = 10;
   const paginatedUsers = filteredUsers.slice(
     (page - 1) * pageSize,
@@ -46,7 +102,7 @@ const UserPage = () => {
     }
   }, [users]);
   const applyFilters = () => {
-    const result = users?.data?.filter((user) => {
+    const result = users?.data?.filter((user: User) => {
       const isVerifiedByAdmin = Boolean(user.isVerifiedByAdmin);
       const isVerified = Boolean(user.isVerified);
 
@@ -94,6 +150,8 @@ const UserPage = () => {
         async onSuccess() {
           toast.dismiss();
           setSelectedUser(null);
+          setSearchTerm("");
+          setSelectedRole("");
           toast.success("User role updated successfully");
           await refetch();
         },
@@ -211,14 +269,14 @@ const UserPage = () => {
 
   return (
     <div className="flex w-full flex-col px-8">
-      <div className="sticky top-0 z-10 my-2 mb-4 flex items-center justify-between gap-2 backdrop-blur md:gap-0">
+      <div className="sticky top-0 z-10 my-2 mb-4 flex items-center justify-between backdrop-blur md:gap-0">
         <input
           type="text"
           placeholder="Search by name or email"
-          className="w-full rounded-md border border-gray-300 px-2 py-3 text-sm shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white md:rounded-r-none"
+          className="w-full rounded-md border border-gray-300 px-2 py-3 text-sm shadow-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:border-gray-600 dark:bg-gray-700 dark:text-white md:rounded-r-none"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <div className="hidden md:block">
+        <div className="">
           <Dropdown
             button={
               <button className="flex w-full flex-row items-center border border-gray-300 bg-[#F9F9F9] px-4 py-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
@@ -234,18 +292,27 @@ const UserPage = () => {
             <FilterComponent />
           </Dropdown>
         </div>
-        <button
-          className="block self-end rounded p-3.5 dark:border-gray-600 dark:bg-gray-700 md:hidden"
+        {/* <button
+          className="self-end rounded p-3.5 dark:border-gray-600 dark:bg-gray-700"
           onClick={() => {
             setFilterModalOpen(true);
             setOpen(true);
           }}
         >
           <Filter size={18} color="white" />
-        </button>
-        <div className="hidden rounded-r-md bg-primary p-[15px] md:block">
+        </button> */}
+        <div className="rounded-r-md bg-primary p-[15px]">
           <Search className="" size={16} color="white" />
         </div>
+        <Button
+          title="Add new User"
+          className="ml-2 p-3"
+          onClick={() => {
+            setCreateModalOpen(true);
+            setViewModalOpen(false);
+            setOpen(true);
+          }}
+        />
       </div>
       <div className="custom-scrollbar mb-3 flex-1 overflow-auto overflow-x-scroll rounded-lg border bg-white shadow dark:border-gray-500 dark:bg-gray-800">
         <table className="min-w-full table-auto text-sm">
@@ -276,9 +343,7 @@ const UserPage = () => {
                 </td> */}
                 <td className="p-4">{user.name}</td>
                 <td className="p-4">{user.email}</td>
-                <td className="p-4">
-                  {user.role === "WORKER" ? "CONTRACTOR" : user.role}
-                </td>
+                <td className="p-4">{user.role.replaceAll("_", " ")}</td>
                 <td className="p-4">
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerifiedByAdmin ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:bg-opacity-50"}`}
@@ -289,10 +354,11 @@ const UserPage = () => {
                 </td>
                 <td className="space-x-2 p-4 text-center">
                   <button
-                    className="text-blue-600 hover:text-blue-800"
+                    className="text-primary"
                     onClick={() => {
                       setSelectedUser(user);
                       setViewModalOpen(true);
+                      setCreateModalOpen(false);
                       setOpen(true);
                     }}
                     title="View"
@@ -331,7 +397,12 @@ const UserPage = () => {
       </div>
 
       {isViewModalOpen && selectedUser && (
-        <ModalBody>
+        <ModalBody
+          onClose={() => {
+            setViewModalOpen(false);
+            setSelectedUser(null);
+          }}
+        >
           <ModalContent>
             <div className="flex flex-col items-center border-b pb-4">
               <img
@@ -375,10 +446,10 @@ const UserPage = () => {
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
               disabled={!selectedUser?.isVerified}
-              options={[
-                { value: "EMPLOYEE", label: "EMPLOYEE" },
-                { value: "WORKER", label: "CONTRACTOR" },
-              ]}
+              options={Array.from(Object.values(userRoles)).map((role) => ({
+                value: role,
+                label: role.replaceAll("_", " "),
+              }))}
             />
             {/* <label className="mt-6 block text-sm font-medium text-gray-700">
             Select Role:
@@ -434,13 +505,139 @@ const UserPage = () => {
           </ModalFooter>
         </ModalBody>
       )}
-      {isFilterModalOpen && (
+      {isCreateModalOpen && (
+        // <CreateUserModal
+        //   onClose={() => {
+        //     setCreateModalOpen(false);
+        //     setOpen(false);
+        //   }}
+        // />
+        <ModalBody
+          onClose={() => {
+            setCreateModalOpen(false);
+            reset(); // form reset
+          }}
+        >
+          <ModalContent>
+            <h2 className="mb-4 text-xl font-semibold text-gray-800 dark:text-gray-100">
+              Create New User
+            </h2>
+
+            <FormProvider {...methods}>
+              <form
+                onSubmit={handleSubmit(onSubmitCreateUser, (errors) => {
+                  // If validation fails, show first error in toast
+                  const firstError = Object.values(errors)[0];
+
+                  if (firstError && "message" in firstError) {
+                    toast.error(
+                      (firstError as { message?: string }).message ??
+                        "Validation error",
+                    );
+                  } else {
+                    toast.error("Please fill all required fields correctly.");
+                  }
+                })}
+              >
+                {/* <ModalBody> */}
+                <div className="flex flex-col">
+                  {/* Name Field */}
+
+                  <Controller
+                    control={control}
+                    name="name"
+                    render={({ field }) => (
+                      <Input
+                        placeholder="Enter full name"
+                        {...field}
+                        label="Full Name"
+                        required
+                        error={errors.name?.message}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="email"
+                    render={({ field }) => (
+                      <Input
+                        placeholder="Enter email address"
+                        {...field}
+                        label="Email"
+                        required
+                        error={errors.email?.message}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <Input
+                        placeholder="Enter phone number"
+                        {...field}
+                        label="Phone Number"
+                        required
+                        error={errors.phoneNumber?.message}
+                      />
+                    )}
+                  />
+
+                  {/* Role Select */}
+
+                  <Controller
+                    control={control}
+                    name="role"
+                    render={({ field }) => (
+                      <Select
+                        id="role"
+                        {...field}
+                        label="Select Role"
+                        required
+                        error={errors.role?.message}
+                        options={Array.from(Object.values(userRoles)).map(
+                          (role) => ({
+                            value: role,
+                            label: role.replaceAll("_", " "),
+                          }),
+                        )}
+                      />
+                    )}
+                  />
+                </div>
+                {/* </ModalBody> */}
+
+                <ModalFooter className="flex justify-end gap-3 pt-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      reset();
+                      setCreateModalOpen(false);
+                      setOpen(false);
+                    }}
+                    title="Cancel"
+                  />
+
+                  <Button
+                    type="submit"
+                    disabled={!isValid || isSubmitting || createUser.isPending}
+                    title="Create User"
+                    loading={isSubmitting || createUser.isPending}
+                  />
+                </ModalFooter>
+              </form>
+            </FormProvider>
+          </ModalContent>
+        </ModalBody>
+      )}
+      {/* {isFilterModalOpen && (
         <div ref={modalRef} onClick={(e) => e.stopPropagation()}>
           <ModalBody>
             <FilterComponent />
           </ModalBody>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

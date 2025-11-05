@@ -68,9 +68,11 @@ export const ModalTrigger = ({
 export const ModalBody = ({
   children,
   className,
+  onClose,
 }: {
   children: ReactNode;
   className?: string;
+  onClose?: () => void;
 }) => {
   const { open } = useModal();
 
@@ -85,7 +87,11 @@ export const ModalBody = ({
   const modalRef = useRef(null);
   const { setOpen } = useModal();
   useOutsideClick(modalRef, () => setOpen(false));
-
+  // Close handler
+  const handleClose = () => {
+    setOpen(false);
+    onClose?.(); // custom close logic
+  };
   return (
     <AnimatePresence>
       {open && (
@@ -108,7 +114,7 @@ export const ModalBody = ({
           <motion.div
             ref={modalRef}
             className={cn(
-              "relative z-50 flex max-h-[90%] w-full min-w-fit flex-1 flex-col overflow-hidden border border-transparent bg-white p-4 md:max-w-[60%] md:rounded-2xl dark:bg-gray-950",
+              "relative z-50 flex max-h-[90%] w-full min-w-fit flex-1 flex-col overflow-hidden border border-transparent bg-white p-4 dark:bg-gray-950 md:max-w-[60%] md:rounded-2xl",
               className,
             )}
             initial={{
@@ -134,7 +140,7 @@ export const ModalBody = ({
               damping: 15,
             }}
           >
-            <CloseIcon />
+            <CloseIcon onClose={handleClose} />
             {children}
           </motion.div>
         </motion.div>
@@ -200,11 +206,14 @@ const Overlay = ({ className }: { className?: string }) => {
   );
 };
 
-const CloseIcon = () => {
+const CloseIcon = ({ onClose }: { onClose?: () => void }) => {
   const { setOpen } = useModal();
   return (
     <button
-      onClick={() => setOpen(false)}
+      onClick={() => {
+        setOpen(false);
+        onClose?.();
+      }}
       className="group absolute right-4 top-4"
     >
       <svg

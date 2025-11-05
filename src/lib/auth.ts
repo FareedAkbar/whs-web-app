@@ -1,12 +1,12 @@
+import { UserRole } from "@/types/roles";
 
-
-type Role = keyof typeof ROLES
-type Permission = (typeof ROLES)[Role][number]
+// ✅ Roles type aur permission helper same rehenga
+type Role = keyof typeof ROLES;
+type Permission = (typeof ROLES)[Role][number];
 
 const ROLES = {
   ADMIN: [
     "view:incidents",
-    // "create:incidents",
     "update:incidents",
     "delete:incidents",
     "assign:incidents",
@@ -14,26 +14,48 @@ const ROLES = {
     "update:checklist",
     "view:checklist",
     "view:homeCards",
-    // "view:homeCounters",
     "view:contractors",
     "assign:contractors",
     "cancel:incidents",
-    // "accept/reject:incidents"
+    "assign:departments",
+    "assign:inspections",
   ],
-  WORKER: ["view:incidents", "update:incidents", "view:homeCounters", "accept/reject:incidents", "start:incident", "complete:incident","change:role"
+  WORKER: [
+    "view:incidents",
+    "update:incidents",
+    "view:homeCounters",
+    "accept/reject:incidents",
+    "start:incident",
+    "complete:incident",
+    "change:role",
   ],
-  EMPLOYEE: ["view:incidents", "create:incidents","view:homeCounters","fill:checklist","change:role"],
+  EMPLOYEE: [
+    "view:incidents",
+    "create:incidents",
+    "view:homeCounters",
+    "fill:checklist",
+    "change:role",
+  ],
+  STAFF: [
+    "view:incidents",
+    "create:incidents",
+    "view:homeCounters",
+    "fill:checklist",
+    "change:role",
+  ],
+  DEPARTMENT_MANAGER: ["view:homeCounters"],
+  FACILITY_MANAGER: ["view:homeCounters", "close:hazard", "assign:officer"],
+  // P_AND_C_MEMBER: ["view:homeCounters", "create:incidents"],
+  P_AND_C_MANAGER: ["view:homeCounters", "close:incident", "assign:officer"],
+  P_AND_C_OFFICER: ["view:homeCounters", "pick:incident", "complete:incident"],
+  FACILITY_OFFICER: ["view:homeCounters", "pick:hazard", "complete:hazard"],
   UNDEFINED: [],
-} as const
+} as const;
 
-export function hasPermission(role: Role, permission: Permission) {
-   
-    
-    if (!role) {
-        console.warn("User or roles are undefined:", role);
-        return false;
-      }
-    
-      return (ROLES[role] as readonly Permission[]).includes(permission)
-      
+export function hasPermission(role: UserRole, permission: Permission) {
+  if (!role) {
+    console.warn("User or roles are undefined:", role);
+    return false;
+  }
+  return (ROLES[role] as readonly Permission[]).includes(permission);
 }

@@ -138,7 +138,7 @@ export const authRouter = createTRPCRouter({
         name: z.string(),
         email: z.string().email(),
         password: z.string(),
-        phone: z.string(),
+        phoneNumber: z.string(),
         role: z.string(),
       }),
     )
@@ -149,7 +149,7 @@ export const authRouter = createTRPCRouter({
           name: input.name,
           email: input.email,
           password: input.password,
-          phoneNumber: input.phone,
+          phoneNumber: input.phoneNumber,
           role: input.role,
         };
 
@@ -198,5 +198,55 @@ export const authRouter = createTRPCRouter({
       //
       console.log(ctx, input);
       return true;
+    }),
+
+  createPassword: publicProcedure
+    .input(
+      z.object({
+        email: z.string().email(),
+        password: z.string(),
+        code: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const user = {
+          email: input.email,
+          password: input.password,
+          code: input.code,
+        };
+
+        const response = await fetch(`${env.BASE_URL}/user/create-password`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(user),
+        });
+        console.log(response);
+        if (!response.ok) {
+          const error = (await response.json()) as { error: string };
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: error.error,
+          });
+        }
+        const userData = (await response.json()) as unknown;
+
+        console.log(userData);
+
+        return {
+          status: true,
+        };
+      } catch (error: unknown) {
+        console.error("Network error:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            error instanceof Error
+              ? error.message
+              : "An unknown error occurred",
+        });
+      }
     }),
 });

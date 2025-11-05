@@ -3,12 +3,13 @@
 import Image from "next/image";
 import { useState } from "react";
 import { IconMailFilled, IconPhoneFilled, IconEdit } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import { api } from "@/trpc/react";
 import Button from "@/components/ui/Button";
 import { hasPermission } from "@/lib/auth";
+import { useRouter } from "next/router";
 
 const ProfileScreen = () => {
   const { data, isLoading, refetch } = api.users.getUser.useQuery();
@@ -47,7 +48,7 @@ const ProfileScreen = () => {
         async onSuccess() {
           toast.dismiss();
           setSelectedRole(selectedRole);
-          router.refresh?.(); // or `router.push(router.asPath)` to refresh data
+          // router.refresh?.(); // or `router.push(router.asPath)` to refresh data
           toast.success("User role updated successfully");
           await refetch();
           await session.update?.({ role: selectedRole });
@@ -135,13 +136,7 @@ const ProfileScreen = () => {
             <h1 className="mt-1 text-xl font-bold capitalize dark:text-white">
               {user?.name}
             </h1>
-            <p className="capitalize text-gray-500">
-              {user?.role !== "UNDEFINED"
-                ? user?.role === "WORKER"
-                  ? "CONTRACTOR"
-                  : user?.role
-                : ""}
-            </p>
+            <p className="capitalize text-gray-500">{user?.role}</p>
           </div>
         </div>
         {user && hasPermission(user.role, "change:role") && (

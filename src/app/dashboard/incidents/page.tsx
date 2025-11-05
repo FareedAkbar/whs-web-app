@@ -11,15 +11,17 @@ import { set } from "zod";
 import { useSession } from "next-auth/react";
 import { severityMapping } from "@/constants/severity";
 import { useRouter } from "next/navigation";
+import { ReportResponse } from "@/types/report";
 
 export default function IncidentsList() {
   const { data: incidents, isLoading } = api.incidents.getIncidents.useQuery();
-  const { data: workers } = api.workers.getWorkers.useQuery();
+  // const { data: workers } = api.workers.getWorkers.useQuery();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [filteredIncidents, setFilteredIncidents] = useState<IncidentData[]>(
+  const [filteredIncidents, setFilteredIncidents] = useState<ReportResponse[]>(
     incidents?.data ?? [],
   );
+
   const router = useRouter();
 
   const statusMapping = {
@@ -31,6 +33,7 @@ export default function IncidentsList() {
     CANCELLED: "bg-red-100 dark:bg-red-900 dark:bg-opacity-50 text-red-600",
     ASSIGNED:
       "bg-purple-100 dark:bg-purple-900 dark:bg-opacity-50 text-purple-600",
+    CLOSED: "bg-gray-100 dark:bg-gray-900 dark:text-gray-400 text-gray-600",
   };
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -70,27 +73,33 @@ export default function IncidentsList() {
     setFilteredIncidents(incidents?.data ?? []);
   };
   const handleFilter = () => {
+    if (!incidents?.data) return;
+    const from = dateFrom ? new Date(dateFrom) : null;
+    const to = dateTo ? new Date(dateTo) : null;
+    if (to) {
+      // Ensure "to" includes the entire day till midnight
+      to.setHours(23, 59, 59, 999);
+    }
     setFilteredIncidents(
-      incidents?.data?.filter((item) => {
+      incidents?.data?.filter((item: ReportResponse) => {
+        const createdAt = new Date(item.report.createdAt);
         return (
-          (!dateFrom || item.incidentReport.createdAt >= dateFrom) &&
-          (!dateTo || item.incidentReport.createdAt <= dateTo) &&
-          (!priority.length ||
-            priority.includes(item.incidentReport.priority)) &&
-          (!status.length || status.includes(item.incidentReport.status)) &&
-          (!assignedTo ||
-            (Array.isArray(item.incidentAssignee) &&
-              item.incidentAssignee.some(
-                (assignee) => assignee.assignedTo === assignedTo,
-              ))) &&
-          // (!taskType || item.incidentReport.taskType === taskType) &&
+          (!from || createdAt >= from) &&
+          (!to || createdAt <= to) &&
+          (!priority.length || priority.includes(item.report.priority)) &&
+          (!status.length || status.includes(item.incident?.status! ?? "")) &&
+          // (!status.length || status.includes(item.report.status)) &&
+          // (!assignedTo ||
+          //   (Array.isArray(item.incidentAssignee) &&
+          //     item.incidentAssignee.some(
+          //       (assignee) => assignee.assignedTo === assignedTo,
+          //     ))) &&
+          // (!taskType || item.report.taskType === taskType) &&
           (!searchTerm ||
-            item.incidentReport.description
+            item.report.description
               .toLowerCase()
               .includes(searchTerm.toLowerCase()) ||
-            item.incidentReport.title
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()))
+            item.report.title.toLowerCase().includes(searchTerm.toLowerCase()))
         );
       }) ?? [],
     );
@@ -115,7 +124,7 @@ export default function IncidentsList() {
         <input
           type="text"
           placeholder="Search incidents..."
-          className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Dropdown
@@ -202,7 +211,7 @@ export default function IncidentsList() {
             </div>
 
             {/* Assigned Person */}
-            {session.data?.user?.role == "ADMIN" && (
+            {/* {session.data?.user?.role == "ADMIN" && (
               <div>
                 <Select
                   options={
@@ -216,7 +225,7 @@ export default function IncidentsList() {
                   label="Assigned To"
                 />
               </div>
-            )}
+            )} */}
 
             {/* Task Type */}
             {/* <div>
@@ -253,18 +262,18 @@ export default function IncidentsList() {
           <Search className="" size={16} color="white" />
         </div>
       </div>
-      <div className="custom-scrollbar grid flex-1 grid-cols-1 gap-4 overflow-y-auto pb-4 lg:grid-cols-2 lg:px-8">
+      <div className="custom-scrollbar grid flex-1 grid-cols-1 gap-4 overflow-y-auto pb-4 lg:grid-cols-2">
         {filteredIncidents.length > 0 &&
           filteredIncidents?.map((item) => (
             <div
-              key={item.incidentReport.id}
+              key={item.report.id}
               className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg dark:border-gray-500 dark:bg-gray-800 dark:shadow-gray-700"
               // onClick={() => {
               //   setSelectedIncident(item);
               //   setOpen(true);
               // }}
               onClick={() =>
-                router.push(`/dashboard/incidents/${item.incidentReport.id}`)
+                router.push(`/dashboard/incidents/${item.report.id}`)
               }
             >
               <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
@@ -272,7 +281,7 @@ export default function IncidentsList() {
                   <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
                     <AlertTriangle
                       size={40}
-                      color={`${severityMapping[item?.incidentReport?.priority] ?? "black"}`}
+                      color={`${severityMapping[item?.report?.priority] ?? "black"}`}
                     />
                   </div>
                   {/* <img
@@ -288,34 +297,33 @@ export default function IncidentsList() {
                       className="font-semibold capitalize"
                       style={{
                         color:
-                          severityMapping[item?.incidentReport?.priority] ??
-                          "#000",
+                          severityMapping[item?.report?.priority] ?? "#000",
                       }}
                     >
-                      {item.incident.title}
+                      {item.report.title}
                     </h2>
 
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {item.incident.description}
+                      {item.report.description}
                     </p>
                   </div>
                 </div>
                 <div className="flex flex-col items-center justify-end gap-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.incidentReport.status as keyof typeof statusMapping]}`}
+                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.incident?.status as keyof typeof statusMapping]}`}
                   >
-                    {item.incidentReport.status.replace("_", " ")}
+                    {item.incident?.status.replace("_", " ")}
                   </span>
                   {/* <div
                     className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium text-white ${
                       severityMapping[
-                        item?.incidentReport
+                        item?.report
                           ?.priority as keyof typeof severityMapping
                       ] || "bg-gray-400"
                     }`}
                   >
                     <AlertTriangle size={18} />
-                    <span>{item?.incidentReport?.priority}</span>
+                    <span>{item?.report?.priority}</span>
                   </div> */}
                 </div>
               </div>

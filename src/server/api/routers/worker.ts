@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "@/env";
+import { UsersResponseData } from "@/types/user";
 
 export const workerRouter = createTRPCRouter({
   getWorkers: publicProcedure.query(async ({ ctx }) => {

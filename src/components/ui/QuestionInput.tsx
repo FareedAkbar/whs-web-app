@@ -4,17 +4,16 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import Button from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
-import { Question, AnsType } from "@/types/questions";
 import { PlusIcon, Pencil, Trash2 } from "lucide-react";
 
 interface Props {
-  initialData?: Question;
-  onDone: (data: Question) => void;
+  initialData?: NewQuestion;
+  onDone: (data: NewQuestion) => void;
 }
 
 export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
-  const [question, setQuestion] = useState(initialData?.question ?? "");
-  const [type, setType] = useState<AnsType>(initialData?.type ?? "text");
+  const [question, setQuestion] = useState(initialData?.title ?? "");
+  const [type, setType] = useState<AnsType>("TEXT");
   const [options, setOptions] = useState<string[]>(initialData?.options ?? []);
   const [newOption, setNewOption] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -47,14 +46,12 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
     setOptions(updated);
   };
   const handleDone = () => {
-    const finalData: Question = {
-      id: initialData?.id ?? `Q${options.length + 1}`,
-      question: question.trim(),
+    const finalData: NewQuestion = {
+      questionNumber: initialData?.questionNumber ?? 1,
+      title: question.trim(),
       type,
       options:
-        type === "single_selection" || type === "multiple_selection"
-          ? options
-          : [],
+        type === "SINGLE_OPTION" || type === "MULTI_OPTION" ? options : [],
     };
     onDone(finalData);
   };
@@ -81,16 +78,16 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
           onChange={(e) => setType(e.target.value as AnsType)}
           label="Select Question Type"
           options={[
-            { label: "Text", value: "text" },
-            { label: "Yes No", value: "yes_no" },
-            { label: "Single Selection", value: "single_selection" },
-            { label: "Multiple Selection", value: "multiple_selection" },
-            { label: "Date", value: "date" },
-            { label: "Date Range", value: "date_range" },
+            { label: "Text", value: "TEXT" },
+            { label: "Yes No", value: "YES_NO" },
+            { label: "Single Selection", value: "SINGLE_OPTION" },
+            { label: "Multiple Selection", value: "MULTI_OPTION" },
+            { label: "Date", value: "DATE" },
+            { label: "Date Range", value: "DATE_RANGE" },
           ]}
         />
 
-        {(type === "single_selection" || type === "multiple_selection") && (
+        {(type === "SINGLE_OPTION" || type === "MULTI_OPTION") && (
           <div className="mt-4 space-y-3">
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
@@ -166,7 +163,7 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
             className="w-full sm:w-auto"
             disabled={
               question.trim() === "" ||
-              ((type === "single_selection" || type === "multiple_selection") &&
+              ((type === "SINGLE_OPTION" || type === "MULTI_OPTION") &&
                 options.length === 0)
             }
           />

@@ -2,31 +2,33 @@
 
 import { QuestionInput } from "@/components/ui/QuestionInput";
 import Button from "@/components/ui/Button";
-import type { Question } from "@/types/questions";
 import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import { api } from "@/trpc/react";
+import { IconChecklist } from "@tabler/icons-react";
 
 export default function CreateInspectionPage() {
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<NewQuestion[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const router = useRouter();
+  const createInspection = api.inspections.createInspection.useMutation();
   const addNewQuestion = () => {
-    const newQuestion: Question = {
-      id: `Q${questions.length + 1}`,
-      question: "",
-      type: "text",
+    const newQuestion: NewQuestion = {
+      title: "",
+      questionNumber: questions.length + 1,
+      type: "TEXT",
       options: [],
     };
     setQuestions([...questions, newQuestion]);
     setEditingIndex(questions.length);
   };
 
-  const updateQuestion = (index: number, data: Question) => {
+  const updateQuestion = (index: number, data: NewQuestion) => {
     const updated = [...questions];
     updated[index] = data;
     setQuestions(updated);
@@ -39,7 +41,7 @@ export default function CreateInspectionPage() {
     if (editingIndex === index) setEditingIndex(null);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title.trim() || !description.trim()) {
       alert("Please fill in both title and description.");
       return;
@@ -47,31 +49,41 @@ export default function CreateInspectionPage() {
 
     const timestamp = new Date().getTime();
 
-    const checklist: Inspection = {
-      id: `inspection_${timestamp}`,
+    const checklist: NewInspection = {
       title,
       description,
-      questions: questions.map((q, i) => ({
-        ...q,
-        id: `Q${i + 1}`,
-      })),
+      questions: questions,
       status: "not_started",
     };
 
-    const storedInspections = JSON.parse(
-      localStorage.getItem("inspections") ?? "[]",
-    ) as Inspection[];
+    // const storedInspections = JSON.parse(
+    //   localStorage.getItem("inspections") ?? "[]",
+    // ) as Inspection[];
 
-    const updatedInspections: Inspection[] = [...storedInspections, checklist];
-    localStorage.setItem("inspections", JSON.stringify(updatedInspections));
-    router.push("/dashboard/inspections-checklist");
-    setQuestions([]);
-    setTitle("");
-    setDescription("");
+    // const updatedInspections: Inspection[] = [...storedInspections, checklist];
+    // localStorage.setItem("inspections", JSON.stringify(updatedInspections));
+    await createInspection.mutateAsync(checklist, {
+      onSuccess: () => {
+        router.push("/dashboard/inspections-checklist");
+        setQuestions([]);
+        setTitle("");
+        setDescription("");
+      },
+      onError: (error) => {
+        alert(`Error creating inspection: ${error.message}`);
+      },
+    });
   };
 
   return (
     <div className="p-8">
+      <div className="flex w-full items-center justify-end">
+        <Button
+          onClick={() => router.push("/dashboard/inspections-checklist")}
+          title="Inspections List"
+          icon={<IconChecklist />}
+        />
+      </div>
       <Input
         type="text"
         placeholder="Inspection Title"
@@ -80,6 +92,7 @@ export default function CreateInspectionPage() {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
+
       <Label className="text-md mb-2 text-gray-500">
         Inspection Description
       </Label>
@@ -101,10 +114,10 @@ export default function CreateInspectionPage() {
                 }}
               />
             ) : (
-              q.question.trim() && (
+              q.title.trim() && (
                 <div className="flex items-start justify-between rounded-lg border bg-white p-4 shadow dark:bg-gray-700 dark:text-white">
                   <div>
-                    <p className="font-medium">Q: {q.question}</p>
+                    <p className="font-medium">Q: {q.title}</p>
                     <p className="text-sm capitalize text-gray-600 dark:text-gray-400">
                       Type: {q.type?.replace("_", " ")}
                     </p>
@@ -143,6 +156,8 @@ export default function CreateInspectionPage() {
               onClick={handleSubmit}
               variant="secondary"
               title="Submit Checklist"
+              disabled={createInspection.isPending}
+              loading={createInspection.isPending}
             />
           )}
         </div>

@@ -8,6 +8,10 @@ import { userRouter } from "./routers/user";
 import { enumRouter } from "./routers/enum";
 import { dashboardRouter } from "./routers/dashboard";
 import { mediaRouter } from "./routers/media";
+import { departmentRouter } from "./routers/department";
+import { groupRouter } from "./routers/groups";
+import { InspectionRouter } from "./routers/inspections";
+import { reportRouter } from "./routers/report";
 
 /**
  * This is the primary router for your server.
@@ -17,13 +21,17 @@ import { mediaRouter } from "./routers/media";
 export const appRouter = createTRPCRouter({
   post: postRouter,
   auth: authRouter,
-  incidents:incidentRouter,
-  workers:workerRouter,
-  employees:employeeRouter,
-  users:userRouter,
-  enums:enumRouter,
-  dashboard:dashboardRouter,
-  media:mediaRouter
+  incidents: incidentRouter,
+  workers: workerRouter,
+  employees: employeeRouter,
+  users: userRouter,
+  enums: enumRouter,
+  dashboard: dashboardRouter,
+  media: mediaRouter,
+  department: departmentRouter,
+  groups: groupRouter,
+  inspections: InspectionRouter,
+  reports: reportRouter,
 });
 
 // export type definition of API
