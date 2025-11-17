@@ -50,7 +50,13 @@ export default function HazardDetailScreen() {
   // const [comment, setComment] = useState("");
   // const [decision, setDecision] = useState<"accept" | "reject" | null>(null);
   const [modalMode, setModalMode] = useState<
-    "accept" | "reject" | "assign" | "cancel" | "" | "assign-officer"
+    | "accept"
+    | "reject"
+    | "assign"
+    | "cancel"
+    | ""
+    | "assign-officer"
+    | "reassign-officer"
   >("accept");
   const user = session.data?.user;
 
@@ -259,6 +265,17 @@ export default function HazardDetailScreen() {
                   }}
                 />
               )}
+            {hasPermission(user?.role!, "assign:officer") &&
+              hazard?.incidentAssignee && (
+                <Button
+                  title="Reassign Officer"
+                  onClick={() => {
+                    setModalMode("reassign-officer");
+                    setOpen(true);
+                    // open modal logic left to you — this demonstrates the button
+                  }}
+                />
+              )}
             {hasPermission(user?.role!, "pick:hazard") &&
               !hazard?.incidentAssignee && (
                 <Button
@@ -441,6 +458,36 @@ export default function HazardDetailScreen() {
                   <div className="mt-4 flex justify-end">
                     <Button
                       title="Confirm"
+                      onClick={handleDone}
+                      loading={assignIncidentToOfficer.isPending}
+                      disabled={!selectedOfficer}
+                    />
+                  </div>
+                </div>
+              </ModalBody>
+            )}
+            {modalMode == "reassign-officer" && (
+              <ModalBody className="max-w-2xl">
+                <div className="mt-4">
+                  <Select
+                    label="Reassign Officer"
+                    className="mt-2 w-full rounded border p-2"
+                    onChange={(e) => setSelectedOfficer(e.target.value)}
+                    value={selectedOfficer}
+                    options={
+                      officers?.data
+                        ?.filter(
+                          (o: User) => o.id !== hazard?.incidentAssignee?.id,
+                        )
+                        ?.map((o: User) => ({
+                          value: o.id,
+                          label: o.name,
+                        })) ?? []
+                    }
+                  />
+                  <div className="mt-4 flex justify-end">
+                    <Button
+                      title="Confirm Reassignment"
                       onClick={handleDone}
                       loading={assignIncidentToOfficer.isPending}
                       disabled={!selectedOfficer}
