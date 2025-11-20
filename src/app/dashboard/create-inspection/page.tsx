@@ -112,6 +112,10 @@ export default function CreateInspectionPage() {
                   updateQuestion(i, data);
                   setEditingIndex(null);
                 }}
+                onCancel={() => {
+                  if (!q.title.trim()) deleteQuestion(i);
+                  setEditingIndex(null);
+                }}
               />
             ) : (
               q.title.trim() && (

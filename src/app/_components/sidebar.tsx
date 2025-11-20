@@ -45,7 +45,11 @@ const Sidebar = ({
   if (user) {
     const role = user.role;
 
-    if (role === "ADMIN") {
+    if (
+      role === "ADMIN" ||
+      role === "P_AND_C_MANAGER" ||
+      role === "FACILITY_MANAGER"
+    ) {
       navItems.push(
         // {
         //   name: "Contractors",
@@ -62,11 +66,7 @@ const Sidebar = ({
           icon: <IconUser size={20} />,
           path: "/dashboard/users",
         },
-        {
-          name: "Inspections Checklist",
-          icon: <IconChecklist size={20} />,
-          path: "/dashboard/inspections-checklist",
-        },
+
         // {
         //   name: "Departments",
         //   icon: <IconTable size={20} />,
@@ -100,6 +100,11 @@ const Sidebar = ({
     }
 
     navItems.push(
+      {
+        name: "Inspections",
+        icon: <IconChecklist size={20} />,
+        path: "/dashboard/inspections-checklist",
+      },
       {
         name: "Profile",
         icon: <IconUserCircle size={20} />,

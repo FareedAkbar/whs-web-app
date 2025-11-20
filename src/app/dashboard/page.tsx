@@ -15,6 +15,7 @@ const Dashboard = () => {
   const router = useRouter();
   const session = useSession();
   const user = session.data?.user;
+  console.log("token", session.data?.user.token);
 
   // const adminMutation = api.dashboard.getAdminCounters.useQuery();
   // const managerMutation = api.dashboard.getManagerCounters.useMutation();

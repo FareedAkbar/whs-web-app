@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/Select";
@@ -18,6 +18,11 @@ import { hasPermission } from "@/lib/auth";
 import { useSession } from "next-auth/react";
 import { Eye, Trash2 } from "lucide-react";
 import { api } from "@/trpc/react";
+import { toast } from "react-toastify";
+import { m } from "framer-motion";
+import ViewInspections from "@/components/ui/ViewInspections";
+import { UserRole } from "@/types/roles";
+import { set } from "zod";
 
 const statusIcons: Record<string, { icon: React.JSX.Element; label: string }> =
   {
@@ -39,10 +44,12 @@ const statusIcons: Record<string, { icon: React.JSX.Element; label: string }> =
 type FormValue = string | string[];
 
 const InspectionChecklist = () => {
-  const [selectedInspection, setSelectedInspection] =
-    useState<Inspection | null>(null);
   const [formValues, setFormValues] = useState<Record<string, FormValue>>({});
   const [confirmDelete, setConfirmDelete] = useState<Inspection | null>(null);
+  const [modal, setModal] = useState<{
+    type: "view" | "delete" | "assign" | null;
+    data?: InspectionDetail | null | Inspection;
+  }>({ type: null, data: null });
 
   const router = useRouter();
   const { setOpen } = useModal();
@@ -51,7 +58,18 @@ const InspectionChecklist = () => {
     data: inspections,
     isLoading,
     refetch,
-  } = api.inspections.getInsepctions.useQuery();
+  } = api.inspections.getInspections.useQuery();
+  const { data: inspectionDetail } = api.inspections.getInspectionById.useQuery(
+    { id: modal.data?.id ?? "" },
+    {
+      enabled:
+        (modal.type === "view" || modal.type === "assign") &&
+        Boolean(modal.data?.id),
+      staleTime: 0, // always fresh
+    },
+  );
+  const submitInspection = api.inspections.submitInspection.useMutation();
+
   const deleteInspection = api.inspections.deleteInspection.useMutation({
     onSuccess: () => {
       setConfirmDelete(null);
@@ -63,29 +81,90 @@ const InspectionChecklist = () => {
       setAssignInspection(null);
       setSelectedUser(null);
       setDueDate("");
+      toast.success("Inspection assigned successfully");
+      setOpen(false);
+      setModal({ type: null, data: null });
       void refetch();
     },
   });
+  const buildPayload = (): {
+    inspectionId: string;
+    answers: { questionId: string; answer: string | string[] }[];
+  } | null => {
+    const inspection = inspectionDetail?.data;
+    if (!inspection) return null;
+
+    return {
+      inspectionId: inspection.inspections.find(
+        (i) => i.status === "INITIATED" && i.assignedTo.id === user?.id,
+      )!.id,
+      answers: inspection.questions.map((q) => {
+        if (q.type === "DATE_RANGE") {
+          return {
+            questionId: q.id,
+            answer: [
+              (formValues[`${q.id}_start`] as string) || "",
+              (formValues[`${q.id}_end`] as string) || "",
+            ],
+          };
+        }
+
+        return {
+          questionId: q.id,
+          answer: formValues[q.id] as string | string[],
+        };
+      }),
+    };
+  };
+
   const session = useSession();
   const user = session.data?.user;
   // NEW STATE for assign modal
   const [assignInspection, setAssignInspection] = useState<Inspection | null>(
     null,
   );
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState("");
 
   const { data: verifiedUsers, isLoading: loadingUsers } =
-    api.users.getVerifiedUsers.useQuery(undefined, {
-      enabled: user?.role === "ADMIN",
-    });
+    api.users.getVerifiedUsers.useQuery();
+  const filterByRole = (users: User[], currentUserRole: UserRole) => {
+    if (!users) return [];
+
+    switch (currentUserRole) {
+      case "ADMIN":
+        return users;
+
+      case "P_AND_C_MANAGER":
+        return users.filter(
+          (u) => u.role === "P_AND_C_OFFICER" || u.role === "STAFF",
+        );
+
+      case "FACILITY_MANAGER":
+        return users.filter(
+          (u) => u.role === "FACILITY_OFFICER" || u.role === "STAFF",
+        );
+
+      default:
+        return []; // others cannot assign inspections
+    }
+  };
 
   // ✅ Filter users by search
-  const filteredUsers =
-    verifiedUsers?.data?.filter((u) =>
-      u.name?.toLowerCase().includes(searchTerm.toLowerCase()),
-    ) ?? [];
+  const filteredUsers = useMemo(
+    () =>
+      filterByRole(verifiedUsers?.data ?? [], user?.role!).filter((u) => {
+        return (
+          u.name?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+          !inspectionDetail?.data?.inspections.some(
+            (i) => i.assignedTo?.id === u.id,
+          )
+        );
+      }),
+    [searchTerm, verifiedUsers, inspectionDetail],
+  );
 
   const updateStatus = (id: string, status: Inspection["status"]) => {
     const updated = inspections?.data?.map((insp) =>
@@ -96,13 +175,13 @@ const InspectionChecklist = () => {
   };
   const handleInputChange = (id: string, value: FormValue) => {
     setFormValues((prev) => ({ ...prev, [id]: value }));
-    if (!selectedInspection?.id) return;
-    updateStatus(selectedInspection.id, "in_progress");
+    if (!modal.data?.id) return;
+    updateStatus(modal.data.id, "in_progress");
   };
 
   const isFormValid = () => {
     return (
-      selectedInspection?.questions.every((q: Question) => {
+      modal.data?.questions.every((q: Question) => {
         if (q.type === "MULTI_OPTION") {
           const value = formValues[q.id];
           return Array.isArray(value) && value.length > 0;
@@ -121,16 +200,31 @@ const InspectionChecklist = () => {
 
   const handleSubmit = () => {
     if (!isFormValid()) {
-      alert("Please fill out all questions before submitting.");
+      toast.error("Please fill out all questions before submitting.");
       return;
     }
 
-    if (!selectedInspection?.id) return;
-    updateStatus(selectedInspection.id, "submitted");
-    setSelectedInspection(null);
-    setFormValues({});
-    setOpen(false);
+    const payload = buildPayload();
+    if (!payload) return;
+
+    submitInspection.mutate(payload, {
+      onSuccess: (res) => {
+        if (res.status) {
+          toast.success("Inspection submitted successfully!");
+        } else {
+          toast.error(res.error ?? "Failed to submit inspection");
+        }
+
+        setModal({ type: null, data: null });
+        setFormValues({});
+        setOpen(false);
+      },
+      onError: () => {
+        toast.error("Something went wrong!");
+      },
+    });
   };
+
   if (isLoading) {
     return (
       <div className="relative flex h-2/3 w-full items-center justify-center">
@@ -140,7 +234,7 @@ const InspectionChecklist = () => {
   }
   return (
     <div className="flex flex-col items-center justify-center space-y-4 p-6">
-      {user && hasPermission(user.role, "create:checklist") && (
+      {user && hasPermission(user.role, "create:inspections") && (
         <div className="flex w-full items-center justify-end">
           <Button
             onClick={() => router.push("/dashboard/create-inspection")}
@@ -171,8 +265,8 @@ const InspectionChecklist = () => {
                   {/* View icon */}
                   <button
                     onClick={() => {
-                      setSelectedInspection(inspection);
                       setFormValues({});
+                      setModal({ type: "view", data: inspection });
                       setOpen(true);
                     }}
                     className="text-primary hover:scale-105"
@@ -183,7 +277,7 @@ const InspectionChecklist = () => {
                   {/* Delete icon */}
                   <button
                     onClick={() => {
-                      setConfirmDelete(inspection);
+                      setModal({ type: "delete", data: inspection });
                       setOpen(true);
                     }}
                     className="text-primary hover:scale-105"
@@ -191,68 +285,124 @@ const InspectionChecklist = () => {
                     <Trash2 size={20} />
                   </button>
                 </div>
-                <Button
-                  title="Assign Inspection"
-                  icon={<UserPlus size={16} />}
-                  onClick={() => {
-                    setAssignInspection(inspection);
-                    setOpen(true);
-                  }}
-                />
+                {user && hasPermission(user.role, "assign:inspections") && (
+                  <Button
+                    title="Assign Inspection"
+                    icon={<UserPlus size={16} />}
+                    onClick={() => {
+                      setModal({ type: "assign", data: inspection });
+                      setOpen(true);
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
         ))}
+        {inspections?.data?.length === 0 && (
+          <p className="text-center text-gray-500">No inspections found.</p>
+        )}
       </div>
 
       {/* View Modal */}
-      {selectedInspection && (
-        <ModalBody className="mx-3 w-full overflow-y-auto">
+      {modal.type === "view" && modal.data && inspectionDetail && (
+        <ModalBody className="w-full overflow-y-auto">
           <ModalContent className="w-full">
             <h2 className="mb-4 text-2xl font-bold dark:text-white">
-              {selectedInspection.title}
+              {modal.data.title}
             </h2>
+            <p className="mb-4 text-gray-600 dark:text-gray-400">
+              {modal.data.description}
+            </p>
 
-            <div className="gap-4">
-              {selectedInspection.questions.map((q: Question) => (
-                <div
-                  key={q.id}
-                  // className={`${
-                  //   q.type === "YES_NO" || q.type === "DATE_RANGE"
-                  //     ? "col-span-2"
-                  //     : ""
-                  // }`}
-                >
-                  {user && hasPermission(user.role, "fill:checklist")
-                    ? renderQuestion(q, formValues, handleInputChange)
-                    : user &&
-                      hasPermission(user.role, "view:checklist") &&
-                      renderQuestionViewOnly(q)}
+            {/* --------------------------------------
+          1. VIEW QUESTIONS (no inspection filled)
+      --------------------------------------- */}
+            {inspectionDetail.data?.questions &&
+              inspectionDetail.data?.questions?.length > 0 &&
+              hasPermission(user?.role!, "view:inspections") &&
+              !inspectionDetail?.data?.inspections.some(
+                (insp) => insp.answers?.length > 0,
+              ) && (
+                <div className="mb-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                  <h3 className="mb-3 text-xl font-semibold dark:text-white">
+                    Questions
+                  </h3>
+
+                  {inspectionDetail.data?.questions
+                    .sort((a, b) => a.questionNumber! - b.questionNumber!)
+                    .map((q) => (
+                      <div
+                        key={q.id}
+                        className="mb-3 border-b border-gray-500 pb-3"
+                      >
+                        <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                          {q.questionNumber}. {q.title}
+                        </p>
+
+                        <p className="mt-1 text-gray-600 dark:text-gray-400">
+                          Type: {q.type.replaceAll("_", " ")}
+                        </p>
+
+                        {(q.type === "SINGLE_OPTION" ||
+                          q.type === "MULTI_OPTION") && (
+                          <div className="ml-4 mt-2">
+                            {q.options?.map((opt, i) => (
+                              <p
+                                key={i}
+                                className="text-gray-500 dark:text-gray-400"
+                              >
+                                • {opt}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                 </div>
-              ))}
-            </div>
+              )}
 
-            {user && hasPermission(user.role, "fill:checklist") && (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSubmit();
-                }}
-              >
-                <Button
-                  type="submit"
-                  title="Submit"
-                  className="mt-4 w-full"
-                  disabled={!isFormValid()}
-                />
-              </form>
+            {/* --------------------------------------
+          2. ASSIGN USER SECTION
+      --------------------------------------- */}
+            {user && hasPermission(user.role, "view:filled-inspections") && (
+              <ViewInspections
+                inspections={inspectionDetail.data?.inspections!}
+                questions={inspectionDetail.data?.questions!}
+                isUserAdmin={inspectionDetail.data?.createdBy === user.id}
+              />
             )}
+
+            {/* --------------------------------------
+          3. FILL INSPECTION ANSWERS (no answers yet)
+      --------------------------------------- */}
+            {modal.data.questions &&
+              user &&
+              hasPermission(user.role, "fill:inspections") &&
+              !inspectionDetail?.data?.inspections.some(
+                (insp) => insp.answers && (insp.answers?.length ?? 0) > 0,
+              ) && (
+                <div className="mt-4 space-y-4">
+                  {modal.data.questions.map((q) =>
+                    renderQuestion(q, formValues, handleInputChange),
+                  )}
+
+                  {hasPermission(user.role, "submit:inspection") && (
+                    <Button
+                      title="Submit"
+                      onClick={handleSubmit}
+                      disabled={!isFormValid()}
+                      loading={submitInspection.isPending}
+                    />
+                  )}
+                </div>
+              )}
           </ModalContent>
         </ModalBody>
       )}
 
       {/* Delete Modal */}
-      {confirmDelete && (
+      {modal.type === "delete" && modal.data && (
         <ModalBody className="mx-3 w-full">
           <ModalContent className="w-full">
             <h2 className="mb-4 text-xl font-bold dark:text-white">
@@ -260,7 +410,7 @@ const InspectionChecklist = () => {
             </h2>
             <p className="mb-6 text-gray-600 dark:text-gray-300">
               Are you sure you want to delete{" "}
-              <span className="font-semibold">{confirmDelete.title}</span>? This
+              <span className="font-semibold">{modal.data.title}</span>? This
               action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
@@ -271,9 +421,7 @@ const InspectionChecklist = () => {
               />
               <Button
                 title={deleteInspection.isPending ? "Deleting..." : "Delete"}
-                onClick={() =>
-                  deleteInspection.mutate({ id: confirmDelete.id })
-                }
+                onClick={() => deleteInspection.mutate({ id: modal.data?.id! })}
                 disabled={deleteInspection.isPending}
               />
             </div>
@@ -282,11 +430,11 @@ const InspectionChecklist = () => {
       )}
 
       {/* Assign Modal */}
-      {assignInspection && (
+      {modal.type === "assign" && modal.data && (
         <ModalBody className="mx-3 w-full">
           <ModalContent className="w-full">
             <h2 className="mb-4 text-xl font-bold dark:text-white">
-              Assign Inspection: {assignInspection.title}
+              Assign Inspection: {modal.data.title}
             </h2>
 
             {/* Search Users */}
@@ -337,15 +485,16 @@ const InspectionChecklist = () => {
                 onClick={() => setAssignInspection(null)}
               />
               <Button
-                title={assignMutation.isPending ? "Assigning..." : "Assign"}
+                title={"Assign"}
                 disabled={!selectedUser || !dueDate || assignMutation.isPending}
                 onClick={() =>
                   assignMutation.mutate({
-                    surveyId: assignInspection.id,
+                    surveyId: modal.data?.id!,
                     assignedTo: selectedUser!,
                     dueDate,
                   })
                 }
+                loading={assignMutation.isPending}
               />
             </div>
           </ModalContent>

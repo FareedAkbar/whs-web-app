@@ -114,7 +114,7 @@ export const ModalBody = ({
           <motion.div
             ref={modalRef}
             className={cn(
-              "relative z-50 flex max-h-[90%] w-full min-w-fit flex-1 flex-col overflow-hidden border border-transparent bg-white p-4 dark:bg-gray-950 md:max-w-[60%] md:rounded-2xl",
+              "relative z-50 flex max-h-[90%] w-full min-w-fit flex-1 flex-col overflow-hidden border border-transparent bg-white py-3 dark:bg-gray-950 md:max-w-[60%] md:rounded-2xl",
               className,
             )}
             initial={{
@@ -140,8 +140,15 @@ export const ModalBody = ({
               damping: 15,
             }}
           >
-            <CloseIcon onClose={handleClose} />
-            {children}
+            {/* Close Icon fixed */}
+            <div className="absolute right-4 top-4 z-50">
+              <CloseIcon onClose={handleClose} />
+            </div>
+
+            {/* Scrollable content */}
+            <div className="custom-scroller overflow-y-auto pr-2">
+              {children}
+            </div>
           </motion.div>
         </motion.div>
       )}
