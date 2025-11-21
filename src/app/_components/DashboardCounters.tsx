@@ -85,7 +85,10 @@ const DashboardCounters: React.FC = () => {
         ),
         dashboard.inspections &&
           Object.keys(dashboard.inspections).length > 0 && (
-            <Card key="inspections" onClick={() => router.push("/inspections")}>
+            <Card
+              key="inspections"
+              onClick={() => router.push("/dashboard/inspections")}
+            >
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-lg font-semibold dark:text-white">
                   Inspections

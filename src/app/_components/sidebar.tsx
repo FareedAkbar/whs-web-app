@@ -103,7 +103,7 @@ const Sidebar = ({
       {
         name: "Inspections",
         icon: <IconChecklist size={20} />,
-        path: "/dashboard/inspections-checklist",
+        path: "/dashboard/inspections",
       },
       {
         name: "Profile",

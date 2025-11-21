@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import { IconChecklist } from "@tabler/icons-react";
+import { toast } from "react-toastify";
 
 export default function CreateInspectionPage() {
   const [questions, setQuestions] = useState<NewQuestion[]>([]);
@@ -64,7 +65,8 @@ export default function CreateInspectionPage() {
     // localStorage.setItem("inspections", JSON.stringify(updatedInspections));
     await createInspection.mutateAsync(checklist, {
       onSuccess: () => {
-        router.push("/dashboard/inspections-checklist");
+        router.push("/dashboard/inspections");
+        toast.success("Inspection created successfully!");
         setQuestions([]);
         setTitle("");
         setDescription("");

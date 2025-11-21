@@ -285,16 +285,18 @@ const InspectionChecklist = () => {
                     <Trash2 size={20} />
                   </button>
                 </div>
-                {user && hasPermission(user.role, "assign:inspections") && (
-                  <Button
-                    title="Assign Inspection"
-                    icon={<UserPlus size={16} />}
-                    onClick={() => {
-                      setModal({ type: "assign", data: inspection });
-                      setOpen(true);
-                    }}
-                  />
-                )}
+                {user &&
+                  hasPermission(user.role, "assign:inspections") &&
+                  inspection.createdBy === user.id && (
+                    <Button
+                      title="Assign Inspection"
+                      icon={<UserPlus size={16} />}
+                      onClick={() => {
+                        setModal({ type: "assign", data: inspection });
+                        setOpen(true);
+                      }}
+                    />
+                  )}
               </div>
             </div>
           </div>
@@ -320,6 +322,8 @@ const InspectionChecklist = () => {
       --------------------------------------- */}
             {inspectionDetail.data?.questions &&
               inspectionDetail.data?.questions?.length > 0 &&
+              user?.id !==
+                inspectionDetail?.data?.inspections?.[0]?.assignedTo.id &&
               hasPermission(user?.role!, "view:inspections") &&
               !inspectionDetail?.data?.inspections.some(
                 (insp) => insp.answers?.length > 0,
@@ -377,8 +381,9 @@ const InspectionChecklist = () => {
           3. FILL INSPECTION ANSWERS (no answers yet)
       --------------------------------------- */}
             {modal.data.questions &&
-              user &&
-              hasPermission(user.role, "fill:inspections") &&
+              hasPermission(user?.role!, "fill:inspections") &&
+              inspectionDetail?.data?.inspections?.[0]?.assignedTo.id ===
+                user?.id! &&
               !inspectionDetail?.data?.inspections.some(
                 (insp) => insp.answers && (insp.answers?.length ?? 0) > 0,
               ) && (
@@ -387,13 +392,15 @@ const InspectionChecklist = () => {
                     renderQuestion(q, formValues, handleInputChange),
                   )}
 
-                  {hasPermission(user.role, "submit:inspection") && (
-                    <Button
-                      title="Submit"
-                      onClick={handleSubmit}
-                      disabled={!isFormValid()}
-                      loading={submitInspection.isPending}
-                    />
+                  {hasPermission(user?.role!, "submit:inspection") && (
+                    <div className="mt-6 flex justify-end">
+                      <Button
+                        title="Submit"
+                        onClick={handleSubmit}
+                        disabled={!isFormValid()}
+                        loading={submitInspection.isPending}
+                      />
+                    </div>
                   )}
                 </div>
               )}
@@ -415,14 +422,14 @@ const InspectionChecklist = () => {
             </p>
             <div className="flex justify-end gap-3">
               <Button
-                title="Cancel"
-                onClick={() => setConfirmDelete(null)}
-                variant="secondary"
-              />
-              <Button
                 title={deleteInspection.isPending ? "Deleting..." : "Delete"}
                 onClick={() => deleteInspection.mutate({ id: modal.data?.id! })}
                 disabled={deleteInspection.isPending}
+              />
+              <Button
+                title="Cancel"
+                onClick={() => setConfirmDelete(null)}
+                variant="secondary"
               />
             </div>
           </ModalContent>

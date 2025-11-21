@@ -57,6 +57,7 @@ const ROLES = {
     "view:inspections",
     "view:filled-inspections",
     "submit:inspection",
+    "fill:inspections",
   ],
   // P_AND_C_MEMBER: ["view:homeCounters", "create:incidents"],
   P_AND_C_MANAGER: [
@@ -69,6 +70,7 @@ const ROLES = {
     "view:inspections",
     "view:filled-inspections",
     "submit:inspection",
+    "fill:inspections",
   ],
   P_AND_C_OFFICER: [
     "view:homeCounters",
