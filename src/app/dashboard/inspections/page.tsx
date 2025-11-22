@@ -275,15 +275,17 @@ const InspectionChecklist = () => {
                   </button>
 
                   {/* Delete icon */}
-                  <button
-                    onClick={() => {
-                      setModal({ type: "delete", data: inspection });
-                      setOpen(true);
-                    }}
-                    className="text-primary hover:scale-105"
-                  >
-                    <Trash2 size={20} />
-                  </button>
+                  {user?.id === inspection.createdBy && (
+                    <button
+                      onClick={() => {
+                        setModal({ type: "delete", data: inspection });
+                        setOpen(true);
+                      }}
+                      className="text-primary hover:scale-105"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  )}
                 </div>
                 {user &&
                   hasPermission(user.role, "assign:inspections") &&
@@ -461,10 +463,10 @@ const InspectionChecklist = () => {
                   <div
                     key={u.id}
                     onClick={() => setSelectedUser(u.id)}
-                    className={`cursor-pointer rounded-md p-2 ${
+                    className={`cursor-pointer p-2 ${
                       selectedUser === u.id
                         ? "bg-primary text-white"
-                        : "border-b hover:bg-gray-100 dark:hover:bg-gray-700"
+                        : "border-b hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                     }`}
                   >
                     {u.name} ({u.email})
