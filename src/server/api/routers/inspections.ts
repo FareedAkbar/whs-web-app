@@ -311,7 +311,9 @@ export const InspectionRouter = createTRPCRouter({
         if (!response.ok) {
           return {
             status: false,
-            error: responseData.message ?? "Something went wrong",
+            error:
+              (responseData as { message?: string }).message ??
+              "Something went wrong",
           };
         }
 

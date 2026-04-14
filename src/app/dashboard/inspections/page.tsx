@@ -111,7 +111,7 @@ const InspectionChecklist = () => {
 
         return {
           questionId: q.id,
-          answer: formValues[q.id] as string | string[],
+          answer: formValues[q.id]! as string | string[],
         };
       }),
     };

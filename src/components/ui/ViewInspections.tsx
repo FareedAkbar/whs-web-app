@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import parseToArray from "@/utils/parseToArray";
 
 interface ViewInspectionsProps {
   inspections: InspectionItem[];
@@ -53,7 +54,7 @@ export default function ViewInspections({
               </div>
 
               {/* Expand button */}
-              {!(!isUserAdmin && insp.answers && insp.answers.length === 0) && (
+              {!(!isUserAdmin && insp?.answers?.length === 0) && (
                 <button
                   onClick={() =>
                     setExpandedIndex(isExpanded ? null : inspIndex)
@@ -101,7 +102,7 @@ export default function ViewInspections({
                               ? ans.answer.join(", ")
                               : typeof ans.answer === "string" &&
                                   ans.answer.startsWith("[")
-                                ? JSON.parse(ans.answer).join(", ")
+                                ? parseToArray(ans.answer).join(", ")
                                 : ans.answer}
                           </p>
                         </div>

@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import TopBar from "../_components/topbar";
 import Sidebar from "../_components/sidebar";
 import { redirect } from "next/navigation";
-import { dummyInspections } from "@/constants/inspections";
 
 export default function RootLayout({
   children,
@@ -21,9 +20,6 @@ export default function RootLayout({
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
-  useEffect(() => {
-    localStorage.setItem("inspections", JSON.stringify(dummyInspections));
-  }, []);
 
   if (session?.data?.user?.role == "UNDEFINED") {
     redirect("/auth/on-boarding");
