@@ -44,6 +44,11 @@ export default function IncidentsList() {
   const [assignedTo, setAssignedTo] = useState("");
   // const [taskType, setTaskType] = useState("");
   const session = useSession();
+  const [assignedTab, setAssignedTab] = useState("All");
+  const user = session?.data?.user;
+  const handleAssignedTabChange = (tab: string) => {
+    setAssignedTab(tab);
+  };
 
   useEffect(() => {
     if (incidents?.data) {
@@ -71,44 +76,59 @@ export default function IncidentsList() {
     setIsFilterOpen(false);
     setSearchTerm("");
     setFilteredIncidents(incidents?.data ?? []);
+    setAssignedTab("All");
   };
   const handleFilter = () => {
     if (!incidents?.data) return;
+
     const from = dateFrom ? new Date(dateFrom) : null;
     const to = dateTo ? new Date(dateTo) : null;
-    if (to) {
-      // Ensure "to" includes the entire day till midnight
-      to.setHours(23, 59, 59, 999);
-    }
-    setFilteredIncidents(
-      incidents?.data?.filter((item: ReportResponse) => {
-        const createdAt = new Date(item.report.createdAt);
-        return (
-          (!from || createdAt >= from) &&
-          (!to || createdAt <= to) &&
-          (!priority.length || priority.includes(item.report.priority)) &&
-          (!status.length || status.includes(item.incident?.status! ?? "")) &&
-          // (!status.length || status.includes(item.report.status)) &&
-          // (!assignedTo ||
-          //   (Array.isArray(item.incidentAssignee) &&
-          //     item.incidentAssignee.some(
-          //       (assignee) => assignee.assignedTo === assignedTo,
-          //     ))) &&
-          // (!taskType || item.report.taskType === taskType) &&
-          (!searchTerm ||
-            item.report.description
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            item.report.title.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-      }) ?? [],
-    );
+
+    if (to) to.setHours(23, 59, 59, 999);
+
+    const filtered = incidents.data.filter((item: ReportResponse) => {
+      const createdAt = new Date(item.report.createdAt);
+
+      const matchesDate =
+        (!from || createdAt >= from) && (!to || createdAt <= to);
+
+      const matchesPriority =
+        !priority.length || priority.includes(item.report.priority);
+
+      const matchesStatus =
+        !status.length || status.includes(item.incident?.status ?? "");
+
+      const matchesSearch =
+        !searchTerm ||
+        item.report.description
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        item.report.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Assigned tab logic
+      const matchesTab =
+        assignedTab === "All"
+          ? true
+          : assignedTab === "Assigned To Me"
+            ? item.incidentAssignee?.id === user?.id
+            : !(item.incidentAssignee?.id === user?.id);
+
+      return (
+        matchesDate &&
+        matchesPriority &&
+        matchesStatus &&
+        matchesSearch &&
+        matchesTab
+      );
+    });
+
+    setFilteredIncidents(filtered);
     setIsFilterOpen(false);
   };
 
   useEffect(() => {
     handleFilter();
-  }, [searchTerm]);
+  }, [searchTerm, assignedTab]);
 
   if (isLoading) {
     return (
@@ -262,6 +282,27 @@ export default function IncidentsList() {
           <Search className="" size={16} color="white" />
         </div>
       </div>
+      {user?.role === "P_AND_C_OFFICER" && (
+        <div className="mb-3 flex gap-3 px-1">
+          {["All", "Assigned To Me", "Others"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => {
+                handleAssignedTabChange(tab);
+                // handleFilter(); // uncomment if you want auto filtering on tab click
+              }}
+              className={`rounded-full border px-4 py-2 text-sm transition ${
+                assignedTab === tab
+                  ? "border-primary bg-primary text-white"
+                  : "border-gray-300 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="custom-scrollbar grid flex-1 grid-cols-1 gap-4 overflow-y-auto pb-4 lg:grid-cols-2">
         {filteredIncidents.length > 0 &&
           filteredIncidents?.map((item) => (
@@ -304,7 +345,9 @@ export default function IncidentsList() {
                     </h2>
 
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {item.report.description}
+                      {item.report.description.length > 100
+                        ? item.report.description.slice(0, 100) + "..."
+                        : item.report.description}
                     </p>
                   </div>
                 </div>

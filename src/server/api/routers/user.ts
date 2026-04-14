@@ -203,7 +203,7 @@ export const userRouter = createTRPCRouter({
       const userToken = ctx.session?.user.token;
       const userRole = ctx.session?.user.role; // 👈 role extract
 
-      if (!userToken || userRole !== "ADMIN") {
+      if (!userToken) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Unauthorized",

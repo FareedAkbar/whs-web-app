@@ -9,7 +9,6 @@ import { toast } from "react-toastify";
 import { api } from "@/trpc/react";
 import Button from "@/components/ui/Button";
 import { hasPermission } from "@/lib/auth";
-import { useRouter } from "next/router";
 
 const ProfileScreen = () => {
   const { data, isLoading, refetch } = api.users.getUser.useQuery();
@@ -18,7 +17,6 @@ const ProfileScreen = () => {
   // console.log("user data", data);
 
   const user = data?.data;
-  const router = useRouter();
   const session = useSession();
   const [isChangingRole, setIsChangingRole] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>(

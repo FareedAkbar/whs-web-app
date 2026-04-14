@@ -5,7 +5,7 @@ import z from "zod";
 import { assign } from "nodemailer/lib/shared";
 
 export const InspectionRouter = createTRPCRouter({
-  getInsepctions: publicProcedure.query(async ({ ctx }) => {
+  getInspections: publicProcedure.query(async ({ ctx }) => {
     try {
       const userToken = ctx.session?.user.token;
       if (!userToken) {
@@ -44,6 +44,56 @@ export const InspectionRouter = createTRPCRouter({
       };
     }
   }),
+  getInspectionById: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const userToken = ctx.session?.user.token;
+        if (!userToken) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Unauthorized",
+          });
+        }
+        const response = await fetch(
+          `${env.BASE_URL}/inspection/inspection-survey`,
+          {
+            method: "POST",
+            headers: {
+              authorization: `Bearer ${userToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id: input.id }),
+          },
+        );
+        console.log("response", response);
+        if (!response.ok) {
+          const errorData = (await response.json()) as { message: string };
+          console.error("inspections getting error:", errorData);
+          return {
+            status: false,
+            error: errorData.message,
+          };
+        }
+
+        const inspectionsData =
+          (await response.json()) as getInspectionResponse;
+        return {
+          status: true,
+          data: inspectionsData.data,
+        };
+      } catch (error) {
+        console.error("Error fetching inspections:", error);
+        return {
+          status: false,
+          error: "Failed to fetch inspections",
+        };
+      }
+    }),
   createInspection: publicProcedure
     .input(
       z.object({
@@ -217,6 +267,65 @@ export const InspectionRouter = createTRPCRouter({
         return {
           status: false,
           error: "Failed to assign inspections",
+        };
+      }
+    }),
+  submitInspection: publicProcedure
+    .input(
+      z.object({
+        inspectionId: z.string(),
+        answers: z.array(
+          z.object({
+            questionId: z.string(),
+            answer: z.any(), // array, string, boolean — allow all
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const userToken = ctx.session?.user.token;
+        if (!userToken) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Unauthorized",
+          });
+        }
+
+        const response = await fetch(`${env.BASE_URL}/inspection/submit`, {
+          method: "PUT",
+          headers: {
+            authorization: `Bearer ${userToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            inspectionId: input.inspectionId,
+            answers: input.answers,
+          }),
+        });
+
+        const responseData = await response.json();
+
+        console.log("Submit inspection response:", responseData);
+
+        if (!response.ok) {
+          return {
+            status: false,
+            error:
+              (responseData as { message?: string }).message ??
+              "Something went wrong",
+          };
+        }
+
+        return {
+          status: true,
+          message: "Inspection submitted successfully",
+        };
+      } catch (error) {
+        console.error("Submit inspection error:", error);
+        return {
+          status: false,
+          error: "Failed to submit inspection",
         };
       }
     }),

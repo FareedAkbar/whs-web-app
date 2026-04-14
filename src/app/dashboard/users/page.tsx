@@ -49,7 +49,7 @@ const UserPage = () => {
   const [page, setPage] = useState(1);
   const [isViewModalOpen, setViewModalOpen] = useState(false);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
-  const [isFilterModalOpen, setFilterModalOpen] = useState(false);
+  // const [isFilterModalOpen, setFilterModalOpen] = useState(false);
 
   const methods = useForm<CreateUserFormData>({
     defaultValues: {

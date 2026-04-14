@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
 import { severityMapping } from "@/constants/severity";
 import { ReportResponse } from "@/types/report";
+import { useSession } from "next-auth/react";
 
 export default function HazardsList() {
   const { data: hazards, isLoading } = api.incidents.getHazards.useQuery();
@@ -36,7 +37,13 @@ export default function HazardsList() {
 
   const [priority, setPriority] = useState<string[]>([]);
   const [status, setStatus] = useState<string[]>([]);
+  const [assignedTab, setAssignedTab] = useState("All");
+  const session = useSession();
 
+  const user = session?.data?.user;
+  const handleAssignedTabChange = (tab: string) => {
+    setAssignedTab(tab);
+  };
   useEffect(() => {
     if (hazards?.data) {
       setFilteredHazards(hazards.data);
@@ -66,36 +73,49 @@ export default function HazardsList() {
   };
   const handleFilter = () => {
     if (!hazards?.data) return;
+
     const from = dateFrom ? new Date(dateFrom) : null;
     const to = dateTo ? new Date(dateTo) : null;
-    if (to) {
-      // Ensure "to" includes the entire day till midnight
-      to.setHours(23, 59, 59, 999);
-    }
-    setFilteredHazards(
-      hazards?.data?.filter((item: ReportResponse) => {
-        const createdAt = new Date(item.report.createdAt);
 
-        return (
-          (!from || createdAt >= from) &&
-          (!to || createdAt <= to) &&
-          (!priority.length || priority.includes(item.report.priority)) &&
-          (!status.length || status.includes(item.hazard?.status ?? "")) &&
-          // (!status.length || status.includes(item.report.status)) &&
-          // (!assignedTo ||
-          //   (Array.isArray(item.incidentAssignee) &&
-          //     item.incidentAssignee.some(
-          //       (assignee) => assignee.assignedTo === assignedTo,
-          //     ))) &&
-          // (!taskType || item.report.taskType === taskType) &&
-          (!searchTerm ||
-            item.report.description
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            item.report.title.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-      }) ?? [],
-    );
+    if (to) to.setHours(23, 59, 59, 999);
+
+    const filtered = hazards.data.filter((item: ReportResponse) => {
+      const createdAt = new Date(item.report.createdAt);
+
+      const matchesDate =
+        (!from || createdAt >= from) && (!to || createdAt <= to);
+
+      const matchesPriority =
+        !priority.length || priority.includes(item.report.priority);
+
+      const matchesStatus =
+        !status.length || status.includes(item.incident?.status ?? "");
+
+      const matchesSearch =
+        !searchTerm ||
+        item.report.description
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        item.report.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Assigned tab logic
+      const matchesTab =
+        assignedTab === "All"
+          ? true
+          : assignedTab === "Assigned To Me"
+            ? item.incidentAssignee?.id === user?.id
+            : !(item.incidentAssignee?.id === user?.id);
+
+      return (
+        matchesDate &&
+        matchesPriority &&
+        matchesStatus &&
+        matchesSearch &&
+        matchesTab
+      );
+    });
+
+    setFilteredHazards(filtered);
     setIsFilterOpen(false);
   };
 
@@ -255,6 +275,27 @@ export default function HazardsList() {
           <Search className="" size={16} color="white" />
         </div>
       </div>
+      {user?.role === "FACILITY_OFFICER" && (
+        <div className="mb-3 flex gap-3 px-1">
+          {["All", "Assigned To Me", "Others"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => {
+                handleAssignedTabChange(tab);
+                // handleFilter(); // uncomment if you want auto filtering on tab click
+              }}
+              className={`rounded-full border px-4 py-2 text-sm transition ${
+                assignedTab === tab
+                  ? "border-primary bg-primary text-white"
+                  : "border-gray-300 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="custom-scrollbar grid flex-1 grid-cols-1 gap-4 overflow-y-auto pb-4 lg:grid-cols-2">
         {filteredHazards.length > 0 &&
           filteredHazards?.map((item) => (
@@ -297,7 +338,10 @@ export default function HazardsList() {
                     </h2>
 
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {item.report.description}
+                      {item.report.description.length > 100
+                        ? item.report.description.slice(0, 100) + "..."
+                        : item.report.description}
+                      {/* {item.report.description} */}
                     </p>
                   </div>
                 </div>

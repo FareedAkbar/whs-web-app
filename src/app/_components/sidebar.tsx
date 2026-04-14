@@ -45,7 +45,11 @@ const Sidebar = ({
   if (user) {
     const role = user.role;
 
-    if (role === "ADMIN") {
+    if (
+      role === "ADMIN" ||
+      role === "P_AND_C_MANAGER" ||
+      role === "FACILITY_MANAGER"
+    ) {
       navItems.push(
         // {
         //   name: "Contractors",
@@ -62,11 +66,7 @@ const Sidebar = ({
           icon: <IconUser size={20} />,
           path: "/dashboard/users",
         },
-        {
-          name: "Inspections Checklist",
-          icon: <IconChecklist size={20} />,
-          path: "/dashboard/inspections-checklist",
-        },
+
         // {
         //   name: "Departments",
         //   icon: <IconTable size={20} />,
@@ -100,6 +100,11 @@ const Sidebar = ({
     }
 
     navItems.push(
+      {
+        name: "Inspections",
+        icon: <IconChecklist size={20} />,
+        path: "/dashboard/inspections",
+      },
       {
         name: "Profile",
         icon: <IconUserCircle size={20} />,
@@ -181,7 +186,7 @@ const Sidebar = ({
         ) : (
           <span className="font-nulshock text-primary">WHS</span>
         )} */}
-        <div className="flex items-center justify-center py-6">
+        <div className="flex items-center justify-center">
           <Image
             src="/images/logo.png"
             alt="WHS Logo"
@@ -214,7 +219,7 @@ const Sidebar = ({
 
         <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent" />
 
-        <nav className="mt-4 flex max-h-[70vh] flex-col gap-2 overflow-y-auto">
+        <nav className="mt-4 flex max-h-[58vh] flex-col gap-2 overflow-y-auto">
           {navItems.map((item, index) => (
             <Link
               key={index}

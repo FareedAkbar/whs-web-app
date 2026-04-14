@@ -16,11 +16,11 @@ const YesNoRadio: React.FC<YesNoRadioProps> = ({
 }) => {
   return (
     <div
-      className={`flex flex-row justify-between bg-gray-100 p-4 ${className}`}
+      className={`flex flex-row justify-between bg-gray-100 p-4 dark:bg-gray-800 ${className}`}
     >
-      <p className="text-gray-700">{question}</p>
+      <p className="text-gray-700 dark:text-gray-200">{question}</p>
       <div className="flex space-x-3">
-        <label className="flex items-center text-sm">
+        <label className="flex items-center text-sm dark:text-gray-200">
           <input
             type="radio"
             // name={name}
@@ -31,7 +31,7 @@ const YesNoRadio: React.FC<YesNoRadioProps> = ({
           />
           Yes
         </label>
-        <label className="flex items-center text-sm">
+        <label className="flex items-center text-sm dark:text-gray-200">
           <input
             type="radio"
             // name={name}

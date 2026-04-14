@@ -48,7 +48,13 @@ export default function IncidentDetailScreen() {
   // const [comment, setComment] = useState("");
   // const [decision, setDecision] = useState<"accept" | "reject" | null>(null);
   const [modalMode, setModalMode] = useState<
-    "accept" | "reject" | "assign" | "cancel" | "" | "assign-officer"
+    | "accept"
+    | "reject"
+    | "assign"
+    | "cancel"
+    | ""
+    | "assign-officer"
+    | "reassign-officer"
   >("accept");
   const user = session.data?.user;
 
@@ -181,7 +187,7 @@ export default function IncidentDetailScreen() {
             setOpen(false);
             setModalMode("");
             toast.success(
-              `${user?.role == "P_AND_C_MANAGER" ? "Incident assigned successfully" : "Incident picked successfully"} `,
+              `${user?.role == "P_AND_C_MANAGER" ? `Incident ${incident.incidentAssignee ? " reassigned " : " assigned "}  successfully` : "Incident picked successfully"} `,
             );
           },
           onError: (error: ErrorResponse) => {
@@ -246,6 +252,16 @@ export default function IncidentDetailScreen() {
                     setModalMode("assign-officer");
                     setOpen(true);
                     // open modal logic left to you — this demonstrates the button
+                  }}
+                />
+              )}
+            {hasPermission(user?.role!, "assign:officer") &&
+              incident?.incidentAssignee && (
+                <Button
+                  title="Reassign Officer"
+                  onClick={() => {
+                    setModalMode("reassign-officer");
+                    setOpen(true);
                   }}
                 />
               )}
@@ -497,6 +513,37 @@ export default function IncidentDetailScreen() {
                 </div>
               </ModalBody>
             )}
+            {modalMode == "reassign-officer" && (
+              <ModalBody className="max-w-2xl">
+                <div className="mt-4">
+                  <Select
+                    label="Reassign Officer"
+                    className="mt-2 w-full rounded border p-2"
+                    onChange={(e) => setSelectedOfficer(e.target.value)}
+                    value={selectedOfficer}
+                    options={
+                      officers?.data
+                        ?.filter(
+                          (o: User) => o.id !== incident?.incidentAssignee?.id,
+                        )
+                        .map((o: User) => ({
+                          value: o.id,
+                          label: o.name,
+                        })) ?? []
+                    }
+                  />
+                  <div className="mt-4 flex justify-end">
+                    <Button
+                      title="Confirm Reassignment"
+                      onClick={handleDone}
+                      loading={assignIncidentToOfficer.isPending}
+                      disabled={!selectedOfficer}
+                    />
+                  </div>
+                </div>
+              </ModalBody>
+            )}
+
             {/* Capture / Upload (for staff when incident is completed but report not closed) */}
             {user?.role === "STAFF" &&
               incidentMeta?.status === "COMPLETED" &&

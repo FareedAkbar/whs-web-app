@@ -9,11 +9,16 @@ import { PlusIcon, Pencil, Trash2 } from "lucide-react";
 interface Props {
   initialData?: NewQuestion;
   onDone: (data: NewQuestion) => void;
+  onCancel?: () => void;
 }
 
-export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
+export const QuestionInput: React.FC<Props> = ({
+  initialData,
+  onDone,
+  onCancel,
+}) => {
   const [question, setQuestion] = useState(initialData?.title ?? "");
-  const [type, setType] = useState<AnsType>("TEXT");
+  const [type, setType] = useState<AnsType>(initialData?.type ?? "TEXT");
   const [options, setOptions] = useState<string[]>(initialData?.options ?? []);
   const [newOption, setNewOption] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -64,7 +69,7 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
           Question
         </label>
         <textarea
-          className="shadow-input h-2/3 w-full appearance-none rounded-md border border-[#ADADAD] bg-gray-50 px-3 py-2 pr-10 text-sm text-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:text-white"
+          className="shadow-input h-2/3 w-full appearance-none rounded-md border bg-gray-50 px-3 py-2 pr-10 text-sm text-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:text-white"
           placeholder="Enter your question"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
@@ -139,7 +144,7 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
                           onClick={() => handleEditOption(idx)}
                           title="Edit"
                         >
-                          <Pencil size={16} />
+                          <Pencil size={16} className="text-primary" />
                         </button>
                         <button
                           onClick={() => handleDeleteOption(idx)}
@@ -156,7 +161,7 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
           </div>
         )}
 
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end gap-3 pt-4">
           <Button
             title="Done"
             onClick={handleDone}
@@ -166,6 +171,12 @@ export const QuestionInput: React.FC<Props> = ({ initialData, onDone }) => {
               ((type === "SINGLE_OPTION" || type === "MULTI_OPTION") &&
                 options.length === 0)
             }
+          />
+          <Button
+            title="Cancel"
+            onClick={onCancel}
+            className="w-full sm:w-auto"
+            variant="secondary"
           />
         </div>
       </div>

@@ -17,6 +17,10 @@ interface getInspectionsResponse {
   data: Inspection[];
   message: string;
 }
+interface getInspectionResponse {
+  data: InspectionDetail;
+  message: string;
+}
 type AnsType =
   | "TEXT"
   | "YES_NO"
@@ -32,6 +36,7 @@ type Inspection = {
   questions: Question[];
   status?: string;
   dueDate?: string;
+  createdBy: string;
 };
 interface InspectionLog {
   id: string;
@@ -96,6 +101,7 @@ type InspectionDetail = {
   status?: string;
   dueDate?: string;
   inspections: InspectionItem[];
+  createdBy: string;
 };
 type NewInspection = {
   title: string;

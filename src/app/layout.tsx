@@ -35,7 +35,7 @@ export default async function RootLayout({
                   newestOnTop={false}
                   progressClassName={"bg-blue-600"}
                   closeOnClick
-                  theme="dark"
+                  // theme="dark"
                   rtl={false}
                   pauseOnFocusLoss
                   draggable
