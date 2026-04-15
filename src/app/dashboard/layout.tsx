@@ -39,7 +39,11 @@ export default function RootLayout({
         </div>
       </div>
     );
-  } else if (session.data?.user?.role !== "ADMIN" && !isVerified) {
+  } else if (
+    session.data &&
+    session.data?.user?.role !== "ADMIN" &&
+    !isVerified
+  ) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-white bg-[url('/images/whs-web-bg.png')] bg-cover p-2 dark:bg-gray-950 sm:p-0">
         <div className="flex flex-col items-center justify-center rounded-lg bg-white p-8 text-center shadow-md dark:bg-gray-800">

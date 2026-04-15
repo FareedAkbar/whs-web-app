@@ -124,9 +124,9 @@ const ProfileScreen = () => {
             />
 
             {/* Edit Icon */}
-            <div className="absolute bottom-0 right-0 translate-x-[25%] translate-y-[25%] transform rounded-full bg-primary p-1.5 shadow-md">
+            {/* <div className="absolute bottom-0 right-0 translate-x-[25%] translate-y-[25%] transform rounded-full bg-primary p-1.5 shadow-md">
               <IconEdit size={20} className="text-white" />
-            </div>
+            </div> */}
           </div>
 
           {/* Name & Role */}

@@ -19,28 +19,28 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
   const optionsRef = useRef(null);
   // const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
   const options = [
-    {
-      value: "Profile",
-      label: "Profile",
-      icon: (
-        <Image
-          width={100}
-          height={100}
-          className="h-4 w-4 cursor-pointer rounded-full"
-          src={
-            session.data?.user.image && session.data.user.image !== ""
-              ? session.data.user.image
-              : "/images/user.webp"
-          }
-          alt=""
-        />
-      ),
-    },
-    {
-      value: "settings",
-      label: "Settings",
-      icon: <SettingsIcon className="icon h-4 w-4 stroke-[1px]" />,
-    },
+    // {
+    //   value: "Profile",
+    //   label: "Profile",
+    //   icon: (
+    //     <Image
+    //       width={100}
+    //       height={100}
+    //       className="h-4 w-4 cursor-pointer rounded-full"
+    //       src={
+    //         session.data?.user.image && session.data.user.image !== ""
+    //           ? session.data.user.image
+    //           : "/images/user.webp"
+    //       }
+    //       alt=""
+    //     />
+    //   ),
+    // },
+    // {
+    //   value: "settings",
+    //   label: "Settings",
+    //   icon: <SettingsIcon className="icon h-4 w-4 stroke-[1px]" />,
+    // },
     {
       value: "logout",
       label: "Logout",
@@ -107,12 +107,12 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
       <div className="flex">
         {session.data?.user.email ? (
           <div className="flex items-center gap-4">
-            <Link
+            {/* <Link
               href={"/dashboard"}
               className="rounded-full bg-[#F2F2F2] p-3 dark:bg-gray-800"
             >
               <IconHelp size={20} />
-            </Link>
+            </Link> */}
             <div className="relative flex items-center gap-2">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -134,7 +134,7 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
                   />
                 )}
               </button>
-              <ThemeToggle hide />
+              {/* <ThemeToggle hide /> */}
               {/* <ThemeColorPicker />
               <ThemeFontPicker /> */}
               <div
@@ -149,7 +149,7 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
                     <p className="text-sm capitalize">
                       {session.data?.user.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-600 dark:text-gray-300">
                       {session.data?.user.email}
                     </p>
                   </div>
@@ -157,9 +157,9 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
                 <div className="mb-[1px] w-full border-[0.5px] border-gray-100/20 bg-gray-200 dark:border-gray-600"></div>
                 {options.map((option, index) => (
                   <Fragment key={index}>
-                    {index === options.length - 1 && (
+                    {/* {index === options.length - 1 && (
                       <div className="my-[1px] w-full border-[0.5px] border-gray-100/20 bg-gray-200 dark:border-gray-600"></div>
-                    )}
+                    )} */}
                     <button
                       onClick={() => onOptionSelect(option)}
                       className="flex w-full items-center gap-2 overflow-x-hidden rounded px-2 py-2 text-sm font-light text-black hover:bg-[#e9e8e8] dark:text-white dark:hover:bg-gray-600"
