@@ -15,7 +15,10 @@ import { userRoles } from "@/types/roles";
 
 const inputs = z.object({
   fName: z.string().min(4, "First name must be at least 4 characters"),
-  lName: z.string().min(4, "Last name must be at least 4 characters"),
+  lName: z
+    .string()
+    .regex(/^[A-Za-z\s]+$/, "Last name must contain only alphabets"),
+
   phoneNumber: z
     .string()
     .min(10, "Phone number must be at least 10 characters"),
@@ -160,10 +163,12 @@ export default function Register() {
                 label="Select Role"
                 required
                 error={errors.role?.message}
-                options={Array.from(Object.values(userRoles)).map((role) => ({
-                  value: role,
-                  label: role.replaceAll("_", " "),
-                }))}
+                options={Array.from(Object.values(userRoles))
+                  .filter((role) => role !== "UNDEFINED")
+                  .map((role) => ({
+                    value: role,
+                    label: role.replaceAll("_", " "),
+                  }))}
               />
             )}
           />

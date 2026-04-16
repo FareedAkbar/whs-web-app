@@ -112,11 +112,11 @@ export default function Login() {
             />
           )}
         />
-        <div className="mb-4 w-full text-right text-primary">
+        {/* <div className="mb-4 w-full text-right text-primary">
           <Link href="/auth/forgot-password" className="text-xs underline">
             Forgot Password?
           </Link>
-        </div>
+        </div> */}
 
         <div className="flex h-full w-full flex-col gap-2">
           <Button
