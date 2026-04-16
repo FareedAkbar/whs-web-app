@@ -10,6 +10,7 @@ import { Select } from "@/components/ui/Select";
 import { Controller, useForm } from "react-hook-form";
 import { api } from "@/trpc/react";
 import { useSession } from "next-auth/react";
+import { userRoles } from "@/types/roles";
 
 type FormValues = {
   role: string;
@@ -35,13 +36,14 @@ export default function Onboarding() {
       toast.error("Please select a user type.");
       return;
     }
-    if (!user) {
-      throw new Error("User is undefined");
+    if (!session?.user) {
+      toast.error("Session not ready, please wait...");
+      return;
     }
     try {
       await updateUserProfile.mutateAsync(
         {
-          id: user.id,
+          id: session?.user.id,
           role: values.role,
           isVerifiedByAdmin: false,
         },
@@ -126,10 +128,12 @@ export default function Onboarding() {
               label="Select Role"
               required
               error={errors.role?.message}
-              options={[
-                { label: "CONTRACTOR", value: "WORKER" },
-                { label: "EMPLOYEE", value: "EMPLOYEE" },
-              ]}
+              options={Array.from(Object.values(userRoles))
+                .filter((role) => role !== "UNDEFINED")
+                .map((role) => ({
+                  value: role,
+                  label: role.replaceAll("_", " "),
+                }))}
               selectedValue={field.value}
               onChange={(e) => field.onChange(e.target.value)}
             />

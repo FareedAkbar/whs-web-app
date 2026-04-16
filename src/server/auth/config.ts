@@ -109,21 +109,43 @@ export const authConfig = {
           token.isVerifiedByAdmin = response.user.isVerifiedByAdmin;
         }
       }
+      if (trigger === "update" && session) {
+        if (session?.role) {
+          token.role = session.role;
+        }
 
-      if (
-        trigger === "update" &&
-        typeof session === "object" &&
-        session !== null
-      ) {
-        const typedSession = session as {
-          user?: { role?: UserRole };
-        };
-        if (typedSession.user?.role) {
-          token.role = typedSession.user.role;
+        if (session?.isVerifiedByAdmin !== undefined) {
+          token.isVerifiedByAdmin = session.isVerifiedByAdmin;
         }
       }
+      // if (trigger === "update" && session) {
+      // const updatedUser = (session as { user: typeof token}).user;
+
+      // console.log("JWT Update Triggered. Updated User----------------: ", updatedUser);
+
+      // if (
+      //   trigger === "update" &&
+      //   typeof session === "object" &&
+      //   session !== null
+      // ) {
+      //   console.log(
+      //     "Updating token role based on session user role:",
+      //     session.user.role,
+      //   );
+      //   const typedSession = session as {
+      //     user?: { role?: UserRole };
+      //   };
+      //   if (typedSession.user?.role) {
+      //     token.role = typedSession.user.role;
+      //   }
+      // }
 
       // if (trigger === "update" && session?.user?.role) {
+      //   console.log(
+      //     "Updating token role based on session user role:",
+      //     session.user.role,
+      //   );
+
       //   token.role = session.user.role;
       // }
 
