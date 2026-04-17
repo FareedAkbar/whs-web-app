@@ -81,7 +81,7 @@ export default function CreateInspectionPage() {
     <div className="p-8">
       <div className="flex w-full items-center justify-end">
         <Button
-          onClick={() => router.push("/dashboard/inspections-checklist")}
+          onClick={() => router.push("/dashboard/inspections")}
           title="Inspections List"
           icon={<IconChecklist />}
         />

@@ -134,7 +134,9 @@ const ProfileScreen = () => {
             <h1 className="mt-1 text-xl font-bold capitalize dark:text-white">
               {user?.name}
             </h1>
-            <p className="capitalize text-gray-500">{user?.role}</p>
+            <p className="capitalize text-gray-500">
+              {user?.role.replaceAll("_", " ")}
+            </p>
           </div>
         </div>
         {user && hasPermission(user.role, "change:role") && (
