@@ -446,10 +446,12 @@ const UserPage = () => {
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
               disabled={!selectedUser?.isVerified}
-              options={Array.from(Object.values(userRoles)).map((role) => ({
-                value: role,
-                label: role.replaceAll("_", " "),
-              }))}
+              options={Array.from(Object.values(userRoles))
+                .filter((role) => role !== "UNDEFINED")
+                .map((role) => ({
+                  value: role,
+                  label: role.replaceAll("_", " "),
+                }))}
             />
             {/* <label className="mt-6 block text-sm font-medium text-gray-700">
             Select Role:
@@ -595,12 +597,12 @@ const UserPage = () => {
                         label="Select Role"
                         required
                         error={errors.role?.message}
-                        options={Array.from(Object.values(userRoles)).map(
-                          (role) => ({
+                        options={Array.from(Object.values(userRoles))
+                          .filter((role) => role !== "UNDEFINED")
+                          .map((role) => ({
                             value: role,
                             label: role.replaceAll("_", " "),
-                          }),
-                        )}
+                          }))}
                       />
                     )}
                   />

@@ -42,7 +42,7 @@ const ROLES = {
     "create:incidents",
     "view:homeCounters",
     "fill:inspections",
-    "change:role",
+    // "change:role",
     "submit:inspection",
     "view:filled-inspections",
   ],

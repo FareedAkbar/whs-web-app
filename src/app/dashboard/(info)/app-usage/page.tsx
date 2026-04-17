@@ -11,24 +11,24 @@ export default function AppUsagePage() {
 
       <ul className="ml-6 list-disc space-y-3">
         <li>
-          <strong className="underline">Inspections:</strong> Quickly complete
+          <strong className="font-bold">Inspections:</strong> Quickly complete
           your scheduled inspections using easy-to-follow checklists.
         </li>
         <li>
-          <strong className="underline">Reporting:</strong> See a hazard? Snap a
+          <strong className="font-bold">Reporting:</strong> See a hazard? Snap a
           picture, fill a short report, and assign it to the right team.
         </li>
         <li>
-          <strong className="underline">Task Management:</strong> Managers and
+          <strong className="font-bold">Task Management:</strong> Managers and
           supervisors can assign work based on reported issues and track the
           status — <em>To Do ➔ In Progress ➔ Resolved ➔ Closed</em>.
         </li>
         <li>
-          <strong className="underline">Notifications:</strong> Stay updated
+          <strong className="font-bold">Notifications:</strong> Stay updated
           with instant alerts about task assignments, deadlines, and follow-ups.
         </li>
         <li>
-          <strong className="underline">Dashboards:</strong> Track safety
+          <strong className="font-bold">Dashboards:</strong> Track safety
           performance over time and make data-driven improvements.
         </li>
       </ul>

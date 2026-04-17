@@ -92,5 +92,50 @@ input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0px 1000px #374151 inset !important; /* Dark mode background */
   -webkit-text-fill-color: #fff !important; /* Dark mode text */
 }
+/* ===== Custom Scrollbar ===== */
 
-  }
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* no background */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: transparent; /* hidden by default */
+  border-radius: 9999px;
+  transition: background-color 0.3s ease;
+}
+
+/* Hover pe show */
+:hover::-webkit-scrollbar-thumb {
+  background-color: #9ca3af; /* Tailwind gray-400 (light mode) */
+}
+
+/* Dark mode */
+.dark:hover::-webkit-scrollbar-thumb {
+  background-color: #4b5563; /* Tailwind gray-600 */
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+*:hover {
+  scrollbar-color: #9ca3af transparent;
+}
+
+.dark *:hover {
+  scrollbar-color: #4b5563 transparent;
+}
+
+/* Make date picker icon white in dark mode */
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+}

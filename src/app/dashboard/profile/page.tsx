@@ -124,9 +124,9 @@ const ProfileScreen = () => {
             />
 
             {/* Edit Icon */}
-            <div className="absolute bottom-0 right-0 translate-x-[25%] translate-y-[25%] transform rounded-full bg-primary p-1.5 shadow-md">
+            {/* <div className="absolute bottom-0 right-0 translate-x-[25%] translate-y-[25%] transform rounded-full bg-primary p-1.5 shadow-md">
               <IconEdit size={20} className="text-white" />
-            </div>
+            </div> */}
           </div>
 
           {/* Name & Role */}
@@ -134,7 +134,9 @@ const ProfileScreen = () => {
             <h1 className="mt-1 text-xl font-bold capitalize dark:text-white">
               {user?.name}
             </h1>
-            <p className="capitalize text-gray-500">{user?.role}</p>
+            <p className="capitalize text-gray-500">
+              {user?.role.replaceAll("_", " ")}
+            </p>
           </div>
         </div>
         {user && hasPermission(user.role, "change:role") && (
