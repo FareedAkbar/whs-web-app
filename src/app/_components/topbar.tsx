@@ -134,7 +134,7 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
                   />
                 )}
               </button>
-              <ThemeToggle hide />
+              {/* <ThemeToggle hide /> */}
               {/* <ThemeColorPicker />
               <ThemeFontPicker /> */}
               <div
@@ -149,7 +149,7 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
                     <p className="text-sm capitalize">
                       {session.data?.user.name}
                     </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                    <p className="text-xs text-gray-600 dark:text-gray-300">
                       {session.data?.user.email}
                     </p>
                   </div>

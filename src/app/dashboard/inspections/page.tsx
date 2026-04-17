@@ -618,7 +618,7 @@ function renderQuestion(
                   }}
                   className="accent-primary"
                 />
-                <span>{opt}</span>
+                <span className="text-sm dark:text-gray-50">{opt}</span>
               </label>
             ))}
           </div>

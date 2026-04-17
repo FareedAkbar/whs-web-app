@@ -98,12 +98,26 @@ export default function ViewInspections({
                           </p>
 
                           <p className="mt-2 text-gray-700 dark:text-gray-300">
-                            {Array.isArray(ans.answer)
+                            {/* {Array.isArray(ans.answer)
                               ? ans.answer.join(", ")
                               : typeof ans.answer === "string" &&
                                   ans.answer.startsWith("[")
                                 ? parseToArray(ans.answer).join(", ")
-                                : ans.answer}
+                                : ans.answer} */}
+                            {Array.isArray(ans.answer)
+                              ? ans.answer.join(", ")
+                              : typeof ans.answer === "string"
+                                ? (() => {
+                                    try {
+                                      const parsed = JSON.parse(ans.answer);
+                                      return Array.isArray(parsed)
+                                        ? parsed.join(", ")
+                                        : ans.answer;
+                                    } catch {
+                                      return ans.answer;
+                                    }
+                                  })()
+                                : String(ans.answer)}
                           </p>
                         </div>
                       ))
