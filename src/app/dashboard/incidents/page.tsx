@@ -403,7 +403,7 @@ export default function IncidentsList() {
             </div>
           ))}
         {filteredIncidents.length === 0 && (
-          <div className="flex h-full w-full items-center justify-center text-gray-500">
+          <div className="flex h-[60vh] w-full items-center justify-center text-gray-500">
             No incidents found
           </div>
         )}

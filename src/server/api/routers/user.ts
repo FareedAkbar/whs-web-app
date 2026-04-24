@@ -8,6 +8,7 @@ import {
   UsersResponseData,
 } from "@/types/user";
 import { create } from "domain";
+import { clerkClient } from "@/lib/clerk";
 
 export const userRouter = createTRPCRouter({
   getUsers: publicProcedure.query(async ({ ctx }) => {
@@ -307,6 +308,29 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const tempPassword = crypto.randomUUID().slice(0, 12) + "A1!";
+
+      let clerkUser;
+      try {
+        clerkUser = await clerkClient.users.createUser({
+          emailAddress: [input.email],
+          password: tempPassword,
+          firstName: input.name.split(" ")[0],
+          lastName: input.name.split(" ").slice(1).join(" ") || "",
+          phoneNumbers: input.phoneNumber ? [input.phoneNumber] : undefined,
+          publicMetadata: {
+            role: input.role,
+          },
+          // Admin ne banaya toh email verify skip karo
+          skipPasswordChecks: true,
+        });
+      } catch (err: any) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            err.errors?.[0]?.longMessage ?? "Failed to create Clerk user",
+        });
+      }
       try {
         const userToken = ctx.session?.user.token;
         if (!userToken) {

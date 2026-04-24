@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { env } from "@/env";
 import { TRPCError } from "@trpc/server";
+import { clerkClient } from "@/lib/clerk";
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
@@ -144,6 +145,25 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       console.log(input);
+      let clerkUser;
+      try {
+        clerkUser = await clerkClient.users.createUser({
+          emailAddress: [input.email],
+          password: input.password,
+          firstName: input.name.split(" ")[0],
+          lastName: input.name.split(" ").slice(1).join(" ") || "",
+          phoneNumbers: input.phoneNumber ? [input.phoneNumber] : undefined,
+          publicMetadata: {
+            role: input.role,
+          },
+        });
+      } catch (err: any) {
+        // Clerk ka error handle karo (e.g. email already exists)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: err.errors?.[0]?.message ?? "Failed to create Clerk user",
+        });
+      }
       try {
         const user = {
           name: input.name,

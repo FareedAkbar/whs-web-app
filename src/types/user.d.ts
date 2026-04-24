@@ -29,4 +29,5 @@ interface User {
   isVerifiedByAdmin?: boolean;
   phoneNumber?: string;
   isVerified?: boolean;
+  clerkId?: string;
 }

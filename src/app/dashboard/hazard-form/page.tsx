@@ -179,6 +179,7 @@ const HazardForm = () => {
                       type="text"
                       label="Hazard Title"
                       placeholder="Enter Hazard title"
+                      required
                       error={errors.reportTitle?.message}
                       {...field}
                     />
@@ -191,7 +192,7 @@ const HazardForm = () => {
             <div className="flex flex-wrap gap-4">
               <div className="min-w-[280px] flex-1">
                 <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Report Description
+                  Report Description <span className="text-red-500">*</span>
                 </label>
                 <Controller
                   name="reportDescription"
@@ -215,7 +216,8 @@ const HazardForm = () => {
 
               <div className="min-w-[280px] flex-1">
                 <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Detailed Incident Description
+                  Detailed Incident Description{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <Controller
                   name="hazardDescription"
@@ -245,7 +247,7 @@ const HazardForm = () => {
               render={({ field }) => (
                 <div>
                   <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Severity
+                    Severity <span className="text-red-500">*</span>
                   </label>
                   <div className="flex flex-wrap gap-3">
                     {severityKeys.map((key) => {
@@ -316,7 +318,7 @@ const HazardForm = () => {
               render={({ field }) => (
                 <div>
                   <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Upload Images
+                    Upload Images <span className="text-red-500">*</span>
                   </label>
 
                   <div className="mt-2 flex items-center gap-3">

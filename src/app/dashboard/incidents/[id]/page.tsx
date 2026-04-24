@@ -419,7 +419,7 @@ export default function IncidentDetailScreen() {
             <div className="space-y-2 text-sm">
               <div className="flex gap-2">
                 <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Name:
+                  Incident:
                 </span>
                 <span className="font-semibold text-gray-800 dark:text-gray-200">
                   {incidentMeta?.name ?? "N/A"}
