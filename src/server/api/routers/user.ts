@@ -317,7 +317,6 @@ export const userRouter = createTRPCRouter({
           password: tempPassword,
           firstName: input.name.split(" ")[0],
           lastName: input.name.split(" ").slice(1).join(" ") || "",
-          phoneNumbers: input.phoneNumber ? [input.phoneNumber] : undefined,
           publicMetadata: {
             role: input.role,
           },

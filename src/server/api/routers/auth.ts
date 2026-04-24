@@ -152,13 +152,14 @@ export const authRouter = createTRPCRouter({
           password: input.password,
           firstName: input.name.split(" ")[0],
           lastName: input.name.split(" ").slice(1).join(" ") || "",
-          phoneNumbers: input.phoneNumber ? [input.phoneNumber] : undefined,
           publicMetadata: {
             role: input.role,
           },
         });
       } catch (err: any) {
         // Clerk ka error handle karo (e.g. email already exists)
+        console.error("Clerk error:", err);
+        console.log("Clerk full error:", JSON.stringify(err, null, 2));
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: err.errors?.[0]?.message ?? "Failed to create Clerk user",

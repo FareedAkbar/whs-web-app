@@ -126,7 +126,7 @@ export default function Register() {
               label="Email"
               required
               error={errors.email?.message}
-              className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-black"
+              className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-white"
             />
           )}
         />
