@@ -209,6 +209,7 @@ const HazardForm = () => {
                       type="text"
                       label="Incident Title"
                       placeholder="Enter incident title"
+                      required
                       error={errors.reportTitle?.message}
                       {...field}
                     />
@@ -224,6 +225,7 @@ const HazardForm = () => {
                   render={({ field }) => (
                     <Select
                       label="Incident Type"
+                      required
                       options={Object.keys(IncidentCategoryType)?.map(
                         (t: string) => ({ label: t, value: t }),
                       )}
@@ -239,7 +241,7 @@ const HazardForm = () => {
             <div className="flex flex-wrap gap-4">
               <div className="min-w-[280px] flex-1">
                 <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Report Description
+                  Report Description <span className="text-red-500">*</span>
                 </label>
                 <Controller
                   name="reportDescription"
@@ -263,7 +265,8 @@ const HazardForm = () => {
 
               <div className="min-w-[280px] flex-1">
                 <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Detailed Incident Description
+                  Detailed Incident Description{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <Controller
                   name="incidentDescription"
@@ -298,6 +301,7 @@ const HazardForm = () => {
                   render={({ field }) => (
                     <Select
                       label="Treatment Type"
+                      required
                       options={
                         Object.values(treatmentType).map((t) => ({
                           label: t.replaceAll("_", " "),
@@ -324,6 +328,7 @@ const HazardForm = () => {
                     <Input
                       label="Injured Body Part"
                       placeholder="e.g., arm"
+                      required
                       {...field}
                     />
                   )}
@@ -344,7 +349,7 @@ const HazardForm = () => {
                   control={control}
                   rules={{ required: "Injured person name is required" }}
                   render={({ field }) => (
-                    <Input label="Injured Person Name" {...field} />
+                    <Input label="Injured Person Name" {...field} required />
                   )}
                 />
                 {errors.injuredPersonName && (
@@ -365,7 +370,7 @@ const HazardForm = () => {
                     required: "Injured person phone number is required",
                   }}
                   render={({ field }) => (
-                    <Input label="Injured Person Phone" {...field} />
+                    <Input label="Injured Person Phone" {...field} required />
                   )}
                 />
                 {errors.injuredPhoneNumber && (
@@ -387,7 +392,7 @@ const HazardForm = () => {
                     required: "Injured person email is required",
                   }}
                   render={({ field }) => (
-                    <Input label="Injured Person Email" {...field} />
+                    <Input label="Injured Person Email" {...field} required />
                   )}
                 />
                 {errors.injuredPersonEmail && (
@@ -407,7 +412,7 @@ const HazardForm = () => {
                     control={control}
                     rules={{ required: "First aider name is required" }}
                     render={({ field }) => (
-                      <Input label="First Aider Name" {...field} />
+                      <Input label="First Aider Name" {...field} required />
                     )}
                   />
                   {errors.firstAiderName && (
@@ -428,7 +433,7 @@ const HazardForm = () => {
                       required: "First aider phone number is required",
                     }}
                     render={({ field }) => (
-                      <Input label="First Aider Phone" {...field} />
+                      <Input label="First Aider Phone" {...field} required />
                     )}
                   />
                   {errors.firstAiderPhone && (
@@ -449,7 +454,7 @@ const HazardForm = () => {
                       required: "First aider email is required",
                     }}
                     render={({ field }) => (
-                      <Input label="First Aider Email" {...field} />
+                      <Input label="First Aider Email" {...field} required />
                     )}
                   />
                   {errors.firstAiderEmail && (
@@ -483,7 +488,7 @@ const HazardForm = () => {
               render={({ field }) => (
                 <div>
                   <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Severity
+                    Severity <span className="text-red-500">*</span>
                   </label>
                   <div className="flex flex-wrap gap-3">
                     {severityKeys.map((key) => {
@@ -555,7 +560,7 @@ const HazardForm = () => {
               render={({ field }) => (
                 <div>
                   <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Upload Images
+                    Upload Images <span className="text-red-500">*</span>
                   </label>
 
                   <div className="mt-2 flex items-center gap-3">

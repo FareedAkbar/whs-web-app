@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@clerk/backend": "^3.3.0",
     "@hookform/resolvers": "^4.1.2",
     "@radix-ui/react-label": "^2.1.2",
     "@t3-oss/env-nextjs": "^0.10.1",

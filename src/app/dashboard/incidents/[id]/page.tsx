@@ -393,14 +393,14 @@ export default function IncidentDetailScreen() {
                               image.url && window.open(image.url, "_blank")
                             }
                           />
-                          <button
+                          {/* <button
                             onClick={() =>
                               handleDownload(image.url, `incident_${index}.jpg`)
                             }
-                            className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
+                            className="absolute right-1 top-1 z-50 rounded-full bg-white/90 p-1 text-xs shadow"
                           >
                             <DownloadIcon className="h-3 w-3" color="red" />
-                          </button>
+                          </button> */}
                         </div>
                       ))}
                     </div>
@@ -419,7 +419,7 @@ export default function IncidentDetailScreen() {
             <div className="space-y-2 text-sm">
               <div className="flex gap-2">
                 <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Name:
+                  Incident:
                 </span>
                 <span className="font-semibold text-gray-800 dark:text-gray-200">
                   {incidentMeta?.name ?? "N/A"}

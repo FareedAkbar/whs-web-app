@@ -396,12 +396,12 @@ export default function HazardsList() {
               )} */}
             </div>
           ))}
-        {filteredHazards.length === 0 && (
-          <div className="flex h-full w-full items-center justify-center text-gray-500">
-            No hazards found
-          </div>
-        )}
       </div>
+      {filteredHazards.length === 0 && (
+        <div className="flex h-[60vh] w-full items-center justify-center text-gray-500">
+          No hazards found
+        </div>
+      )}
     </div>
   );
 }

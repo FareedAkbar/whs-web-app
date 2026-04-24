@@ -73,6 +73,9 @@ const InspectionChecklist = () => {
   const deleteInspection = api.inspections.deleteInspection.useMutation({
     onSuccess: () => {
       setConfirmDelete(null);
+      toast.success("Inspection deleted successfully");
+      setOpen(false);
+      setModal({ type: null, data: null });
       void refetch();
     },
   });
@@ -127,6 +130,27 @@ const InspectionChecklist = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState("");
+  const [assignedTab, setAssignedTab] = useState("All");
+  const [filteredInspections, setFilteredInspections] = useState<Inspection[]>(
+    [],
+  );
+  const handleAssignedTabChange = (tab: string) => {
+    setAssignedTab(tab);
+  };
+  useEffect(() => {
+    if (!inspections?.data) return;
+
+    let data = inspections.data;
+
+    if (assignedTab === "Created by me") {
+      data = data.filter((inspection) => inspection.createdBy === user?.id);
+    } else if (assignedTab === "Assigned to me") {
+      data = data.filter((inspection) => inspection.createdBy !== user?.id);
+    }
+
+    // "All" → no filter
+    setFilteredInspections(data);
+  }, [assignedTab, inspections?.data]);
 
   const { data: verifiedUsers, isLoading: loadingUsers } =
     api.users.getVerifiedUsers.useQuery();
@@ -243,9 +267,27 @@ const InspectionChecklist = () => {
           />
         </div>
       )}
+      <div className="mb-3 flex gap-3 px-1">
+        {["All", "Created by me", "Assigned to me"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => {
+              handleAssignedTabChange(tab);
+              // handleFilter(); // uncomment if you want auto filtering on tab click
+            }}
+            className={`rounded-full border px-4 py-2 text-sm transition ${
+              assignedTab === tab
+                ? "border-primary bg-primary text-white"
+                : "border-gray-300 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
 
       <div className="w-full space-y-6 p-6">
-        {inspections?.data?.map((inspection: Inspection) => (
+        {filteredInspections?.map((inspection: Inspection) => (
           <div
             key={inspection.id}
             className="relative w-full rounded-lg border bg-white p-6 text-left shadow-md dark:bg-gray-800 dark:text-white"
@@ -425,12 +467,18 @@ const InspectionChecklist = () => {
             <div className="flex justify-end gap-3">
               <Button
                 title={deleteInspection.isPending ? "Deleting..." : "Delete"}
-                onClick={() => deleteInspection.mutate({ id: modal.data?.id! })}
+                onClick={() => {
+                  deleteInspection.mutate({ id: modal.data?.id! });
+                }}
                 disabled={deleteInspection.isPending}
               />
               <Button
                 title="Cancel"
-                onClick={() => setConfirmDelete(null)}
+                onClick={() => {
+                  setConfirmDelete(null);
+                  setOpen(false);
+                  setModal({ type: null, data: null });
+                }}
                 variant="secondary"
               />
             </div>
