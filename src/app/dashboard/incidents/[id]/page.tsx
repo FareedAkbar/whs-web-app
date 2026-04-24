@@ -393,14 +393,14 @@ export default function IncidentDetailScreen() {
                               image.url && window.open(image.url, "_blank")
                             }
                           />
-                          <button
+                          {/* <button
                             onClick={() =>
                               handleDownload(image.url, `incident_${index}.jpg`)
                             }
-                            className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
+                            className="absolute right-1 top-1 z-50 rounded-full bg-white/90 p-1 text-xs shadow"
                           >
                             <DownloadIcon className="h-3 w-3" color="red" />
-                          </button>
+                          </button> */}
                         </div>
                       ))}
                     </div>
