@@ -17,7 +17,8 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
     BASE_URL: z.string().default("https://whs.iconsole.com.au"),
-    AUTH_TRUST_HOST: z.string().default("https://whs.iconsole.com.au"),
+    AUTH_TRUST_HOST: z.string(),
+    AUTH_URL: z.string().optional(),
   },
 
   /**
@@ -44,7 +45,8 @@ export const env = createEnv({
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
     NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
     NEXT_PUBLIC_MEDIA_URL: process.env.NEXT_PUBLIC_MEDIA_URL,
-    AUTH_TRUST_HOST: process.env.NEXTAUTH,
+    AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST,
+    AUTH_URL: process.env.AUTH_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
