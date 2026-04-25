@@ -55,7 +55,7 @@ const DashboardCounters: React.FC = () => {
     dashboard.hazards && Object.keys(dashboard.hazards).length > 0;
 
   return (
-    <div className="flex flex-wrap gap-6 p-6">
+    <div className="flex flex-wrap gap-6">
       {/* Dynamically render available cards in equal space */}
       {[
         dashboard.users && Object.keys(dashboard.users).length > 0 && (
@@ -106,7 +106,7 @@ const DashboardCounters: React.FC = () => {
       ]
         .filter(Boolean)
         .map((card, index, arr) => (
-          <div key={index} className={`min-w-[280px] flex-1`}>
+          <div key={index} className="w-full md:min-w-[280px] md:flex-1">
             {card}
           </div>
         ))}

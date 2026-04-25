@@ -60,9 +60,9 @@ export default function RootLayout({
     );
   }
   return (
-    <div className="relative flex min-h-screen w-full bg-white bg-[url('/images/whs-web-bg.png')] bg-cover p-2 dark:bg-gray-950 sm:p-0">
-      <div className="flex h-screen w-screen flex-col">
-        <div className="relative flex h-full w-full overflow-hidden">
+    <div className="relative flex min-h-screen w-full bg-white bg-[url('/images/whs-web-bg.png')] bg-cover dark:bg-gray-950">
+      <div className="flex h-screen w-full min-w-0 flex-col">
+        <div className="relative flex h-full min-w-0 overflow-hidden">
           <Sidebar isDrawerOpen={isDrawerOpen} toggleDrawer={toggleDrawer} />
 
           <div className="flex flex-1 flex-col">

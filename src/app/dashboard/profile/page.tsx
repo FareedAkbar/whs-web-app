@@ -131,7 +131,7 @@ const ProfileScreen = () => {
 
           {/* Name & Role */}
           <div>
-            <h1 className="mt-1 text-xl font-bold capitalize dark:text-white">
+            <h1 className="mt-5 font-bold capitalize dark:text-white md:text-xl">
               {user?.name}
             </h1>
             <p className="capitalize text-gray-500">

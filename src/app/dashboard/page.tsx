@@ -83,21 +83,24 @@ const Dashboard = () => {
             variant="secondary"
           />
         )} */}
-
-        {user && hasPermission(user.role, "create:incidents") && (
-          <Button
-            title="Report an Incident"
-            onClick={() => router.push("/dashboard/incident-form")}
-            icon={<IconAlertCircle size={18} />}
-          />
-        )}
-        {user && hasPermission(user.role, "create:incidents") && (
-          <Button
-            title="Report a Hazard"
-            onClick={() => router.push("/dashboard/hazard-form")}
-            icon={<IconAlertCircle size={18} />}
-          />
-        )}
+        <div className="flex w-full flex-col gap-4 sm:flex-row sm:justify-between">
+          {user && hasPermission(user.role, "create:incidents") && (
+            <Button
+              title="Report an Incident"
+              onClick={() => router.push("/dashboard/incident-form")}
+              icon={<IconAlertCircle size={18} />}
+              className="w-full sm:w-auto"
+            />
+          )}
+          {user && hasPermission(user.role, "create:hazards") && (
+            <Button
+              title="Report a Hazard"
+              onClick={() => router.push("/dashboard/hazard-form")}
+              icon={<IconAlertCircle size={18} />}
+              className="w-full sm:w-auto"
+            />
+          )}
+        </div>
       </div>
     </div>
   );
