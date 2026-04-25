@@ -545,7 +545,7 @@ export default function IncidentDetailScreen() {
             )}
 
             {/* Capture / Upload (for staff when incident is completed but report not closed) */}
-            {user?.role === "STAFF" &&
+            {/* {user?.role === "STAFF" &&
               incidentMeta?.status === "COMPLETED" &&
               report.status !== "CLOSED" && (
                 <Button
@@ -555,7 +555,7 @@ export default function IncidentDetailScreen() {
                     console.log("open upload");
                   }}
                 />
-              )}
+              )} */}
           </div>
         </div>
       </div>

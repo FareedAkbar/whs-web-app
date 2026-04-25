@@ -45,6 +45,7 @@ const ROLES = {
     // "change:role",
     "submit:inspection",
     "view:filled-inspections",
+    "create:hazards",
   ],
   DEPARTMENT_MANAGER: ["view:homeCounters"],
   FACILITY_MANAGER: [

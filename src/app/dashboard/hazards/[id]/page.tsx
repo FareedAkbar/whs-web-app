@@ -497,7 +497,7 @@ export default function HazardDetailScreen() {
               </ModalBody>
             )}
             {/* Capture / Upload (for staff when hazard is completed but report not closed) */}
-            {user?.role === "STAFF" &&
+            {/* {user?.role === "STAFF" &&
               hazardMeta?.status === "COMPLETED" &&
               report.status !== "CLOSED" && (
                 <Button
@@ -507,7 +507,7 @@ export default function HazardDetailScreen() {
                     console.log("open upload");
                   }}
                 />
-              )}
+              )} */}
           </div>
         </div>
       </div>

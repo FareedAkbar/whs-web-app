@@ -44,7 +44,7 @@ export default function RootLayout({
       {/* Foreground Content */}
       <div className="relative z-10 flex h-full min-h-screen w-full flex-1 flex-col lg:flex-row">
         {/* Left Side: Form/Content */}
-        <div className="flex w-full flex-1 items-center justify-center py-10 lg:h-screen lg:w-1/2 lg:py-0">
+        <div className="flex w-full flex-1 items-center justify-center px-3 py-10 lg:h-screen lg:w-1/2 lg:py-0">
           <div className="w-full max-w-md">{children}</div>
         </div>
 
