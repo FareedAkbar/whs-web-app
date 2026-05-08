@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { severityMapping } from "@/constants/severity";
 import { ReportResponse } from "@/types/report";
 import { useSession } from "next-auth/react";
+import { hasPermission } from "@/lib/auth";
+import { IconAlertCircle } from "@tabler/icons-react";
 
 export default function HazardsList() {
   const { data: hazards, isLoading } = api.incidents.getHazards.useQuery();
@@ -89,7 +91,7 @@ export default function HazardsList() {
         !priority.length || priority.includes(item.report.priority);
 
       const matchesStatus =
-        !status.length || status.includes(item.incident?.status ?? "");
+        !status.length || status.includes(item.hazard?.status ?? "");
 
       const matchesSearch =
         !searchTerm ||
@@ -133,98 +135,100 @@ export default function HazardsList() {
 
   return (
     <div className="flex w-full flex-col px-8">
-      <div className="sticky top-0 z-10 mb-4 flex h-full items-center justify-between backdrop-blur">
-        <input
-          type="text"
-          placeholder="Search hazards..."
-          className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <Dropdown
-          button={
-            <button className="flex w-full flex-row items-center border border-gray-300 bg-[#F9F9F9] px-4 py-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-              Filters
-              <ChevronDown className="ml-2 inline" size={16} />
-            </button>
-          }
-          className="absolute right-0 z-50"
-          isOpen={isFilterOpen}
-          setIsOpen={setIsFilterOpen}
-        >
-          <div className="flex flex-col gap-3 text-sm text-gray-700 dark:text-gray-200">
-            <p className="border-b pb-2 font-bold">Filter</p>
-            {/* Date Range */}
-            <div>
-              <label className="text-sm font-medium">Date Range</label>
-              <div className="mt-1 flex gap-2">
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-1/2 rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
-                />
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="w-1/2 rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
-                />
+      <div className="mb-4 flex w-full flex-col gap-2 sm:flex-row sm:items-center">
+        {/* Search + Filter row */}
+        <div className="sticky top-0 z-10 flex flex-1 items-center justify-between backdrop-blur">
+          <input
+            type="text"
+            placeholder="Search hazards..."
+            className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <Dropdown
+            button={
+              <button className="flex w-full flex-row items-center border border-gray-300 bg-[#F9F9F9] px-4 py-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                Filters
+                <ChevronDown className="ml-2 inline" size={16} />
+              </button>
+            }
+            className="absolute right-0 z-50"
+            isOpen={isFilterOpen}
+            setIsOpen={setIsFilterOpen}
+          >
+            <div className="flex flex-col gap-3 text-sm text-gray-700 dark:text-gray-200">
+              <p className="border-b pb-2 font-bold">Filter</p>
+              {/* Date Range */}
+              <div>
+                <label className="text-sm font-medium">Date Range</label>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="w-1/2 rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
+                  />
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="w-1/2 rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Priority Checkboxes */}
-            <div>
-              <label className="text-sm font-medium">Priority</label>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {["LOW", "MEDIUM", "HIGH", "EXTREME"].map((p) => (
-                  <label
-                    key={p}
-                    className="flex items-center gap-1 text-sm capitalize"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={priority.includes(p)}
-                      onChange={() =>
-                        toggleArrayValue(p, setPriority, priority)
-                      }
-                      className="accent-primary"
-                    />
-                    {p.toLowerCase()}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Status Checkboxes */}
-            <div>
-              <label className="text-sm font-medium">Status</label>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {Object.keys(statusMapping).map((statusName) => (
-                  <label
-                    key={statusName}
-                    className="flex items-center gap-1 text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={status.includes(statusName)}
-                      onChange={() =>
-                        toggleArrayValue(statusName, setStatus, status)
-                      }
-                      className="accent-primary"
-                    />
-                    <span
-                      // className={`rounded-full px-2 py-0.5 text-xs ${statusMapping[statusName as keyof typeof statusMapping]}`}
-                      className={`capitalize`}
+              {/* Priority Checkboxes */}
+              <div>
+                <label className="text-sm font-medium">Priority</label>
+                <div className="mt-1 flex flex-wrap gap-2">
+                  {["LOW", "MEDIUM", "HIGH", "EXTREME"].map((p) => (
+                    <label
+                      key={p}
+                      className="flex items-center gap-1 text-sm capitalize"
                     >
-                      {statusName.replace("_", " ").toLowerCase()}
-                    </span>
-                  </label>
-                ))}
+                      <input
+                        type="checkbox"
+                        checked={priority.includes(p)}
+                        onChange={() =>
+                          toggleArrayValue(p, setPriority, priority)
+                        }
+                        className="accent-primary"
+                      />
+                      {p.toLowerCase()}
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Assigned Person */}
-            {/* {session.data?.user?.role == "ADMIN" && (
+              {/* Status Checkboxes */}
+              <div>
+                <label className="text-sm font-medium">Status</label>
+                <div className="mt-1 flex flex-wrap gap-2">
+                  {Object.keys(statusMapping).map((statusName) => (
+                    <label
+                      key={statusName}
+                      className="flex items-center gap-1 text-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={status.includes(statusName)}
+                        onChange={() =>
+                          toggleArrayValue(statusName, setStatus, status)
+                        }
+                        className="accent-primary"
+                      />
+                      <span
+                        // className={`rounded-full px-2 py-0.5 text-xs ${statusMapping[statusName as keyof typeof statusMapping]}`}
+                        className={`capitalize`}
+                      >
+                        {statusName.replace("_", " ").toLowerCase()}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Assigned Person */}
+              {/* {session.data?.user?.role == "ADMIN" && (
               <div>
                 <Select
                   options={
@@ -240,8 +244,8 @@ export default function HazardsList() {
               </div>
             )} */}
 
-            {/* Task Type */}
-            {/* <div>
+              {/* Task Type */}
+              {/* <div>
               <label className="font-medium">Task Type</label>
               <select
                 value={taskType}
@@ -257,23 +261,34 @@ export default function HazardsList() {
               </select>
             </div> */}
 
-            {/* Filter Button */}
-            <Button
-              // className="mt-3 w-full rounded bg-blue-600 py-2 text-white transition hover:bg-blue-700"
-              onClick={handleFilter}
-              title="Apply Filters"
-              icon={<Filter size={16} />}
-            />
-            <Button
-              title="Clear Filters"
-              onClick={handleClearFilter}
-              variant="secondary"
-            />
+              {/* Filter Button */}
+              <Button
+                // className="mt-3 w-full rounded bg-blue-600 py-2 text-white transition hover:bg-blue-700"
+                onClick={handleFilter}
+                title="Apply Filters"
+                icon={<Filter size={16} />}
+              />
+              <Button
+                title="Clear Filters"
+                onClick={handleClearFilter}
+                variant="secondary"
+              />
+            </div>
+          </Dropdown>
+          <div className="rounded-r-md bg-primary p-[15px]">
+            <Search className="" size={16} color="white" />
           </div>
-        </Dropdown>
-        <div className="rounded-r-md bg-primary p-[15px]">
-          <Search className="" size={16} color="white" />
         </div>
+
+        {/* Report button — full width on mobile, auto on sm+ */}
+        {user && hasPermission(user.role, "create:hazards") && (
+          <Button
+            title="Report a Hazard"
+            onClick={() => router.push("/dashboard/hazard-form")}
+            icon={<IconAlertCircle size={18} />}
+            className="w-full sm:w-auto"
+          />
+        )}
       </div>
       {user?.role === "FACILITY_OFFICER" && (
         <div className="mb-3 flex gap-3 px-1">

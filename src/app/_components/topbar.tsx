@@ -134,7 +134,7 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
                   />
                 )}
               </button>
-              {/* <ThemeToggle hide /> */}
+              <ThemeToggle hide />
               {/* <ThemeColorPicker />
               <ThemeFontPicker /> */}
               <div

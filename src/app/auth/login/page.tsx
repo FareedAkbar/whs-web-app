@@ -39,7 +39,6 @@ export default function Login() {
         redirect: false,
       });
       const session = await getSession();
-      console.log("response", response);
 
       if (session !== null && response?.ok && !response.error) {
         toast.dismiss();

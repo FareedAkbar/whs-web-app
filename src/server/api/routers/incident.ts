@@ -8,7 +8,6 @@ export const incidentRouter = createTRPCRouter({
   getIncidents: publicProcedure.query(async ({ ctx }) => {
     try {
       const userToken = ctx.session?.user.token;
-      console.log("userToken", userToken);
       if (!userToken) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
@@ -22,7 +21,7 @@ export const incidentRouter = createTRPCRouter({
           "Content-Type": "application/json",
         },
       });
-      console.log("response", response);
+
       if (!response.ok) {
         const errorData = (await response.json()) as { message: string };
         console.error("incidents getting error:", errorData);
@@ -55,7 +54,6 @@ export const incidentRouter = createTRPCRouter({
   getHazards: publicProcedure.query(async ({ ctx }) => {
     try {
       const userToken = ctx.session?.user.token;
-      console.log("userToken", userToken);
       if (!userToken) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
@@ -69,7 +67,7 @@ export const incidentRouter = createTRPCRouter({
           "Content-Type": "application/json",
         },
       });
-      console.log("response", response);
+
       if (!response.ok) {
         const errorData = (await response.json()) as { message: string };
         console.error("incidents getting error:", errorData);
@@ -125,7 +123,7 @@ export const incidentRouter = createTRPCRouter({
           },
           body: JSON.stringify(input),
         });
-        console.log("response", response);
+
         if (!response.ok) {
           const errorData = (await response.json()) as { message: string };
           console.error("incident assign error:", errorData);
@@ -180,7 +178,7 @@ export const incidentRouter = createTRPCRouter({
             },
           },
         );
-        console.log("response", response);
+
         if (!response.ok) {
           const errorData = (await response.json()) as { message: string };
           console.error("incident getting error:", errorData);
@@ -402,7 +400,7 @@ export const incidentRouter = createTRPCRouter({
           },
           body: JSON.stringify(input),
         });
-        console.log("response", response);
+
         if (!response.ok) {
           const errorData = (await response.json()) as { message: string };
           console.error("incident assign error:", errorData);
@@ -456,7 +454,7 @@ export const incidentRouter = createTRPCRouter({
           },
           body: JSON.stringify(input),
         });
-        console.log("response", response);
+
         if (!response.ok) {
           const errorData = (await response.json()) as { message: string };
           console.error("incident assign error:", errorData);
