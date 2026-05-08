@@ -19,7 +19,7 @@ export const enumRouter = createTRPCRouter({
           "Content-Type": "application/json",
         },
       });
-      console.log("response", response);
+
       if (!response.ok) {
         const errorData = (await response.json()) as { message: string };
         console.error("enums getting error:", errorData);

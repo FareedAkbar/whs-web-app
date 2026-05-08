@@ -21,7 +21,7 @@ export const InspectionRouter = createTRPCRouter({
           "Content-Type": "application/json",
         },
       });
-      console.log("response", response);
+
       if (!response.ok) {
         const errorData = (await response.json()) as { message: string };
         console.error("inspections getting error:", errorData);
@@ -70,7 +70,7 @@ export const InspectionRouter = createTRPCRouter({
             body: JSON.stringify({ id: input.id }),
           },
         );
-        console.log("response", response);
+
         if (!response.ok) {
           const errorData = (await response.json()) as { message: string };
           console.error("inspections getting error:", errorData);

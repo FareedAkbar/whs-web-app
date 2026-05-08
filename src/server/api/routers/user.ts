@@ -27,7 +27,7 @@ export const userRouter = createTRPCRouter({
           "Content-Type": "application/json",
         },
       });
-      console.log("response", response);
+
       if (!response.ok) {
         const errorData = (await response.json()) as { message: string };
         console.error("users getting error:", errorData);
@@ -69,7 +69,7 @@ export const userRouter = createTRPCRouter({
           authorization: `Bearer ${userToken}`,
         },
       });
-      console.log("response", response);
+
       if (!response.ok) {
         const errorData = (await response.json()) as { message: string };
         console.error("users getting error:", errorData);
@@ -122,7 +122,7 @@ export const userRouter = createTRPCRouter({
           },
           body: JSON.stringify(input),
         });
-        console.log("response", response);
+
         if (!response.ok) {
           const errorData = (await response.json()) as { message: string };
           console.error("user update error:", errorData);
@@ -173,7 +173,7 @@ export const userRouter = createTRPCRouter({
           },
           body: JSON.stringify(input),
         });
-        console.log("response", response);
+
         if (!response.ok) {
           const errorData = (await response.json()) as { message: string };
           console.error("user update error:", errorData);

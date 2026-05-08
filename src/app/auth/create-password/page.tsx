@@ -121,11 +121,11 @@ export default function CreatePasswordScreen() {
         />
 
         <div className="flex gap-5 pt-4">
-          <Button
+          {/* <Button
             title="Back"
             variant="secondary"
             onClick={() => router.back()}
-          />
+          /> */}
           <Button
             title={loading ? "Creating..." : "Create"}
             icon={<IconChevronRight size={12} />}

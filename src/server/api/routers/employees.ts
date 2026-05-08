@@ -23,7 +23,7 @@ export const employeeRouter = createTRPCRouter({
           },
         },
       );
-      console.log("response", response);
+
       if (!response.ok) {
         const errorData = (await response.json()) as { message: string };
         console.error("employees getting error:", errorData);

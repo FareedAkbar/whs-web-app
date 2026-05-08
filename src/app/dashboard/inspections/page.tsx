@@ -259,32 +259,34 @@ const InspectionChecklist = () => {
   return (
     <div className="flex flex-col items-center justify-center space-y-4 p-6">
       {user && hasPermission(user.role, "create:inspections") && (
-        <div className="flex w-full items-center justify-end">
-          <Button
-            onClick={() => router.push("/dashboard/create-inspection")}
-            title="Create Inspection Checklist"
-            icon={<PlusIcon />}
-          />
-        </div>
+        <>
+          <div className="flex w-full items-center justify-end">
+            <Button
+              onClick={() => router.push("/dashboard/create-inspection")}
+              title="Create Inspection Checklist"
+              icon={<PlusIcon />}
+            />
+          </div>
+          <div className="mb-3 flex gap-3 px-1">
+            {["All", "Created by me", "Assigned to me"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => {
+                  handleAssignedTabChange(tab);
+                  // handleFilter(); // uncomment if you want auto filtering on tab click
+                }}
+                className={`rounded-full border px-4 py-2 text-sm transition ${
+                  assignedTab === tab
+                    ? "border-primary bg-primary text-white"
+                    : "border-gray-300 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </>
       )}
-      <div className="mb-3 flex gap-3 px-1">
-        {["All", "Created by me", "Assigned to me"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => {
-              handleAssignedTabChange(tab);
-              // handleFilter(); // uncomment if you want auto filtering on tab click
-            }}
-            className={`rounded-full border px-4 py-2 text-sm transition ${
-              assignedTab === tab
-                ? "border-primary bg-primary text-white"
-                : "border-gray-300 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
 
       <div className="w-full space-y-6 p-6">
         {filteredInspections?.map((inspection: Inspection) => (
