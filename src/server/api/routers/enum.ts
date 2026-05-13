@@ -30,7 +30,6 @@ export const enumRouter = createTRPCRouter({
       }
 
       const enumsData = (await response.json()) as EnumerationsResponse;
-      console.log("enumsData", enumsData);
       return {
         status: true,
         data: enumsData.data,

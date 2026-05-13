@@ -324,7 +324,7 @@ export default function IncidentsList() {
           filteredIncidents?.map((item) => (
             <div
               key={item.report.id}
-              className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg dark:border-gray-500 dark:bg-gray-800 dark:shadow-gray-700"
+              className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg dark:border-gray-600 dark:bg-gray-800 dark:shadow-gray-700"
               // onClick={() => {
               //   setSelectedIncident(item);
               //   setOpen(true);

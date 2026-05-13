@@ -29,7 +29,6 @@ export default function Login() {
     resolver: zodResolver(inputs),
   });
   const onSubmit = async (data: InputType) => {
-    console.log("data", data);
     toast.loading("Logging in...");
 
     try {

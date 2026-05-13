@@ -212,7 +212,6 @@ export const authConfig = {
             if (!response.user) {
               return null;
             }
-            console.log("response.user", response);
 
             const user: User = {
               ...response.user,

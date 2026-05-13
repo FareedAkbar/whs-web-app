@@ -11,8 +11,8 @@ export default function PrivacyPolicyPage() {
 
       <ol className="ml-6 mt-4 list-decimal space-y-3">
         <li>
-          <strong className="underline">Information We Collect:</strong> We may
-          collect the following types of information:
+          <strong>Information We Collect:</strong> We may collect the following
+          types of information:
           <ul className="ml-6 mt-2 list-disc">
             <li>
               Personal Information (e.g., name, email address) — only if you
@@ -29,33 +29,32 @@ export default function PrivacyPolicyPage() {
         </li>
 
         <li>
-          <strong className="underline">How We Use Your Information:</strong> To
-          provide and improve app features, respond to support requests,
-          maintain security, and send important updates if necessary.
+          <strong>How We Use Your Information:</strong> To provide and improve
+          app features, respond to support requests, maintain security, and send
+          important updates if necessary.
         </li>
 
         <li>
-          <strong className="underline">Data Storage & Security:</strong> All
-          data is securely stored and protected using industry-standard
-          practices. We do not sell, rent, or share your personal information.
+          <strong>Data Storage & Security:</strong> All data is securely stored
+          and protected using industry-standard practices. We do not sell, rent,
+          or share your personal information.
         </li>
 
         <li>
-          <strong className="underline">Third-Party Services:</strong> We may
-          use trusted third-party tools (like analytics or crash reporting) that
-          collect non-personal data under their own privacy policies.
+          <strong>Third-Party Services:</strong> We may use trusted third-party
+          tools (like analytics or crash reporting) that collect non-personal
+          data under their own privacy policies.
         </li>
 
         <li>
-          <strong className="underline">Your Choices:</strong> You can choose
-          not to provide certain data, but that may limit some features. You may
-          delete your account or data anytime by contacting us.
+          <strong>Your Choices:</strong> You can choose not to provide certain
+          data, but that may limit some features. You may delete your account or
+          data anytime by contacting us.
         </li>
 
         <li>
-          <strong className="underline">Changes to This Policy:</strong> We may
-          update this Privacy Policy occasionally and will notify users of
-          significant changes.
+          <strong>Changes to This Policy:</strong> We may update this Privacy
+          Policy occasionally and will notify users of significant changes.
         </li>
       </ol>
     </div>

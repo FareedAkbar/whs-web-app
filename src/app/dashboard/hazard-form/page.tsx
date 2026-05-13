@@ -88,7 +88,6 @@ const HazardForm = () => {
       categoryType: data.categoryType,
     };
 
-    console.log("Incident Data:", hazardData);
     try {
       await reportHazard.mutateAsync(hazardData, {
         onSuccess: () => {

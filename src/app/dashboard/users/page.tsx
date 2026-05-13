@@ -10,7 +10,10 @@ import {
   useModal,
 } from "@/components/ui/animated-modal"; // Adjust the import path as necessary
 import { toast } from "react-toastify";
-import { IconRosetteDiscountCheckFilled } from "@tabler/icons-react";
+import {
+  IconRosetteDiscountCheckFilled,
+  IconRosetteDiscountCheckOff,
+} from "@tabler/icons-react";
 import Button from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { useSession } from "next-auth/react";
@@ -285,7 +288,7 @@ const UserPage = () => {
               </button>
             }
             className="absolute right-0 z-50"
-            dropdownClassName="w-80"
+            dropdownClassName="w-80 rounded-md border bg-white p-4 shadow-lg dark:border-gray-600 dark:bg-gray-800 "
             isOpen={isFilterOpen}
             setIsOpen={setIsFilterOpen}
           >
@@ -341,12 +344,12 @@ const UserPage = () => {
                 {/* <td className="p-4 text-center">
                   <input type="checkbox" className="accent-primary" />
                 </td> */}
-                <td className="p-4">{user.name}</td>
+                <td className="p-4 capitalize">{user.name}</td>
                 <td className="p-4">{user.email}</td>
                 <td className="p-4">{user.role.replaceAll("_", " ")}</td>
                 <td className="p-4">
                   <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerifiedByAdmin ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:bg-opacity-50"}`}
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerifiedByAdmin ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-500 dark:bg-yellow-900 dark:bg-opacity-50"}`}
                   >
                     <span className="h-2 w-2 rounded-full bg-current"></span>
                     {user.isVerifiedByAdmin ? "Approved" : "Pending"}
@@ -421,7 +424,12 @@ const UserPage = () => {
                     className="text-green-600"
                     size={20}
                   />
-                ) : null}
+                ) : (
+                  <IconRosetteDiscountCheckOff
+                    className="text-red-600"
+                    size={20}
+                  />
+                )}
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {selectedUser?.email}
@@ -431,12 +439,12 @@ const UserPage = () => {
             {/* Verification Status Messages */}
             <div className="flex items-center justify-center">
               {selectedUser?.isVerifiedByAdmin ? (
-                <p className="mt-4 w-fit rounded-md bg-green-100 px-3 py-1 text-center text-sm font-medium text-green-600">
-                  ✅ Role Approved
+                <p className="mt-4 w-fit rounded-full bg-green-100 px-3 py-1 text-center text-sm font-medium text-green-500 dark:bg-green-900/50">
+                  Role Approved
                 </p>
               ) : (
-                <p className="mt-4 rounded-md bg-yellow-100 px-3 py-1 text-center text-sm font-medium text-yellow-600">
-                  ⚠️ Pending Approval
+                <p className="mt-4 rounded-full bg-yellow-100 px-3 py-1 text-center text-sm font-medium text-yellow-500 dark:bg-yellow-900/50">
+                  Pending Approval
                 </p>
               )}
             </div>

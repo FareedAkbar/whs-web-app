@@ -30,7 +30,6 @@ export const dashboardRouter = createTRPCRouter({
       }
 
       const enumsData = (await response.json()) as DashboardStatsApiResponse;
-      console.log("enumsData", enumsData);
       return {
         status: true,
         data: enumsData.data,
@@ -73,7 +72,6 @@ export const dashboardRouter = createTRPCRouter({
       }
 
       const enumsData = (await response.json()) as DashboardStatsApiResponse;
-      console.log("enumsData", enumsData);
       return {
         status: true,
         data: enumsData.data,

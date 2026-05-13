@@ -13,7 +13,6 @@ export const workerRouter = createTRPCRouter({
           message: "Unauthorized",
         });
       }
-      console.log("resppppp", `${env.BASE_URL}/admin/all-users?workers=true`);
       const response = await fetch(
         `${env.BASE_URL}/admin/all-users?workers=true`,
         {
@@ -35,7 +34,6 @@ export const workerRouter = createTRPCRouter({
       }
 
       const workersData = (await response.json()) as UsersResponseData;
-      console.log("workersData", workersData);
       return {
         status: true,
         data: workersData.users,

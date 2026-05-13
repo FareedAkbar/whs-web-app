@@ -53,7 +53,7 @@ export default function TopBar() {
       await signOut({ callbackUrl: "/", redirect: true });
       router.push("/");
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -64,7 +64,6 @@ export default function TopBar() {
   }) => {
     if (option.value === "logout") await handleSignOut();
     if (option.value === "settings") router.push("/team");
-    console.log("Selected:", option.value);
   };
   const path = usePathname();
   useEffect(() => {

@@ -182,7 +182,6 @@ export default function IncidentDetailScreen() {
         {
           onSuccess: () => {
             void refetch();
-            console.log("close modal");
 
             setOpen(false);
             setModalMode("");

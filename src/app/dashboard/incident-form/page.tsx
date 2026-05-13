@@ -117,7 +117,6 @@ const HazardForm = () => {
       dynamicQuestion: [], // or appropriate value if available
     };
 
-    console.log("Incident Data:", incidentData);
     try {
       await reportIncident.mutateAsync(incidentData, {
         onSuccess: () => {

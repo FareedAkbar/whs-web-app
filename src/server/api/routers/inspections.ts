@@ -138,8 +138,6 @@ export const InspectionRouter = createTRPCRouter({
           status?: string;
         };
 
-        console.log("response create inspection", responseData);
-
         if (!response.ok) {
           console.error("inspections creating error:", responseData);
           return {
@@ -188,8 +186,6 @@ export const InspectionRouter = createTRPCRouter({
           message?: string;
           status?: string;
         };
-
-        console.log("response delete inspection", responseData);
 
         if (!response.ok) {
           console.error("inspections deleting error:", responseData);
@@ -247,8 +243,6 @@ export const InspectionRouter = createTRPCRouter({
           status?: string;
         };
 
-        console.log("response assign inspection", responseData);
-
         if (!response.ok) {
           console.error("inspections assigning error:", responseData);
           return {
@@ -305,8 +299,6 @@ export const InspectionRouter = createTRPCRouter({
         });
 
         const responseData = await response.json();
-
-        console.log("Submit inspection response:", responseData);
 
         if (!response.ok) {
           return {

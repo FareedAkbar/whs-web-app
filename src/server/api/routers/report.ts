@@ -15,7 +15,6 @@ export const reportRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         const userToken = ctx.session?.user.token;
-        console.log("userToken", userToken);
         if (!userToken) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
@@ -33,7 +32,6 @@ export const reportRouter = createTRPCRouter({
             comments: input.comments,
           }),
         });
-        console.log("add comment response", response);
         if (!response.ok) {
           const errorData = (await response.json()) as { message: string };
           console.error("adding comment error:", errorData);
