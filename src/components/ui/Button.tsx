@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils"; // Optional utility to combine classNames
+import { Loader } from "lucide-react";
 
 interface ButtonProps {
   title: string;
@@ -49,9 +50,13 @@ const Button: React.FC<ButtonProps> = ({
       )}
     >
       {loading && (
-        <div
-          className={`h-4 w-4 animate-spin rounded-full border-t ${variant === "primary" ? "border-white" : "border-primary"} bg-transparent`}
+        <Loader
+          size={16}
+          className={`${variant === "primary" ? "text-white" : "text-primary"} animate-spin`}
         />
+        // <div
+        //   className={`h-4 w-4 animate-spin rounded-full border-t ${variant === "primary" ? "border-white" : "border-primary"} bg-transparent`}
+        // />
       )}
       {icon && !loading && (
         <span className={iconWrapper[variant]}>

@@ -124,7 +124,7 @@ const HazardForm = () => {
       files.forEach((file) => {
         formData.append("files", file);
       });
-
+      toast.info("Uploading images...");
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_BASE_URL}/media`,
@@ -201,7 +201,7 @@ const HazardForm = () => {
                     <textarea
                       {...field}
                       className="w-full rounded-md border bg-gray-50 p-3 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white dark:autofill:text-white"
-                      placeholder="Describe the incident (general)"
+                      placeholder="Describe the hazard (general)"
                       rows={4}
                     />
                   )}
@@ -215,8 +215,7 @@ const HazardForm = () => {
 
               <div className="min-w-[280px] flex-1">
                 <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Detailed Incident Description{" "}
-                  <span className="text-red-500">*</span>
+                  Detailed Hazard Description
                 </label>
                 <Controller
                   name="hazardDescription"
@@ -225,7 +224,7 @@ const HazardForm = () => {
                     <textarea
                       {...field}
                       className="w-full rounded-md border bg-gray-50 p-3 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white dark:autofill:text-white"
-                      placeholder="Detailed incident description"
+                      placeholder="Detailed hazard description"
                       rows={4}
                     />
                   )}
@@ -261,7 +260,7 @@ const HazardForm = () => {
                           onClick={() => {
                             field.onChange(key);
                           }}
-                          className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg bg-gray-50 p-4 text-center font-medium shadow-sm transition-all duration-150 dark:bg-gray-700 ${
+                          className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg bg-gray-50 p-4 text-center font-medium shadow-md transition-all duration-150 dark:bg-gray-700 ${
                             isSelected ? "border" : "border border-transparent"
                           }`}
                           style={{
@@ -348,7 +347,7 @@ const HazardForm = () => {
                     {images.map((img) => (
                       <div
                         key={img.id}
-                        className="relative h-24 w-24 rounded-2xl bg-gray-100 shadow-lg"
+                        className="relative h-24 w-24 rounded-2xl bg-gray-100 shadow-lg dark:bg-gray-600"
                       >
                         <button
                           type="button"
@@ -359,7 +358,7 @@ const HazardForm = () => {
                             setImages(filtered);
                             field.onChange(filtered); // keep RHF synced
                           }}
-                          className="absolute -right-1 -top-1 rounded-full bg-white p-0.5 text-red-500 hover:bg-red-50"
+                          className="absolute -right-1 -top-1 rounded-full bg-white p-0.5 text-red-500 hover:bg-red-50 dark:bg-gray-700 dark:text-red-400 dark:hover:bg-red-900/70"
                         >
                           <IconX size={16} />
                         </button>

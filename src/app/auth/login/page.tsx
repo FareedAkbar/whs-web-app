@@ -107,7 +107,9 @@ export default function Login() {
               required
               label="Password"
               // className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-black"
-              onSubmit={handleSubmit(onSubmit)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSubmit(onSubmit)();
+              }}
             />
           )}
         />

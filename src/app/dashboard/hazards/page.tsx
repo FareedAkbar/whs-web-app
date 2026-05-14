@@ -99,6 +99,7 @@ export default function HazardsList() {
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
         item.report.title.toLowerCase().includes(searchTerm.toLowerCase());
+      console.log("user?.id", user?.id);
 
       // Assigned tab logic
       const matchesTab =
@@ -123,7 +124,7 @@ export default function HazardsList() {
 
   useEffect(() => {
     handleFilter();
-  }, [searchTerm]);
+  }, [searchTerm, assignedTab]);
 
   if (isLoading) {
     return (
@@ -302,7 +303,7 @@ export default function HazardsList() {
               className={`rounded-full border px-4 py-2 text-sm transition ${
                 assignedTab === tab
                   ? "border-primary bg-primary text-white"
-                  : "border-gray-300 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                  : "border-gray-300 bg-gray-100 text-gray-800 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-200"
               }`}
             >
               {tab}

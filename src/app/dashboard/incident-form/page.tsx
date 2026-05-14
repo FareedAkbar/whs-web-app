@@ -58,7 +58,7 @@ const HazardForm = () => {
   const { control, handleSubmit, register, setValue, watch, formState } =
     methods;
   const severityKeys = useMemo(() => Object.keys(severityMapping), []);
-
+  type Image = { id: string; url: string };
   const { errors } = formState;
   // const [date, setDate] = useState<Date | null>(null);
   const [location, setLocation] = useState<{
@@ -145,46 +145,74 @@ const HazardForm = () => {
   // watch fields to control conditional sections
   const treatmentTypeValue = watch("treatmentType");
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // handleFileChange only manages setImages state
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onFieldChange: (images: Image[]) => void,
+    currentImages: Image[],
+  ) => {
     e.preventDefault();
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
+    if (!e.target.files) return;
 
-      const formData = new FormData();
-      files.forEach((file) => {
-        formData.append("files", file);
+    const files = Array.from(e.target.files);
+
+    // Give each placeholder a stable tempId to find and replace later
+    const placeholders: Image[] = files.map((file, i) => ({
+      id: `temp-${file.name}-${Date.now()}-${i}`,
+      url: URL.createObjectURL(file),
+    }));
+
+    const placeholderIds = new Set(placeholders.map((p) => p.id));
+
+    // Add placeholders on top of current images
+    setImages((prev) => [...prev, ...placeholders]);
+    onFieldChange([...currentImages, ...placeholders]);
+
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
+    toast.info("Uploading images...");
+    console.log("Uploading files:", files);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/media`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session?.data?.user.token}` },
+          body: formData,
+        },
+      );
+
+      const result = (await response.json()) as UploadMediaApiResponse;
+      if (!response.ok)
+        throw new Error(result.message || "Failed to upload files");
+
+      const uploadedImages: Image[] =
+        result?.fileUrls?.map((img: FileUrl) => ({
+          id: img.file.id,
+          url: img.file.url,
+        })) ?? [];
+
+      // Use functional update to get latest state, then swap placeholders for real images
+      setImages((prev) => {
+        const withoutPlaceholders = prev.filter(
+          (img) => !placeholderIds.has(img.id),
+        );
+        const updated = [...withoutPlaceholders, ...uploadedImages];
+        onFieldChange(updated); // sync RHF with the true latest state
+        return updated;
       });
 
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/media`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${session?.data?.user.token}`,
-            },
-            body: formData,
-          },
-        );
-
-        const result = (await response.json()) as UploadMediaApiResponse;
-
-        if (!response.ok) {
-          throw new Error(result.message || "Failed to upload files");
-        }
-
-        const uploadedImages =
-          result?.fileUrls?.map((img: FileUrl) => ({
-            id: img.file.id,
-            url: img.file.url,
-          })) || [];
-
-        setImages((prev) => [...prev, ...uploadedImages]);
-        toast.success("Images uploaded successfully!");
-      } catch (error) {
-        console.error("Upload failed:", error);
-        toast.error("Image upload failed.");
-      }
+      toast.success("Images uploaded successfully!");
+    } catch (error) {
+      // Remove only this batch's placeholders, keep everything else
+      setImages((prev) => {
+        const reverted = prev.filter((img) => !placeholderIds.has(img.id));
+        onFieldChange(reverted);
+        return reverted;
+      });
+      console.error("Upload failed:", error);
+      toast.error("Image upload failed.");
     }
   };
 
@@ -264,8 +292,7 @@ const HazardForm = () => {
 
               <div className="min-w-[280px] flex-1">
                 <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Detailed Incident Description{" "}
-                  <span className="text-red-500">*</span>
+                  Detailed Incident Description
                 </label>
                 <Controller
                   name="incidentDescription"
@@ -503,9 +530,7 @@ const HazardForm = () => {
                             field.onChange(key);
                             setSelectedSeverity(key);
                           }}
-                          className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg p-4 text-center font-medium shadow-sm transition-all duration-150 ${
-                            isSelected ? "border" : "border border-transparent"
-                          }`}
+                          className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg bg-gray-50 p-4 text-center font-medium shadow-md transition-all duration-150 dark:bg-gray-700 ${isSelected ? "border" : ""}`}
                           style={{
                             backgroundColor: isSelected
                               ? `${color}22`
@@ -571,16 +596,7 @@ const HazardForm = () => {
                         accept="image/*"
                         multiple
                         onChange={(e) => {
-                          void handleFileChange(e);
-                          // update field value for validation sync
-                          const files = Array.from(e.target.files ?? []);
-                          if (files.length > 0) {
-                            const newImages = files.map((file, i) => ({
-                              id: `${file.name}-${i}`,
-                              url: URL.createObjectURL(file),
-                            }));
-                            field.onChange([...images, ...newImages]);
-                          }
+                          void handleFileChange(e, field.onChange, images);
                         }}
                         className="hidden"
                       />
@@ -590,7 +606,7 @@ const HazardForm = () => {
                     {images.map((img) => (
                       <div
                         key={img.id}
-                        className="relative h-24 w-24 rounded-2xl bg-gray-100 shadow-lg"
+                        className="relative h-24 w-24 rounded-2xl bg-gray-100 shadow-lg dark:bg-gray-600"
                       >
                         <button
                           type="button"
@@ -601,7 +617,7 @@ const HazardForm = () => {
                             setImages(filtered);
                             field.onChange(filtered); // keep RHF synced
                           }}
-                          className="absolute -right-1 -top-1 rounded-full bg-white p-0.5 text-red-500 hover:bg-red-50"
+                          className="absolute -right-1 -top-1 rounded-full bg-white p-0.5 text-red-500 hover:bg-red-50 dark:bg-gray-700 dark:text-red-400 dark:hover:bg-red-900/70"
                         >
                           <IconX size={16} />
                         </button>

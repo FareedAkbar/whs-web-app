@@ -60,6 +60,8 @@ export const incidentRouter = createTRPCRouter({
           message: "Unauthorized",
         });
       }
+      console.log("Fetching hazards with token:", userToken);
+
       const response = await fetch(`${env.BASE_URL}/incident?type=HAZARD`, {
         method: "GET",
         headers: {
@@ -82,6 +84,7 @@ export const incidentRouter = createTRPCRouter({
         message: string;
         data: ReportResponse[];
       };
+
       return {
         status: true,
         data: incidentsData.data,

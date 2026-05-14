@@ -35,7 +35,8 @@ export default function IncidentsList() {
     CANCELLED: "bg-red-100 dark:bg-red-900 dark:bg-opacity-50 text-red-600",
     ASSIGNED:
       "bg-purple-100 dark:bg-purple-900 dark:bg-opacity-50 text-purple-600",
-    CLOSED: "bg-gray-100 dark:bg-gray-900 dark:text-gray-400 text-gray-600",
+    CLOSED:
+      "bg-gray-100 dark:bg-gray-900 dark:text-gray-400 dark:bg-opacity-50 text-gray-600",
   };
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -190,7 +191,7 @@ export default function IncidentsList() {
                   {["LOW", "MEDIUM", "HIGH", "EXTREME"].map((p) => (
                     <label
                       key={p}
-                      className="flex items-center gap-1 text-sm capitalize"
+                      className="flex cursor-pointer items-center gap-1 text-sm capitalize"
                     >
                       <input
                         type="checkbox"
@@ -213,7 +214,7 @@ export default function IncidentsList() {
                   {Object.keys(statusMapping).map((statusName) => (
                     <label
                       key={statusName}
-                      className="flex items-center gap-1 text-sm"
+                      className="flex cursor-pointer items-center gap-1 text-sm"
                     >
                       <input
                         type="checkbox"
@@ -310,7 +311,7 @@ export default function IncidentsList() {
               className={`rounded-full border px-4 py-2 text-sm transition ${
                 assignedTab === tab
                   ? "border-primary bg-primary text-white"
-                  : "border-gray-300 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                  : "border-gray-300 bg-gray-100 text-gray-800 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-200"
               }`}
             >
               {tab}

@@ -344,7 +344,9 @@ export default function HazardDetailScreen() {
           {/* Report Description */}
           <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <p>
-              <span className="font-medium">Report Description:</span>
+              <span className="font-medium text-primary">
+                Report Description:
+              </span>
               <br />
               {report.description}
             </p>
@@ -352,7 +354,7 @@ export default function HazardDetailScreen() {
             {/* Detailed description from hazard object (if present) */}
             {hazardMeta?.hazardDescription && (
               <p>
-                <span className="font-medium text-red-500">
+                <span className="font-medium text-primary">
                   Hazard Detailed Description:
                 </span>
                 {hazardMeta.hazardDescription}
@@ -371,7 +373,9 @@ export default function HazardDetailScreen() {
                   </p>
                 </div>
               ) : (
-                <p className="text-sm font-medium">No Officer assigned.</p>
+                <p className="text-sm font-medium underline">
+                  No Officer assigned.
+                </p>
               )}
             </div>
           </div>
@@ -409,7 +413,7 @@ export default function HazardDetailScreen() {
                               width={112}
                               height={112}
                             />
-                            <button
+                            {/* <button
                               onClick={() =>
                                 handleDownload(
                                   image.url,
@@ -419,7 +423,7 @@ export default function HazardDetailScreen() {
                               className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
                             >
                               <DownloadIcon className="h-3 w-3" color="red" />
-                            </button>
+                            </button> */}
                           </div>
                         ),
                       )}

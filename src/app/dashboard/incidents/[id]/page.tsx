@@ -333,7 +333,9 @@ export default function IncidentDetailScreen() {
           {/* Report Description */}
           <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <p>
-              <span className="font-medium">Report Description:</span>
+              <span className="font-medium text-primary">
+                Report Description:
+              </span>
               <br />
               {report.description}
             </p>
@@ -341,9 +343,10 @@ export default function IncidentDetailScreen() {
             {/* Detailed description from incident object (if present) */}
             {incidentMeta?.incidentDescription && (
               <p>
-                <span className="font-medium text-red-500">
+                <span className="font-medium text-primary">
                   Incident Detailed Description:
                 </span>
+                <br />
                 {incidentMeta.incidentDescription}
               </p>
             )}
@@ -360,7 +363,9 @@ export default function IncidentDetailScreen() {
                   </p>
                 </div>
               ) : (
-                <p className="text-sm font-medium">No Officer assigned.</p>
+                <p className="text-sm font-medium underline">
+                  No Officer assigned.
+                </p>
               )}
             </div>
           </div>
@@ -443,7 +448,7 @@ export default function IncidentDetailScreen() {
                 </span>
               </div>
 
-              <div className="flex gap-2">
+              {/* <div className="flex gap-2">
                 <span className="font-medium text-gray-600 dark:text-gray-400">
                   Treatment Desc:
                 </span>
@@ -452,11 +457,11 @@ export default function IncidentDetailScreen() {
                     ? incidentMeta?.treatmentDescription
                     : "Not Provided"}
                 </span>
-              </div>
+              </div> */}
 
               <div className="flex gap-2">
                 <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Created At:
+                  Created at:
                 </span>
                 <span className="font-semibold text-gray-800 dark:text-gray-200">
                   {incidentMeta?.createdAt
