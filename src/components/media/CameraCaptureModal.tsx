@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import {
   IconCamera,
+  IconPhotoUp,
   IconRefresh,
   IconVideoOff,
   IconX,
@@ -22,25 +23,41 @@ export default function CameraCaptureModal({
   onCapture,
 }: CameraCaptureModalProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const fallbackInputRef = useRef<HTMLInputElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isFrontCamera, setIsFrontCamera] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
-  const stopCamera = () => {
+  const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
     setIsReady(false);
     setIsFrontCamera(false);
-  };
+  }, []);
 
-  const startCamera = async () => {
+  const startCamera = useCallback(async () => {
     if (!open) return;
     setIsStarting(true);
+    setCameraError(null);
 
     try {
       stopCamera();
-      const stream = await navigator.mediaDevices.getUserMedia({
+
+      const getUserMedia =
+        navigator.mediaDevices?.getUserMedia?.bind(navigator.mediaDevices);
+
+      if (!getUserMedia) {
+        setCameraError(
+          window.isSecureContext
+            ? "This browser does not support live camera preview."
+            : "Live camera preview needs HTTPS on mobile. Use the device camera button below, or open the app over HTTPS.",
+        );
+        return;
+      }
+
+      const stream = await getUserMedia({
         video: { facingMode: "environment" },
         audio: false,
       });
@@ -56,12 +73,12 @@ export default function CameraCaptureModal({
       setIsReady(true);
     } catch (error) {
       console.error("Camera failed:", error);
+      setCameraError("Camera is not available or permission was denied.");
       toast.error("Camera is not available or permission was denied.");
-      onClose();
     } finally {
       setIsStarting(false);
     }
-  };
+  }, [open, stopCamera]);
 
   useEffect(() => {
     if (open) {
@@ -69,16 +86,29 @@ export default function CameraCaptureModal({
     }
 
     return () => stopCamera();
-  }, [open]);
+  }, [open, startCamera, stopCamera]);
 
   const handleClose = () => {
     stopCamera();
+    setCameraError(null);
     onClose();
+  };
+
+  const handleFallbackCapture = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    event.currentTarget.value = "";
+
+    if (!file) return;
+
+    onCapture(file);
+    handleClose();
   };
 
   const handleCapture = () => {
     const video = videoRef.current;
-    if (!video || !video.videoWidth || !video.videoHeight) {
+    if (!video?.videoWidth || !video.videoHeight) {
       toast.error("Camera is still starting. Please try again.");
       return;
     }
@@ -123,6 +153,14 @@ export default function CameraCaptureModal({
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
       <div className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg border bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+        <input
+          ref={fallbackInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFallbackCapture}
+          className="hidden"
+        />
         <div className="flex items-center justify-between border-b px-4 py-3 dark:border-gray-700">
           <div>
             <h2 className="font-semibold">Capture image</h2>
@@ -152,9 +190,17 @@ export default function CameraCaptureModal({
           {!isReady && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white">
               <IconVideoOff size={42} />
-              <p className="text-sm">
-                {isStarting ? "Starting camera..." : "Camera preview loading"}
+              <p className="max-w-md px-4 text-center text-sm">
+                {cameraError ??
+                  (isStarting ? "Starting camera..." : "Camera preview loading")}
               </p>
+              {cameraError && (
+                <Button
+                  title="Open device camera"
+                  icon={<IconPhotoUp size={16} />}
+                  onClick={() => fallbackInputRef.current?.click()}
+                />
+              )}
             </div>
           )}
         </div>
@@ -165,6 +211,13 @@ export default function CameraCaptureModal({
             variant="secondary"
             icon={<IconRefresh size={16} />}
             onClick={() => void startCamera()}
+            disabled={isStarting}
+          />
+          <Button
+            title="Device camera"
+            variant="secondary"
+            icon={<IconPhotoUp size={16} />}
+            onClick={() => fallbackInputRef.current?.click()}
             disabled={isStarting}
           />
           <Button
