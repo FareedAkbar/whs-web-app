@@ -270,7 +270,8 @@ export default function IncidentDetailScreen() {
             {/* Complete Incident - allowed roles & when assigned / in progress */}
             {user &&
               hasPermission(user.role, "complete:incident") &&
-              incidentMeta?.status === "ASSIGNED" && (
+              incidentMeta?.status === "ASSIGNED" &&
+              incident?.incidentAssignee.id === user.id && (
                 <Button
                   title={"Complete Incident"}
                   onClick={() => {
@@ -299,9 +300,9 @@ export default function IncidentDetailScreen() {
               report.status !== "CLOSED" && (
                 <Button
                   title={"Close Incident"}
-                  onClick={closeIncident}
-                  loading={updateReportStatus.isPending}
-                  disabled={updateReportStatus.isPending}
+                  onClick={() => void handleUpdateStatus("CLOSED")}
+                  loading={updateIncidentStatus.isPending}
+                  disabled={updateIncidentStatus.isPending}
                   // disabled={isUpdatingStatus}
                   // variant="secondary"
                 />
@@ -511,7 +512,7 @@ export default function IncidentDetailScreen() {
               </ModalBody>
             )}
             {modalMode == "reassign-officer" && (
-              <ModalBody className="max-w-2xl">
+              <ModalBody className="max-w-2xl p-4">
                 <div className="mt-4">
                   <Select
                     label="Reassign Officer"

@@ -283,7 +283,8 @@ export default function HazardDetailScreen() {
             {/* Complete Hazard - allowed roles & when assigned / in progress */}
             {user &&
               hasPermission(user.role, "complete:hazard") &&
-              hazardMeta?.status === "ASSIGNED" && (
+              hazardMeta?.status === "ASSIGNED" &&
+              hazard?.incidentAssignee.id === user.id && (
                 <Button
                   title={"Complete Hazard"}
                   onClick={() => {
@@ -311,9 +312,9 @@ export default function HazardDetailScreen() {
               report.status !== "CLOSED" && (
                 <Button
                   title={"Close Hazard"}
-                  onClick={closeIncident}
-                  loading={updateReportStatus.isPending}
-                  disabled={updateReportStatus.isPending}
+                  onClick={() => handleUpdateStatus("CLOSED")}
+                  loading={updateIncidentStatus.isPending}
+                  disabled={updateIncidentStatus.isPending}
                   // disabled={isUpdatingStatus}
                   // variant="secondary"
                 />
@@ -437,7 +438,7 @@ export default function HazardDetailScreen() {
             {/* Pick Hazard (for P_AND_C_OFFICER or any user who can self pick) */}
 
             {modalMode == "assign-officer" && (
-              <ModalBody className="max-w-2xl">
+              <ModalBody className="max-w-2xl p-4">
                 <div className="mt-4">
                   <Select
                     label="Assign Officer"
@@ -447,7 +448,7 @@ export default function HazardDetailScreen() {
                     options={
                       officers?.data?.map((o: User) => ({
                         value: o.id,
-                        label: o.name,
+                        label: `${o.name} (${o.email.replaceAll("_", " ")})`,
                       })) ?? []
                     }
                   />
@@ -463,7 +464,7 @@ export default function HazardDetailScreen() {
               </ModalBody>
             )}
             {modalMode == "reassign-officer" && (
-              <ModalBody className="max-w-2xl">
+              <ModalBody className="max-w-2xl p-4">
                 <div className="mt-4">
                   <Select
                     label="Reassign Officer"
@@ -477,7 +478,7 @@ export default function HazardDetailScreen() {
                         )
                         ?.map((o: User) => ({
                           value: o.id,
-                          label: o.name,
+                          label: `${o.name} (${o.email.replaceAll("_", " ")})`,
                         })) ?? []
                     }
                   />
