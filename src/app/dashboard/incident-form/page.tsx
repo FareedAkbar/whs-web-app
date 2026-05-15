@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Controller,
   FormProvider,
@@ -12,25 +12,21 @@ import "react-datepicker/dist/react-datepicker.css";
 import { api } from "@/trpc/react";
 import { toast } from "react-toastify";
 import {
-  IconX,
   IconAlertTriangleFilled,
   IconCircleCheckFilled,
-  IconUpload,
-  IconChevronRight,
 } from "@tabler/icons-react";
 import Button from "@/components/ui/Button";
-import { useSession } from "next-auth/react";
 import { severityMapping } from "@/constants/severity";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/Select";
-import { ThemeContext } from "@/providers/ThemeContext";
 import dynamic from "next/dynamic";
 import {
   IncidentCategoryType,
   NewIncidentReport,
   treatmentType,
 } from "@/types/report";
-import DateField from "@/components/ui/DateField";
+import MediaPicker from "@/components/media/MediaPicker";
+import type { SelectedMedia } from "@/types/media";
 
 const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 const HazardForm = () => {
@@ -55,10 +51,8 @@ const HazardForm = () => {
       coordinates: "",
     },
   });
-  const { control, handleSubmit, register, setValue, watch, formState } =
-    methods;
+  const { control, handleSubmit, setValue, watch, formState } = methods;
   const severityKeys = useMemo(() => Object.keys(severityMapping), []);
-  type Image = { id: string; url: string };
   const { errors } = formState;
   // const [date, setDate] = useState<Date | null>(null);
   const [location, setLocation] = useState<{
@@ -68,15 +62,10 @@ const HazardForm = () => {
     latitude: -34.405,
     longitude: 150.644,
   });
-  const themeContext = useContext(ThemeContext);
-  const theme = themeContext?.theme;
-  const [images, setImages] = useState<{ id: string; url: string }[]>([]);
-  const [selectedSeverity, setSelectedSeverity] = useState<string | null>(null);
+  const [images, setImages] = useState<SelectedMedia[]>([]);
   // const uploadMedia = api.media.uploadMedia.useMutation();
   const router = useRouter();
   const reportIncident = api.incidents.reportIncident.useMutation();
-  const { data: enums } = api.enums.getEnums.useQuery();
-  const session = useSession();
   const handleLocationSelect = (coords: {
     latitude: number;
     longitude: number;
@@ -144,77 +133,6 @@ const HazardForm = () => {
 
   // watch fields to control conditional sections
   const treatmentTypeValue = watch("treatmentType");
-
-  // handleFileChange only manages setImages state
-  const handleFileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-    onFieldChange: (images: Image[]) => void,
-    currentImages: Image[],
-  ) => {
-    e.preventDefault();
-    if (!e.target.files) return;
-
-    const files = Array.from(e.target.files);
-
-    // Give each placeholder a stable tempId to find and replace later
-    const placeholders: Image[] = files.map((file, i) => ({
-      id: `temp-${file.name}-${Date.now()}-${i}`,
-      url: URL.createObjectURL(file),
-    }));
-
-    const placeholderIds = new Set(placeholders.map((p) => p.id));
-
-    // Add placeholders on top of current images
-    setImages((prev) => [...prev, ...placeholders]);
-    onFieldChange([...currentImages, ...placeholders]);
-
-    const formData = new FormData();
-    files.forEach((file) => formData.append("files", file));
-    toast.info("Uploading images...");
-    console.log("Uploading files:", files);
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/media`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${session?.data?.user.token}` },
-          body: formData,
-        },
-      );
-
-      const result = (await response.json()) as UploadMediaApiResponse;
-      if (!response.ok)
-        throw new Error(result.message || "Failed to upload files");
-
-      const uploadedImages: Image[] =
-        result?.fileUrls?.map((img: FileUrl) => ({
-          id: img.file.id,
-          url: img.file.url,
-        })) ?? [];
-
-      // Use functional update to get latest state, then swap placeholders for real images
-      setImages((prev) => {
-        const withoutPlaceholders = prev.filter(
-          (img) => !placeholderIds.has(img.id),
-        );
-        const updated = [...withoutPlaceholders, ...uploadedImages];
-        onFieldChange(updated); // sync RHF with the true latest state
-        return updated;
-      });
-
-      toast.success("Images uploaded successfully!");
-    } catch (error) {
-      // Remove only this batch's placeholders, keep everything else
-      setImages((prev) => {
-        const reverted = prev.filter((img) => !placeholderIds.has(img.id));
-        onFieldChange(reverted);
-        return reverted;
-      });
-      console.error("Upload failed:", error);
-      toast.error("Image upload failed.");
-    }
-  };
 
   return (
     <div className="flex flex-col p-6">
@@ -528,7 +446,6 @@ const HazardForm = () => {
                           tabIndex={0}
                           onClick={() => {
                             field.onChange(key);
-                            setSelectedSeverity(key);
                           }}
                           className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg bg-gray-50 p-4 text-center font-medium shadow-md transition-all duration-150 dark:bg-gray-700 ${isSelected ? "border" : ""}`}
                           style={{
@@ -583,66 +500,17 @@ const HazardForm = () => {
               }}
               render={({ field }) => (
                 <div>
-                  <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Upload Images <span className="text-red-500">*</span>
-                  </label>
-
-                  <div className="mt-2 flex items-center gap-3">
-                    {/* Upload Button */}
-                    <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-2xl border border-gray-300 bg-white shadow dark:bg-gray-700">
-                      <IconUpload size={32} />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={(e) => {
-                          void handleFileChange(e, field.onChange, images);
-                        }}
-                        className="hidden"
-                      />
-                    </label>
-
-                    {/* Preview Thumbnails */}
-                    {images.map((img) => (
-                      <div
-                        key={img.id}
-                        className="relative h-24 w-24 rounded-2xl bg-gray-100 shadow-lg dark:bg-gray-600"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const filtered = images.filter(
-                              (i) => i.id !== img.id,
-                            );
-                            setImages(filtered);
-                            field.onChange(filtered); // keep RHF synced
-                          }}
-                          className="absolute -right-1 -top-1 rounded-full bg-white p-0.5 text-red-500 hover:bg-red-50 dark:bg-gray-700 dark:text-red-400 dark:hover:bg-red-900/70"
-                        >
-                          <IconX size={16} />
-                        </button>
-
-                        {img.url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={img.url}
-                            alt={img.id}
-                            className="h-full w-full rounded-xl object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-xs text-gray-700 dark:text-gray-300">
-                            {img.id}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {errors.media && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {String(errors.media.message)}
-                    </p>
-                  )}
+                  <MediaPicker
+                    value={images}
+                    onChange={(updatedImages) => {
+                      setImages(updatedImages);
+                      field.onChange(updatedImages);
+                    }}
+                    required
+                    error={
+                      errors.media ? String(errors.media.message) : undefined
+                    }
+                  />
                 </div>
               )}
             />

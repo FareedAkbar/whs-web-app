@@ -19,6 +19,7 @@ import {
   IconUserFilled,
   IconChecklist,
   IconFirstAidKit,
+  IconPhoto,
 } from "@tabler/icons-react";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -101,6 +102,11 @@ const Sidebar = ({
     }
 
     navItems.push(
+      {
+        name: "Gallery",
+        icon: <IconPhoto size={20} />,
+        path: "/dashboard/gallery",
+      },
       {
         name: "Inspections",
         icon: <IconChecklist size={20} />,
