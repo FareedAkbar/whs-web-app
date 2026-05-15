@@ -338,6 +338,7 @@ const InspectionChecklist = () => {
                       title="Assign Inspection"
                       icon={<UserPlus size={16} />}
                       onClick={() => {
+                        setSearchTerm("");
                         setModal({ type: "assign", data: inspection });
                         setOpen(true);
                       }}
@@ -494,7 +495,7 @@ const InspectionChecklist = () => {
         <ModalBody className="mx-3 w-full">
           <ModalContent className="w-full">
             <h2 className="mb-4 text-xl font-bold capitalize dark:text-white">
-              Assign Inspection: {modal.data.title}
+              {modal.data.title}
             </h2>
 
             {/* Search Users */}
@@ -648,7 +649,10 @@ function renderQuestion(
           <Label className="mb-1 block">{q.title}</Label>
           <div className="space-y-2">
             {q?.options?.map((opt: string) => (
-              <label key={opt} className="flex items-center space-x-2">
+              <label
+                key={opt}
+                className="flex cursor-pointer items-center space-x-2"
+              >
                 <input
                   type="checkbox"
                   checked={selectedValues.includes(opt)}

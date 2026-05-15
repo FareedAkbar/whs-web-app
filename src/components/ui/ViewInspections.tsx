@@ -112,26 +112,40 @@ export default function ViewInspections({
                           </p>
 
                           <p className="mt-2 text-gray-700 dark:text-gray-300">
-                            {/* {Array.isArray(ans.answer)
-                              ? ans.answer.join(", ")
-                              : typeof ans.answer === "string" &&
-                                  ans.answer.startsWith("[")
-                                ? parseToArray(ans.answer).join(", ")
-                                : ans.answer} */}
-                            {Array.isArray(ans.answer)
-                              ? ans.answer.join(", ")
-                              : typeof ans.answer === "string"
-                                ? (() => {
-                                    try {
-                                      const parsed = JSON.parse(ans.answer);
-                                      return Array.isArray(parsed)
-                                        ? parsed.join(", ")
-                                        : ans.answer;
-                                    } catch {
-                                      return ans.answer;
-                                    }
-                                  })()
-                                : String(ans.answer)}
+                            {(() => {
+                              const rawAnswer = ans.answer;
+                              const questionType = question?.type;
+
+                              // Parse the answer (could be array or JSON string)
+                              let parsed: string | string[] = Array.isArray(
+                                rawAnswer,
+                              )
+                                ? rawAnswer
+                                : typeof rawAnswer === "string"
+                                  ? (() => {
+                                      try {
+                                        const p = JSON.parse(rawAnswer);
+                                        return Array.isArray(p) ? p : rawAnswer;
+                                      } catch {
+                                        return rawAnswer;
+                                      }
+                                    })()
+                                  : String(rawAnswer ?? "");
+
+                              // Handle DATE_RANGE specifically
+                              if (
+                                questionType === "DATE_RANGE" &&
+                                Array.isArray(parsed) &&
+                                parsed.length === 2
+                              ) {
+                                return `From ${parsed[0]} to ${parsed[1]}`;
+                              }
+
+                              // Default: join arrays with comma, or return string as-is
+                              return Array.isArray(parsed)
+                                ? parsed.join(", ")
+                                : parsed;
+                            })()}
                           </p>
                         </div>
                       ))

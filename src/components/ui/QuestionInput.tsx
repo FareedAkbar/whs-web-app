@@ -100,6 +100,12 @@ export const QuestionInput: React.FC<Props> = ({
                 value={newOption}
                 onChange={(e) => setNewOption(e.target.value)}
                 className="flex-1"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddOption();
+                  }
+                }}
               />
               <Button
                 type="button"
@@ -129,6 +135,12 @@ export const QuestionInput: React.FC<Props> = ({
                         value={editingValue}
                         onChange={(e) => setEditingValue(e.target.value)}
                         className="flex-1"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleSaveEditedOption();
+                          }
+                        }}
                       />
                       <Button
                         title="Save"
