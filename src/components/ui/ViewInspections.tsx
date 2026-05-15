@@ -33,14 +33,10 @@ export default function ViewInspections({
             <div className="flex items-start justify-between">
               <div>
                 {isUserAdmin && (
-                  <p className="font-semibold text-gray-800 dark:text-gray-200">
+                  <p className="font-semibold capitalize text-gray-800 dark:text-gray-200">
                     Assigned To: {insp.assignedTo?.name}
                   </p>
                 )}
-
-                <p className="text-gray-600 dark:text-gray-300">
-                  Status: {insp.status}
-                </p>
 
                 {insp.answers?.length > 0 && (
                   <p className="text-gray-600 dark:text-gray-300">
@@ -53,25 +49,43 @@ export default function ViewInspections({
                 </p>
               </div>
 
-              {/* Expand button */}
-              {!(!isUserAdmin && insp?.answers?.length === 0) && (
-                <button
-                  onClick={() =>
-                    setExpandedIndex(isExpanded ? null : inspIndex)
-                  }
-                  className="rounded-full border border-gray-200 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800"
+              {/* Right column: status badge + chevron */}
+              <div className="flex flex-col items-end gap-2">
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${
+                    insp.status === "COMPLETED"
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                      : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
+                  }`}
                 >
-                  {isExpanded ? (
-                    <ChevronUp className="text-primary" size={22} />
-                  ) : (
-                    <ChevronDown className="text-primary" size={22} />
-                  )}
-                </button>
-              )}
+                  {insp.status}
+                </span>
+
+                {!(!isUserAdmin && insp?.answers?.length === 0) && (
+                  <button
+                    onClick={() =>
+                      setExpandedIndex(isExpanded ? null : inspIndex)
+                    }
+                    className="rounded-full border border-gray-200 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800"
+                  >
+                    {isExpanded ? (
+                      <ChevronUp className="text-primary" size={22} />
+                    ) : (
+                      <ChevronDown className="text-primary" size={22} />
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Expandable Answers */}
-            {isExpanded && (
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                isExpanded
+                  ? "mt-4 max-h-[2000px] opacity-100"
+                  : "max-h-0 opacity-0"
+              }`}
+            >
               <div className="mt-4 space-y-2">
                 <p className="font-semibold text-gray-800 dark:text-gray-200">
                   Answers:
@@ -98,26 +112,40 @@ export default function ViewInspections({
                           </p>
 
                           <p className="mt-2 text-gray-700 dark:text-gray-300">
-                            {/* {Array.isArray(ans.answer)
-                              ? ans.answer.join(", ")
-                              : typeof ans.answer === "string" &&
-                                  ans.answer.startsWith("[")
-                                ? parseToArray(ans.answer).join(", ")
-                                : ans.answer} */}
-                            {Array.isArray(ans.answer)
-                              ? ans.answer.join(", ")
-                              : typeof ans.answer === "string"
-                                ? (() => {
-                                    try {
-                                      const parsed = JSON.parse(ans.answer);
-                                      return Array.isArray(parsed)
-                                        ? parsed.join(", ")
-                                        : ans.answer;
-                                    } catch {
-                                      return ans.answer;
-                                    }
-                                  })()
-                                : String(ans.answer)}
+                            {(() => {
+                              const rawAnswer = ans.answer;
+                              const questionType = question?.type;
+
+                              // Parse the answer (could be array or JSON string)
+                              let parsed: string | string[] = Array.isArray(
+                                rawAnswer,
+                              )
+                                ? rawAnswer
+                                : typeof rawAnswer === "string"
+                                  ? (() => {
+                                      try {
+                                        const p = JSON.parse(rawAnswer);
+                                        return Array.isArray(p) ? p : rawAnswer;
+                                      } catch {
+                                        return rawAnswer;
+                                      }
+                                    })()
+                                  : String(rawAnswer ?? "");
+
+                              // Handle DATE_RANGE specifically
+                              if (
+                                questionType === "DATE_RANGE" &&
+                                Array.isArray(parsed) &&
+                                parsed.length === 2
+                              ) {
+                                return `From ${parsed[0]} to ${parsed[1]}`;
+                              }
+
+                              // Default: join arrays with comma, or return string as-is
+                              return Array.isArray(parsed)
+                                ? parsed.join(", ")
+                                : parsed;
+                            })()}
                           </p>
                         </div>
                       ))
@@ -129,7 +157,7 @@ export default function ViewInspections({
                       </div>
                     )}
               </div>
-            )}
+            </div>
           </div>
         );
       })}

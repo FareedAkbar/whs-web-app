@@ -11,6 +11,7 @@ import { ReportResponse } from "@/types/report";
 import { useSession } from "next-auth/react";
 import { hasPermission } from "@/lib/auth";
 import { IconAlertCircle } from "@tabler/icons-react";
+import { statusMapping } from "@/utils/statusColors";
 
 export default function HazardsList() {
   const { data: hazards, isLoading } = api.incidents.getHazards.useQuery();
@@ -22,17 +23,6 @@ export default function HazardsList() {
 
   const router = useRouter();
 
-  const statusMapping = {
-    INITIATED: "bg-blue-100 dark:bg-blue-900 dark:bg-opacity-50 text-blue-600",
-    IN_PROGRESS:
-      "bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-50 text-yellow-600",
-    COMPLETED:
-      "bg-green-100 dark:bg-green-900 dark:bg-opacity-50 text-green-600",
-    CANCELLED: "bg-red-100 dark:bg-red-900 dark:bg-opacity-50 text-red-600",
-    ASSIGNED:
-      "bg-purple-100 dark:bg-purple-900 dark:bg-opacity-50 text-purple-600",
-    CLOSED: "bg-gray-100 dark:bg-gray-900 dark:text-gray-400 text-gray-600",
-  };
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -99,6 +89,7 @@ export default function HazardsList() {
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
         item.report.title.toLowerCase().includes(searchTerm.toLowerCase());
+      console.log("user?.id", user?.id);
 
       // Assigned tab logic
       const matchesTab =
@@ -123,7 +114,7 @@ export default function HazardsList() {
 
   useEffect(() => {
     handleFilter();
-  }, [searchTerm]);
+  }, [searchTerm, assignedTab]);
 
   if (isLoading) {
     return (
@@ -302,7 +293,7 @@ export default function HazardsList() {
               className={`rounded-full border px-4 py-2 text-sm transition ${
                 assignedTab === tab
                   ? "border-primary bg-primary text-white"
-                  : "border-gray-300 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                  : "border-gray-300 bg-gray-100 text-gray-800 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-200"
               }`}
             >
               {tab}
@@ -316,7 +307,7 @@ export default function HazardsList() {
           filteredHazards?.map((item) => (
             <div
               key={item.hazard?.id}
-              className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg dark:border-gray-500 dark:bg-gray-800 dark:shadow-gray-700"
+              className="cursor-pointer rounded-lg border bg-white p-5 shadow-md hover:shadow-lg dark:border-gray-600 dark:bg-gray-800 dark:shadow-gray-700"
               // onClick={() => {
               //   setSelectedIncident(item);
               //   setOpen(true);

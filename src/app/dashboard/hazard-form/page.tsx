@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Controller,
   FormProvider,
@@ -12,20 +12,16 @@ import "react-datepicker/dist/react-datepicker.css";
 import { api } from "@/trpc/react";
 import { toast } from "react-toastify";
 import {
-  IconX,
   IconAlertTriangleFilled,
   IconCircleCheckFilled,
-  IconUpload,
-  IconChevronRight,
 } from "@tabler/icons-react";
 import Button from "@/components/ui/Button";
-import { useSession } from "next-auth/react";
 import { severityMapping } from "@/constants/severity";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/Select";
-import { ThemeContext } from "@/providers/ThemeContext";
 import dynamic from "next/dynamic";
 import { NewHazardReport } from "@/types/report";
+import MediaPicker from "@/components/media/MediaPicker";
+import type { SelectedMedia } from "@/types/media";
 
 const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 const HazardForm = () => {
@@ -51,13 +47,10 @@ const HazardForm = () => {
     latitude: -34.405,
     longitude: 150.644,
   });
-  const themeContext = useContext(ThemeContext);
-  const theme = themeContext?.theme;
-  const [images, setImages] = useState<{ id: string; url: string }[]>([]);
+  const [images, setImages] = useState<SelectedMedia[]>([]);
   // const uploadMedia = api.media.uploadMedia.useMutation();
   const router = useRouter();
   const reportHazard = api.incidents.reportHazard.useMutation();
-  const session = useSession();
   const handleLocationSelect = (coords: {
     latitude: number;
     longitude: number;
@@ -88,7 +81,6 @@ const HazardForm = () => {
       categoryType: data.categoryType,
     };
 
-    console.log("Incident Data:", hazardData);
     try {
       await reportHazard.mutateAsync(hazardData, {
         onSuccess: () => {
@@ -111,51 +103,6 @@ const HazardForm = () => {
     } catch (error) {
       console.error("Error reporting hazard:", error);
       toast.error("Failed to report hazard");
-    }
-  };
-
-  // watch fields to control conditional sections
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-
-      const formData = new FormData();
-      files.forEach((file) => {
-        formData.append("files", file);
-      });
-
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/media`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${session?.data?.user.token}`,
-            },
-            body: formData,
-          },
-        );
-
-        const result = (await response.json()) as UploadMediaApiResponse;
-
-        if (!response.ok) {
-          throw new Error(result.message || "Failed to upload files");
-        }
-
-        const uploadedImages =
-          result?.fileUrls?.map((img: FileUrl) => ({
-            id: img.file.id,
-            url: img.file.url,
-          })) || [];
-
-        setImages((prev) => [...prev, ...uploadedImages]);
-        toast.success("Images uploaded successfully!");
-      } catch (error) {
-        console.error("Upload failed:", error);
-        toast.error("Image upload failed.");
-      }
     }
   };
 
@@ -202,7 +149,7 @@ const HazardForm = () => {
                     <textarea
                       {...field}
                       className="w-full rounded-md border bg-gray-50 p-3 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white dark:autofill:text-white"
-                      placeholder="Describe the incident (general)"
+                      placeholder="Describe the hazard (general)"
                       rows={4}
                     />
                   )}
@@ -216,8 +163,7 @@ const HazardForm = () => {
 
               <div className="min-w-[280px] flex-1">
                 <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Detailed Incident Description{" "}
-                  <span className="text-red-500">*</span>
+                  Detailed Hazard Description
                 </label>
                 <Controller
                   name="hazardDescription"
@@ -226,7 +172,7 @@ const HazardForm = () => {
                     <textarea
                       {...field}
                       className="w-full rounded-md border bg-gray-50 p-3 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white dark:autofill:text-white"
-                      placeholder="Detailed incident description"
+                      placeholder="Detailed hazard description"
                       rows={4}
                     />
                   )}
@@ -262,7 +208,7 @@ const HazardForm = () => {
                           onClick={() => {
                             field.onChange(key);
                           }}
-                          className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg bg-gray-50 p-4 text-center font-medium shadow-sm transition-all duration-150 dark:bg-gray-700 ${
+                          className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg bg-gray-50 p-4 text-center font-medium shadow-md transition-all duration-150 dark:bg-gray-700 ${
                             isSelected ? "border" : "border border-transparent"
                           }`}
                           style={{
@@ -317,75 +263,17 @@ const HazardForm = () => {
               }}
               render={({ field }) => (
                 <div>
-                  <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Upload Images <span className="text-red-500">*</span>
-                  </label>
-
-                  <div className="mt-2 flex items-center gap-3">
-                    {/* Upload Button */}
-                    <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-2xl border border-gray-300 bg-white shadow dark:bg-gray-700">
-                      <IconUpload size={32} />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={(e) => {
-                          void handleFileChange(e);
-                          // update field value for validation sync
-                          const files = Array.from(e.target.files ?? []);
-                          if (files.length > 0) {
-                            const newImages = files.map((file, i) => ({
-                              id: `${file.name}-${i}`,
-                              url: URL.createObjectURL(file),
-                            }));
-                            field.onChange([...images, ...newImages]);
-                          }
-                        }}
-                        className="hidden"
-                      />
-                    </label>
-
-                    {/* Preview Thumbnails */}
-                    {images.map((img) => (
-                      <div
-                        key={img.id}
-                        className="relative h-24 w-24 rounded-2xl bg-gray-100 shadow-lg"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const filtered = images.filter(
-                              (i) => i.id !== img.id,
-                            );
-                            setImages(filtered);
-                            field.onChange(filtered); // keep RHF synced
-                          }}
-                          className="absolute -right-1 -top-1 rounded-full bg-white p-0.5 text-red-500 hover:bg-red-50"
-                        >
-                          <IconX size={16} />
-                        </button>
-
-                        {img.url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={img.url}
-                            alt={img.id}
-                            className="h-full w-full rounded-xl object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-xs text-gray-700 dark:text-gray-300">
-                            {img.id}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {errors.media && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {String(errors.media.message)}
-                    </p>
-                  )}
+                  <MediaPicker
+                    value={images}
+                    onChange={(updatedImages) => {
+                      setImages(updatedImages);
+                      field.onChange(updatedImages);
+                    }}
+                    required
+                    error={
+                      errors.media ? String(errors.media.message) : undefined
+                    }
+                  />
                 </div>
               )}
             />

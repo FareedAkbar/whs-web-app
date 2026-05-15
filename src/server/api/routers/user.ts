@@ -80,7 +80,6 @@ export const userRouter = createTRPCRouter({
       }
 
       const usersData = (await response.json()) as UserResponseData;
-      console.log("usersData", usersData);
 
       return {
         status: true,
@@ -279,7 +278,6 @@ export const userRouter = createTRPCRouter({
           message: string;
           user: User[];
         };
-        console.log("usersData", usersData);
 
         return {
           status: true,
@@ -346,7 +344,6 @@ export const userRouter = createTRPCRouter({
           },
           body: JSON.stringify(input),
         });
-        console.log(response);
         if (!response.ok) {
           const error = (await response.json()) as { error: string };
           throw new TRPCError({

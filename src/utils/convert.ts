@@ -17,7 +17,6 @@ export async function Convert(image: File): Promise<string> {
       const url = URL.createObjectURL(conversionResult as Blob | MediaSource);
       return url;
     } else {
-      console.log("Window is not defined");
       return URL.createObjectURL(image);
     }
   } catch (error) {

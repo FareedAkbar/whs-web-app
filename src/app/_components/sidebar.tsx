@@ -18,6 +18,8 @@ import {
   IconUserCircle,
   IconUserFilled,
   IconChecklist,
+  IconFirstAidKit,
+  IconPhoto,
 } from "@tabler/icons-react";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -82,7 +84,7 @@ const Sidebar = ({
     ) {
       navItems.push({
         name: "Incidents",
-        icon: <IconAlertTriangle size={20} />,
+        icon: <IconFirstAidKit size={20} />,
         path: "/dashboard/incidents",
       });
     }
@@ -100,6 +102,11 @@ const Sidebar = ({
     }
 
     navItems.push(
+      {
+        name: "Gallery",
+        icon: <IconPhoto size={20} />,
+        path: "/dashboard/gallery",
+      },
       {
         name: "Inspections",
         icon: <IconChecklist size={20} />,
@@ -233,7 +240,7 @@ const Sidebar = ({
               }}
             >
               <div
-                className={`flex items-center gap-3 rounded-lg p-3 transition-all ${pathname === item.path ? "border border-[#ECE6E6] bg-[#F8F5F5] text-primary dark:border-gray-400 dark:bg-gray-700" : "text-gray-700 hover:bg-[#F8F5F5] dark:text-gray-300 dark:hover:bg-gray-700"}`}
+                className={`flex items-center gap-3 rounded-lg p-3 transition-all ${pathname === item.path ? "border border-[#ECE6E6] bg-[#F8F5F5] text-primary dark:border-gray-500 dark:bg-gray-700" : "text-gray-700 hover:bg-[#F8F5F5] dark:text-gray-300 dark:hover:bg-gray-700"}`}
               >
                 <span
                   className={

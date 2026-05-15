@@ -44,12 +44,18 @@ export default function CreateInspectionPage() {
 
   const handleSubmit = async () => {
     if (!title.trim() || !description.trim()) {
-      alert("Please fill in both title and description.");
+      toast.error("Please fill in both title and description.");
       return;
     }
 
-    const timestamp = new Date().getTime();
-
+    if (questions.length === 0) {
+      toast.error("Please add at least one question.");
+      return;
+    }
+    if (questions.some((q) => !q.title.trim())) {
+      toast.error("Please ensure all questions have a title.");
+      return;
+    }
     const checklist: NewInspection = {
       title,
       description,
@@ -162,7 +168,7 @@ export default function CreateInspectionPage() {
               onClick={handleSubmit}
               variant="secondary"
               title="Submit Checklist"
-              disabled={createInspection.isPending}
+              disabled={createInspection.isPending || editingIndex !== null}
               loading={createInspection.isPending}
             />
           )}

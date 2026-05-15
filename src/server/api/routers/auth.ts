@@ -144,7 +144,6 @@ export const authRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      console.log(input);
       let clerkUser;
       try {
         clerkUser = await clerkClient.users.createUser({
@@ -159,7 +158,6 @@ export const authRouter = createTRPCRouter({
       } catch (err: any) {
         // Clerk ka error handle karo (e.g. email already exists)
         console.error("Clerk error:", err);
-        console.log("Clerk full error:", JSON.stringify(err, null, 2));
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: err.errors?.[0]?.message ?? "Failed to create Clerk user",
@@ -181,7 +179,6 @@ export const authRouter = createTRPCRouter({
           },
           body: JSON.stringify(user),
         });
-        console.log(response);
         if (!response.ok) {
           const error = (await response.json()) as { error: string };
           throw new TRPCError({
@@ -190,8 +187,6 @@ export const authRouter = createTRPCRouter({
           });
         }
         const userData = (await response.json()) as unknown;
-
-        console.log(userData);
 
         return {
           status: true,
@@ -217,7 +212,6 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       //
-      console.log(ctx, input);
       return true;
     }),
 
@@ -244,7 +238,6 @@ export const authRouter = createTRPCRouter({
           },
           body: JSON.stringify(user),
         });
-        console.log(response);
         if (!response.ok) {
           const error = (await response.json()) as { error: string };
           throw new TRPCError({
@@ -253,8 +246,6 @@ export const authRouter = createTRPCRouter({
           });
         }
         const userData = (await response.json()) as unknown;
-
-        console.log(userData);
 
         return {
           status: true,

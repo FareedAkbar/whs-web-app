@@ -14,6 +14,8 @@ export const incidentRouter = createTRPCRouter({
           message: "Unauthorized",
         });
       }
+      console.log("Fetching incidents with token:", userToken);
+
       const response = await fetch(`${env.BASE_URL}/incident?type=INCIDENT`, {
         method: "GET",
         headers: {
@@ -60,6 +62,8 @@ export const incidentRouter = createTRPCRouter({
           message: "Unauthorized",
         });
       }
+      console.log("Fetching hazards with token:", userToken);
+
       const response = await fetch(`${env.BASE_URL}/incident?type=HAZARD`, {
         method: "GET",
         headers: {
@@ -82,6 +86,7 @@ export const incidentRouter = createTRPCRouter({
         message: string;
         data: ReportResponse[];
       };
+
       return {
         status: true,
         data: incidentsData.data,
@@ -265,8 +270,6 @@ export const incidentRouter = createTRPCRouter({
           body: JSON.stringify(input),
         });
 
-        console.log("Incident API Response:", response);
-
         if (!response.ok) {
           const errorData = (await response.json()) as { message: string };
           console.error("Incident report error:", errorData);
@@ -281,7 +284,6 @@ export const incidentRouter = createTRPCRouter({
           message: string;
           data: ReportResponse;
         };
-        console.log("Incident Reported Successfully:", responseData);
 
         return {
           status: true,
@@ -340,8 +342,6 @@ export const incidentRouter = createTRPCRouter({
           body: JSON.stringify(input),
         });
 
-        console.log("Incident API Response:", response);
-
         if (!response.ok) {
           const errorData = (await response.json()) as { message: string };
           console.error("Incident report error:", errorData);
@@ -356,7 +356,6 @@ export const incidentRouter = createTRPCRouter({
           message: string;
           data: ReportResponse;
         };
-        console.log("Incident Reported Successfully:", responseData);
 
         return {
           status: true,
@@ -493,7 +492,6 @@ export const incidentRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         const userToken = ctx.session?.user.token;
-        console.log("userToken", userToken);
         if (!userToken) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
@@ -511,7 +509,6 @@ export const incidentRouter = createTRPCRouter({
             followUpDescription: input.followUpDescription,
           }),
         });
-        console.log("add comment response", response);
         if (!response.ok) {
           const errorData = (await response.json()) as { message: string };
           console.error("adding comment error:", errorData);

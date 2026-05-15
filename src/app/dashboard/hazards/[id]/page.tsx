@@ -18,6 +18,7 @@ import CommentsSection from "@/components/ui/CommentsSection";
 import FollowUpsSection from "@/components/ui/FollowUpsSection";
 import { Comment, IncidentMedia } from "@/types/report";
 import Image from "next/image";
+import { statusMapping } from "@/utils/statusColors";
 export default function HazardDetailScreen() {
   const params = useParams();
   // const { data: departments, isLoading: isLoadingDepartments } =
@@ -59,17 +60,6 @@ export default function HazardDetailScreen() {
     | "reassign-officer"
   >("accept");
   const user = session.data?.user;
-
-  const statusMapping = {
-    INITIATED: "bg-blue-100 dark:bg-blue-900 dark:bg-opacity-50 text-blue-600",
-    IN_PROGRESS:
-      "bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-50 text-yellow-600",
-    COMPLETED:
-      "bg-green-100 dark:bg-green-900 dark:bg-opacity-50 text-green-600",
-    CANCELLED: "bg-red-100 dark:bg-red-900 dark:bg-opacity-50 text-red-600",
-    ASSIGNED:
-      "bg-purple-100 dark:bg-purple-900 dark:bg-opacity-50 text-purple-600",
-  };
 
   const statusOrder = [
     "INITIATED",
@@ -117,6 +107,7 @@ export default function HazardDetailScreen() {
         (image: IncidentMedia) => image.status === status,
       ) ?? [],
   }));
+
   const handleUpdateStatus = (newStatus: string) => {
     if (!hazard) return;
     updateIncidentStatus.mutate(
@@ -228,7 +219,7 @@ export default function HazardDetailScreen() {
         ← Back to List
       </button>
 
-      <div className="rounded-lg border bg-white p-6 shadow-md dark:border-gray-500 dark:bg-gray-800 dark:text-white dark:shadow-gray-700">
+      <div className="rounded-lg border bg-white p-6 shadow-md dark:border-gray-500 dark:bg-gray-900 dark:text-white dark:shadow-gray-700">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-row items-center gap-4">
             <h2
@@ -266,6 +257,7 @@ export default function HazardDetailScreen() {
                 />
               )}
             {hasPermission(user?.role!, "assign:officer") &&
+              hazard.hazard?.status === "ASSIGNED" &&
               hazard?.incidentAssignee && (
                 <Button
                   title="Reassign Officer"
@@ -291,7 +283,8 @@ export default function HazardDetailScreen() {
             {/* Complete Hazard - allowed roles & when assigned / in progress */}
             {user &&
               hasPermission(user.role, "complete:hazard") &&
-              hazardMeta?.status === "ASSIGNED" && (
+              hazardMeta?.status === "ASSIGNED" &&
+              hazard?.incidentAssignee.id === user.id && (
                 <Button
                   title={"Complete Hazard"}
                   onClick={() => {
@@ -319,9 +312,9 @@ export default function HazardDetailScreen() {
               report.status !== "CLOSED" && (
                 <Button
                   title={"Close Hazard"}
-                  onClick={closeIncident}
-                  loading={updateReportStatus.isPending}
-                  disabled={updateReportStatus.isPending}
+                  onClick={() => handleUpdateStatus("CLOSED")}
+                  loading={updateIncidentStatus.isPending}
+                  disabled={updateIncidentStatus.isPending}
                   // disabled={isUpdatingStatus}
                   // variant="secondary"
                 />
@@ -344,7 +337,9 @@ export default function HazardDetailScreen() {
           {/* Report Description */}
           <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <p>
-              <span className="font-medium">Report Description:</span>
+              <span className="font-medium text-primary">
+                Report Description:
+              </span>
               <br />
               {report.description}
             </p>
@@ -352,7 +347,7 @@ export default function HazardDetailScreen() {
             {/* Detailed description from hazard object (if present) */}
             {hazardMeta?.hazardDescription && (
               <p>
-                <span className="font-medium text-red-500">
+                <span className="font-medium text-primary">
                   Hazard Detailed Description:
                 </span>
                 {hazardMeta.hazardDescription}
@@ -371,7 +366,9 @@ export default function HazardDetailScreen() {
                   </p>
                 </div>
               ) : (
-                <p className="text-sm font-medium">No Officer assigned.</p>
+                <p className="text-sm font-medium underline">
+                  No Officer assigned.
+                </p>
               )}
             </div>
           </div>
@@ -409,7 +406,7 @@ export default function HazardDetailScreen() {
                               width={112}
                               height={112}
                             />
-                            <button
+                            {/* <button
                               onClick={() =>
                                 handleDownload(
                                   image.url,
@@ -419,7 +416,7 @@ export default function HazardDetailScreen() {
                               className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
                             >
                               <DownloadIcon className="h-3 w-3" color="red" />
-                            </button>
+                            </button> */}
                           </div>
                         ),
                       )}
@@ -441,7 +438,7 @@ export default function HazardDetailScreen() {
             {/* Pick Hazard (for P_AND_C_OFFICER or any user who can self pick) */}
 
             {modalMode == "assign-officer" && (
-              <ModalBody className="max-w-2xl">
+              <ModalBody className="max-w-2xl p-4">
                 <div className="mt-4">
                   <Select
                     label="Assign Officer"
@@ -451,7 +448,7 @@ export default function HazardDetailScreen() {
                     options={
                       officers?.data?.map((o: User) => ({
                         value: o.id,
-                        label: o.name,
+                        label: `${o.name} (${o.email.replaceAll("_", " ")})`,
                       })) ?? []
                     }
                   />
@@ -467,7 +464,7 @@ export default function HazardDetailScreen() {
               </ModalBody>
             )}
             {modalMode == "reassign-officer" && (
-              <ModalBody className="max-w-2xl">
+              <ModalBody className="max-w-2xl p-4">
                 <div className="mt-4">
                   <Select
                     label="Reassign Officer"
@@ -481,7 +478,7 @@ export default function HazardDetailScreen() {
                         )
                         ?.map((o: User) => ({
                           value: o.id,
-                          label: o.name,
+                          label: `${o.name} (${o.email.replaceAll("_", " ")})`,
                         })) ?? []
                     }
                   />

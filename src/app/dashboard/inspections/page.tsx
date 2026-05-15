@@ -278,7 +278,7 @@ const InspectionChecklist = () => {
                 className={`rounded-full border px-4 py-2 text-sm transition ${
                   assignedTab === tab
                     ? "border-primary bg-primary text-white"
-                    : "border-gray-300 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                    : "border-gray-300 bg-gray-100 text-gray-800 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-200"
                 }`}
               >
                 {tab}
@@ -292,7 +292,7 @@ const InspectionChecklist = () => {
         {filteredInspections?.map((inspection: Inspection) => (
           <div
             key={inspection.id}
-            className="relative w-full rounded-lg border bg-white p-6 text-left shadow-md dark:bg-gray-800 dark:text-white"
+            className="relative w-full rounded-lg bg-gray-50 p-6 text-left shadow-md dark:bg-gray-800 dark:text-white dark:shadow-gray-700"
           >
             <div className="flex items-start justify-between">
               <div>
@@ -338,6 +338,7 @@ const InspectionChecklist = () => {
                       title="Assign Inspection"
                       icon={<UserPlus size={16} />}
                       onClick={() => {
+                        setSearchTerm("");
                         setModal({ type: "assign", data: inspection });
                         setOpen(true);
                       }}
@@ -356,7 +357,7 @@ const InspectionChecklist = () => {
       {modal.type === "view" && modal.data && inspectionDetail && (
         <ModalBody className="w-full overflow-y-auto">
           <ModalContent className="w-full">
-            <h2 className="mb-4 text-2xl font-bold dark:text-white">
+            <h2 className="mb-4 text-2xl font-bold capitalize dark:text-white">
               {modal.data.title}
             </h2>
             <p className="mb-4 text-gray-600 dark:text-gray-400">
@@ -468,7 +469,8 @@ const InspectionChecklist = () => {
             </p>
             <div className="flex justify-end gap-3">
               <Button
-                title={deleteInspection.isPending ? "Deleting..." : "Delete"}
+                title={"Delete"}
+                loading={deleteInspection.isPending}
                 onClick={() => {
                   deleteInspection.mutate({ id: modal.data?.id! });
                 }}
@@ -492,8 +494,8 @@ const InspectionChecklist = () => {
       {modal.type === "assign" && modal.data && (
         <ModalBody className="mx-3 w-full">
           <ModalContent className="w-full">
-            <h2 className="mb-4 text-xl font-bold dark:text-white">
-              Assign Inspection: {modal.data.title}
+            <h2 className="mb-4 text-xl font-bold capitalize dark:text-white">
+              {modal.data.title}
             </h2>
 
             {/* Search Users */}
@@ -505,7 +507,7 @@ const InspectionChecklist = () => {
             />
 
             {/* Users List */}
-            <div className="mb-4 max-h-60 overflow-y-auto rounded-md border p-2">
+            <div className="mb-4 max-h-60 overflow-y-auto rounded-md border p-2 shadow-md dark:border-gray-500">
               {loadingUsers ? (
                 <p>Loading users...</p>
               ) : filteredUsers.length > 0 ? (
@@ -516,7 +518,7 @@ const InspectionChecklist = () => {
                     className={`cursor-pointer p-2 ${
                       selectedUser === u.id
                         ? "bg-primary text-white"
-                        : "border-b hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                        : "border-b hover:bg-gray-200 dark:border-gray-500 dark:text-white dark:hover:bg-gray-700"
                     }`}
                   >
                     {u.name} ({u.email})
@@ -534,6 +536,7 @@ const InspectionChecklist = () => {
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               className="mb-6"
+              min={new Date().toISOString().split("T")[0]} // prevent past dates
             />
 
             {/* Actions */}
@@ -646,7 +649,10 @@ function renderQuestion(
           <Label className="mb-1 block">{q.title}</Label>
           <div className="space-y-2">
             {q?.options?.map((opt: string) => (
-              <label key={opt} className="flex items-center space-x-2">
+              <label
+                key={opt}
+                className="flex cursor-pointer items-center space-x-2"
+              >
                 <input
                   type="checkbox"
                   checked={selectedValues.includes(opt)}
