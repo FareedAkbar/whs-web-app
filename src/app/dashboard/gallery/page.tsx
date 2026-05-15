@@ -27,7 +27,6 @@ const fileToDataUrl = (file: File) =>
 export default function GalleryPage() {
   const utils = api.useUtils();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [query, setQuery] = useState("");
   const [cameraOpen, setCameraOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { data, isLoading, isFetching, refetch } =
@@ -36,12 +35,7 @@ export default function GalleryPage() {
   const { mutateAsync: deleteMedia, isPending: isDeleting } =
     api.media.deleteMedia.useMutation();
 
-  const media = useMemo(() => {
-    return (data?.data ?? []).filter((item: MediaItem) => {
-      const text = `${item.displayName ?? ""} ${item.originalname ?? ""} ${item.filename ?? ""}`;
-      return text.toLowerCase().includes(query.toLowerCase());
-    });
-  }, [data?.data, query]);
+  const media = data?.data ?? [];
 
   const uploadFiles = async (files: File[]) => {
     if (!files.length) return;
@@ -105,7 +99,7 @@ export default function GalleryPage() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-row justify-between gap-3">
             <input
               ref={fileInputRef}
               type="file"
@@ -133,16 +127,6 @@ export default function GalleryPage() {
             />
           </div>
         </div>
-
-        <div className="mt-5 flex items-center rounded-md border bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-700">
-          <IconSearch size={18} className="text-gray-400" />
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search gallery..."
-            className="w-full bg-transparent px-2 text-sm outline-none dark:text-white"
-          />
-        </div>
       </div>
 
       {isLoading ? (
@@ -150,8 +134,8 @@ export default function GalleryPage() {
           <div className="h-24 w-24 animate-spin rounded-full border-b-2 border-t-2 border-primary" />
         </div>
       ) : media.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {media.map((item) => {
+        <div className="grid grid-cols-3 gap-4 lg:grid-cols-4 xl:grid-cols-6">
+          {media.map((item: MediaItem) => {
             const url = getMediaUrl(
               item,
               process.env.NEXT_PUBLIC_MEDIA_URL ??
@@ -163,46 +147,35 @@ export default function GalleryPage() {
             return (
               <div
                 key={item.id}
-                className="overflow-hidden rounded-lg border bg-white shadow-md transition hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:shadow-gray-700"
+                className="relative aspect-square overflow-hidden rounded-lg border bg-gray-100 shadow-sm transition-all duration-200 hover:shadow-md dark:border-gray-700 dark:bg-gray-700"
               >
-                <div className="aspect-[4/3] bg-gray-100 dark:bg-gray-700">
-                  {url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={url}
-                      alt={title ?? "Media"}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-gray-400">
-                      <IconPhoto size={42} />
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center justify-between gap-3 p-4">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
-                      {title ?? "Untitled media"}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {item.mimetype ?? "Image"}
-                      {item.size ? ` - ${item.size}` : ""}
-                    </p>
+                {url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={url}
+                    alt={title ?? "Media"}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-gray-300 dark:text-gray-600">
+                    <IconPhoto size={32} />
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => void handleDelete(item.id)}
-                    disabled={deletingId === item.id}
-                    className="rounded-full p-2 text-red-500 hover:bg-red-50 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-900/40"
-                    aria-label="Delete media"
-                  >
-                    {isDeleting && deletingId === item.id ? (
-                      <Loader size={18} className="animate-spin" />
-                    ) : (
-                      <IconTrash size={18} />
-                    )}
-                  </button>
-                </div>
+                )}
+
+                {/* Delete button — always visible, top-right */}
+                <button
+                  type="button"
+                  onClick={() => void handleDelete(item.id)}
+                  disabled={deletingId === item.id}
+                  className="absolute right-1.5 top-1.5 rounded-full bg-white/50 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-red-500/20 disabled:opacity-50 dark:bg-black/50 dark:hover:bg-red-500/20"
+                  aria-label="Delete media"
+                >
+                  {isDeleting && deletingId === item.id ? (
+                    <Loader size={13} className="animate-spin" color="red" />
+                  ) : (
+                    <IconTrash size={13} color="red" />
+                  )}
+                </button>
               </div>
             );
           })}
