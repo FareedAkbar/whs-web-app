@@ -17,6 +17,7 @@ import { User } from "@/types/user";
 import CommentsSection from "@/components/ui/CommentsSection";
 import FollowUpsSection from "@/components/ui/FollowUpsSection";
 import { Comment, IncidentMedia } from "@/types/report";
+import { statusMapping } from "@/utils/statusColors";
 export default function IncidentDetailScreen() {
   const params = useParams();
   // const { data: departments, isLoading: isLoadingDepartments } =
@@ -57,17 +58,6 @@ export default function IncidentDetailScreen() {
     | "reassign-officer"
   >("accept");
   const user = session.data?.user;
-
-  const statusMapping = {
-    INITIATED: "bg-blue-100 dark:bg-blue-900 dark:bg-opacity-50 text-blue-600",
-    IN_PROGRESS:
-      "bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-50 text-yellow-600",
-    COMPLETED:
-      "bg-green-100 dark:bg-green-900 dark:bg-opacity-50 text-green-600",
-    CANCELLED: "bg-red-100 dark:bg-red-900 dark:bg-opacity-50 text-red-600",
-    ASSIGNED:
-      "bg-purple-100 dark:bg-purple-900 dark:bg-opacity-50 text-purple-600",
-  };
 
   const statusOrder = [
     "INITIATED",
@@ -222,7 +212,7 @@ export default function IncidentDetailScreen() {
         ← Back to List
       </button>
 
-      <div className="rounded-lg border bg-white p-6 shadow-md dark:border-gray-500 dark:bg-gray-800 dark:text-white dark:shadow-gray-700">
+      <div className="rounded-lg border bg-white p-6 shadow-md dark:border-gray-500 dark:bg-gray-900 dark:text-white dark:shadow-gray-700">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-row items-center gap-4">
             <h2
@@ -255,7 +245,8 @@ export default function IncidentDetailScreen() {
                 />
               )}
             {hasPermission(user?.role!, "assign:officer") &&
-              incident?.incidentAssignee && (
+              incident?.incidentAssignee &&
+              incident.incident?.status === "ASSIGNED" && (
                 <Button
                   title="Reassign Officer"
                   onClick={() => {
@@ -356,7 +347,9 @@ export default function IncidentDetailScreen() {
               {assignee ? (
                 <div className="mt-3 space-y-2">
                   <p className="text-sm font-semibold text-red-500">
-                    Assigned to:
+                    {incident.incidentAssignee.assigntype === "SELF_ASSIGNED"
+                      ? "Picked by:"
+                      : "Assigned to:"}
                   </p>
                   <p className="text-sm capitalize text-gray-700 dark:text-gray-300">
                     {assignee.name} ({assignee.role.replaceAll("_", " ")})
@@ -415,7 +408,7 @@ export default function IncidentDetailScreen() {
           ) : null}
 
           {/* Medical Details */}
-          <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <h4 className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">
               Medical Details
             </h4>
@@ -489,7 +482,7 @@ export default function IncidentDetailScreen() {
             {/* Pick Incident (for P_AND_C_OFFICER or any user who can self pick) */}
 
             {modalMode == "assign-officer" && (
-              <ModalBody className="max-w-2xl">
+              <ModalBody className="max-w-2xl p-4">
                 <div className="mt-4">
                   <Select
                     label="Assign Officer"
