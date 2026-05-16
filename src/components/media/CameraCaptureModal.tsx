@@ -3,9 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import {
+  IconArrowsExchange,
   IconCamera,
-  IconPhotoUp,
-  IconRefresh,
   IconVideoOff,
   IconX,
 } from "@tabler/icons-react";
@@ -17,16 +16,18 @@ interface CameraCaptureModalProps {
   onCapture: (file: File) => void;
 }
 
+type FacingMode = "environment" | "user";
+
 export default function CameraCaptureModal({
   open,
   onClose,
   onCapture,
 }: CameraCaptureModalProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const fallbackInputRef = useRef<HTMLInputElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const [facingMode, setFacingMode] = useState<FacingMode>("environment");
   const [isFrontCamera, setIsFrontCamera] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
 
@@ -52,19 +53,22 @@ export default function CameraCaptureModal({
         setCameraError(
           window.isSecureContext
             ? "This browser does not support live camera preview."
-            : "Live camera preview needs HTTPS on mobile. Use the device camera button below, or open the app over HTTPS.",
+            : "Live camera preview needs HTTPS on mobile. Open the app over HTTPS to use the camera.",
         );
         return;
       }
 
       const stream = await getUserMedia({
-        video: { facingMode: "environment" },
+        video: { facingMode: { ideal: facingMode } },
         audio: false,
       });
 
       streamRef.current = stream;
       const videoTrack = stream.getVideoTracks()[0];
-      setIsFrontCamera(videoTrack?.getSettings().facingMode === "user");
+      const activeFacingMode = videoTrack?.getSettings().facingMode;
+      setIsFrontCamera(
+        activeFacingMode ? activeFacingMode === "user" : facingMode === "user",
+      );
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -78,7 +82,7 @@ export default function CameraCaptureModal({
     } finally {
       setIsStarting(false);
     }
-  }, [open, stopCamera]);
+  }, [facingMode, open, stopCamera]);
 
   useEffect(() => {
     if (open) {
@@ -94,16 +98,10 @@ export default function CameraCaptureModal({
     onClose();
   };
 
-  const handleFallbackCapture = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    event.currentTarget.value = "";
-
-    if (!file) return;
-
-    onCapture(file);
-    handleClose();
+  const handleFlipCamera = () => {
+    setFacingMode((current) =>
+      current === "environment" ? "user" : "environment",
+    );
   };
 
   const handleCapture = () => {
@@ -153,14 +151,6 @@ export default function CameraCaptureModal({
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
       <div className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg border bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 dark:text-white">
-        <input
-          ref={fallbackInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={handleFallbackCapture}
-          className="hidden"
-        />
         <div className="flex items-center justify-between border-b px-4 py-3 dark:border-gray-700">
           <div>
             <h2 className="font-semibold">Capture image</h2>
@@ -194,30 +184,16 @@ export default function CameraCaptureModal({
                 {cameraError ??
                   (isStarting ? "Starting camera..." : "Camera preview loading")}
               </p>
-              {cameraError && (
-                <Button
-                  title="Open device camera"
-                  icon={<IconPhotoUp size={16} />}
-                  onClick={() => fallbackInputRef.current?.click()}
-                />
-              )}
             </div>
           )}
         </div>
 
         <div className="flex flex-col gap-3 border-t p-4 dark:border-gray-700 sm:flex-row sm:justify-end">
           <Button
-            title="Restart"
+            title="Flip camera"
             variant="secondary"
-            icon={<IconRefresh size={16} />}
-            onClick={() => void startCamera()}
-            disabled={isStarting}
-          />
-          <Button
-            title="Device camera"
-            variant="secondary"
-            icon={<IconPhotoUp size={16} />}
-            onClick={() => fallbackInputRef.current?.click()}
+            icon={<IconArrowsExchange size={16} />}
+            onClick={handleFlipCamera}
             disabled={isStarting}
           />
           <Button

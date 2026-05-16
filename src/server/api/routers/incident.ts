@@ -14,7 +14,6 @@ export const incidentRouter = createTRPCRouter({
           message: "Unauthorized",
         });
       }
-      console.log("Fetching incidents with token:", userToken);
 
       const response = await fetch(`${env.BASE_URL}/incident?type=INCIDENT`, {
         method: "GET",
