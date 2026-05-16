@@ -9,6 +9,7 @@ import SessionProvider from "@/providers/SessionProvider";
 import { ThemeProvider } from "@/providers/ThemeContext";
 import { auth } from "@/server/auth";
 import { ModalProvider } from "@/components/ui/animated-modal";
+import ThemedToast from "@/components/ui/ThemedToast";
 
 export const metadata: Metadata = {
   title: "WHS APP",
@@ -28,19 +29,7 @@ export default async function RootLayout({
             <SessionProvider session={session}>
               <ModalProvider>
                 <NextTopLoader color="#cc0000" showSpinner={false} />
-                <ToastContainer
-                  position="top-right"
-                  autoClose={2000}
-                  hideProgressBar={false}
-                  newestOnTop={false}
-                  progressClassName={"bg-blue-600"}
-                  closeOnClick
-                  // theme="dark"
-                  rtl={false}
-                  pauseOnFocusLoss
-                  draggable
-                  pauseOnHover
-                />
+                <ThemedToast />
                 <div className="h-full w-screen overflow-hidden">
                   {children}
                 </div>
