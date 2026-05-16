@@ -20,21 +20,12 @@ export default function AppGalleryModal({
   onClose,
   onSelect,
 }: AppGalleryModalProps) {
-  const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<SelectedMedia[]>([]);
   const { data, isLoading } = api.media.getMedia.useQuery(undefined, {
     enabled: open,
   });
 
-  const media = useMemo(() => {
-    const used = new Set(selectedIds);
-    return (data?.data ?? [])
-      .filter((item: MediaItem) => !used.has(item.id))
-      .filter((item: MediaItem) => {
-        const text = `${item.displayName ?? ""} ${item.originalname ?? ""} ${item.filename ?? ""}`;
-        return text.toLowerCase().includes(query.toLowerCase());
-      });
-  }, [data?.data, query, selectedIds]);
+  const media = data?.data ?? [];
 
   const toggleItem = (item: MediaItem) => {
     const url = getMediaUrl(
@@ -58,7 +49,6 @@ export default function AppGalleryModal({
 
   const handleClose = () => {
     setSelected([]);
-    setQuery("");
     onClose();
   };
 
@@ -66,7 +56,7 @@ export default function AppGalleryModal({
 
   return (
     <div className="fixed inset-0 z-[65] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+      <div className="relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 dark:text-white">
         <div className="flex flex-col gap-3 border-b p-4 dark:border-gray-700 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="font-semibold">Select from app gallery</h2>
@@ -77,23 +67,11 @@ export default function AppGalleryModal({
           <button
             type="button"
             onClick={handleClose}
-            className="absolute right-4 top-4 rounded-full p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 md:static"
+            className="absolute right-4 top-2 rounded-full p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 md:static"
             aria-label="Close gallery"
           >
             <IconX size={20} />
           </button>
-        </div>
-
-        <div className="border-b p-4 dark:border-gray-700">
-          <div className="flex items-center rounded-md border bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
-            <IconSearch size={18} className="text-gray-400" />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search media..."
-              className="w-full bg-transparent px-2 text-sm outline-none dark:text-white"
-            />
-          </div>
         </div>
 
         <div className="custom-scrollbar min-h-[320px] flex-1 overflow-y-auto p-4">
@@ -134,11 +112,7 @@ export default function AppGalleryModal({
                         <IconPhoto size={34} />
                       </div>
                     )}
-                    <div className="absolute inset-x-0 bottom-0 bg-black/55 px-2 py-1 text-xs text-white">
-                      <span className="line-clamp-1">
-                        {item.displayName ?? item.originalname ?? item.filename}
-                      </span>
-                    </div>
+
                     {isSelected && (
                       <span className="absolute right-2 top-2 rounded-full bg-primary p-1 text-white">
                         <IconCheck size={16} />
