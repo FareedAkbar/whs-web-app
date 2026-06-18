@@ -221,7 +221,8 @@ export default function HazardDetailScreen() {
               style={{
                 color: severityMapping[report.priority] ?? "black",
               }}
-            >
+            >{hazard.hazard?.ticket_number}-
+                
               {report.title}
             </h2>
 
@@ -496,36 +497,51 @@ export default function HazardDetailScreen() {
                 </div>
               </ModalBody>
             )}
-            {modalMode == "reassign-officer" && (
-              <ModalBody className="max-w-2xl p-4">
-                <div className="mt-4">
-                  <Select
-                    label="Reassign Officer"
-                    className="mt-2 w-full rounded border p-2"
-                    onChange={(e) => setSelectedOfficer(e.target.value)}
-                    value={selectedOfficer}
-                    options={
-                      officers?.data
-                        ?.filter(
-                          (o: User) => o.id !== hazard?.incidentAssignee?.id,
-                        )
-                        ?.map((o: User) => ({
-                          value: o.id,
-                          label: `${o.name} (${o.email.replaceAll("_", " ")})`,
-                        })) ?? []
-                    }
-                  />
-                  <div className="mt-4 flex justify-end">
-                    <Button
-                      title="Confirm Reassignment"
-                      onClick={handleDone}
-                      loading={assignIncidentToOfficer.isPending}
-                      disabled={!selectedOfficer}
-                    />
-                  </div>
-                </div>
-              </ModalBody>
-            )}
+          {modalMode == "reassign-officer" && (
+  <ModalBody className="max-w-2xl p-4">
+    <div className="mt-4">
+      <Select
+        label="Reassign Officer"
+        className="mt-2 w-full rounded border p-2"
+        onChange={(e) => setSelectedOfficer(e.target.value)}
+        value={selectedOfficer}
+        options={
+          (
+            officers?.data
+              ?.filter(
+                (o: User) =>
+                  o.id !== hazard?.incidentAssignee?.id &&
+                  o.id !== user?.id
+              )
+              .map((o: User) => ({
+                value: o.id,
+                label: o.name,
+              }))
+              .concat(
+                user?.id
+                  ? [
+                      {
+                        value: user.id,
+                        label: `${user.name} (You)`,
+                      },
+                    ]
+                  : []
+              ) ?? []
+          )
+        }
+      />
+
+      <div className="mt-4 flex justify-end">
+        <Button
+          title="Confirm Reassignment"
+          onClick={handleDone}
+          loading={assignIncidentToOfficer.isPending}
+          disabled={!selectedOfficer}
+        />
+      </div>
+    </div>
+  </ModalBody>
+)}
             {/* Capture / Upload (for staff when hazard is completed but report not closed) */}
             {/* {user?.role === "STAFF" &&
               hazardMeta?.status === "COMPLETED" &&

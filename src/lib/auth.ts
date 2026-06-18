@@ -62,7 +62,8 @@ const ROLES = {
 "view:hazards",
     "submit:inspection",
     "fill:inspections",
-        "show/hide:comments"
+        "show/hide:comments",
+        "pick:hazard",
 
   ],
   // P_AND_C_MEMBER: ["view:homeCounters", "create:incidents"],
@@ -78,7 +79,8 @@ const ROLES = {
     "view:incidents",
     "submit:inspection",
     "fill:inspections",
-    "show/hide:comments"
+    "show/hide:comments",
+    "pick:incident"
   ],
   P_AND_C_OFFICER: [
     "view:homeCounters",

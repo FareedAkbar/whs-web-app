@@ -222,16 +222,14 @@ export default function IncidentDetailScreen() {
       <div className="rounded-lg border bg-white p-6 shadow-md dark:border-gray-500 dark:bg-gray-900 dark:text-white dark:shadow-gray-700">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
-              INC-{report.id.substring(0, 8).toUpperCase()}
-            </span>
+           
             <div className="flex flex-row items-center gap-4">
               <h2
                 className="text-xl font-semibold capitalize"
                 style={{
                   color: severityMapping[report.priority] ?? "black",
                 }}
-              >
+              >{incident.incident?.ticket_number}-
                 {report.title}
               </h2>
 
@@ -581,36 +579,51 @@ export default function IncidentDetailScreen() {
                 </div>
               </ModalBody>
             )}
-            {modalMode == "reassign-officer" && (
-              <ModalBody className="max-w-2xl p-4">
-                <div className="mt-4">
-                  <Select
-                    label="Reassign Officer"
-                    className="mt-2 w-full rounded border p-2"
-                    onChange={(e) => setSelectedOfficer(e.target.value)}
-                    value={selectedOfficer}
-                    options={
-                      officers?.data
-                        ?.filter(
-                          (o: User) => o.id !== incident?.incidentAssignee?.id,
-                        )
-                        .map((o: User) => ({
-                          value: o.id,
-                          label: o.name,
-                        })) ?? []
-                    }
-                  />
-                  <div className="mt-4 flex justify-end">
-                    <Button
-                      title="Confirm Reassignment"
-                      onClick={handleDone}
-                      loading={assignIncidentToOfficer.isPending}
-                      disabled={!selectedOfficer}
-                    />
-                  </div>
-                </div>
-              </ModalBody>
-            )}
+           {modalMode == "reassign-officer" && (
+  <ModalBody className="max-w-2xl p-4">
+    <div className="mt-4">
+      <Select
+        label="Reassign Officer"
+        className="mt-2 w-full rounded border p-2"
+        onChange={(e) => setSelectedOfficer(e.target.value)}
+        value={selectedOfficer}
+        options={
+          (
+            officers?.data
+              ?.filter(
+                (o: User) =>
+                  o.id !== incident?.incidentAssignee?.id &&
+                  o.id !== user?.id
+              )
+              .map((o: User) => ({
+                value: o.id,
+                label: o.name,
+              }))
+              .concat(
+                user?.id
+                  ? [
+                      {
+                        value: user.id,
+                        label: `${user.name} (You)`,
+                      },
+                    ]
+                  : []
+              ) ?? []
+          )
+        }
+      />
+
+      <div className="mt-4 flex justify-end">
+        <Button
+          title="Confirm Reassignment"
+          onClick={handleDone}
+          loading={assignIncidentToOfficer.isPending}
+          disabled={!selectedOfficer}
+        />
+      </div>
+    </div>
+  </ModalBody>
+)}
 
             {/* Capture / Upload (for staff when incident is completed but report not closed) */}
             {/* {user?.role === "STAFF" &&
