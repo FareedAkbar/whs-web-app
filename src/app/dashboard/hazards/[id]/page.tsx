@@ -100,13 +100,7 @@ export default function HazardDetailScreen() {
     a.remove();
   };
 
-  const groupedImages = statusOrder.map((status) => ({
-    status,
-    images:
-      hazard?.media?.filter(
-        (image: IncidentMedia) => image.status === status,
-      ) ?? [],
-  }));
+
 
   const handleUpdateStatus = (newStatus: string) => {
     if (!hazard) return;
@@ -336,19 +330,13 @@ export default function HazardDetailScreen() {
         <div className="mt-4 space-y-4">
           {/* Report Description */}
           <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
-            <p>
-              <span className="font-medium text-primary">
-                Report Description:
-              </span>
-              <br />
-              {report.description}
-            </p>
+            
 
             {/* Detailed description from hazard object (if present) */}
             {hazardMeta?.hazardDescription && (
               <p>
                 <span className="font-medium text-primary">
-                  Hazard Detailed Description:
+                  Hazard Detailed Description:{" "}
                 </span>
                 {hazardMeta.hazardDescription}
               </p>
@@ -374,59 +362,104 @@ export default function HazardDetailScreen() {
           </div>
 
           {/* Images */}
-          {groupedImages.length ? (
-            <div className="mt-6">
-              <h3 className="font-semibold text-gray-800 dark:text-gray-200">
-                Hazard Gallery
-              </h3>
+         {/* Images */}
+{hazard.media?.length > 0 ? (
+  <div className="mt-6">
+    <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+      Hazard Gallery
+    </h3>
 
-              {groupedImages.map(({ status, images }) =>
-                images?.length ? (
-                  <div key={status} className="mt-2">
-                    {/* <p className="text-sm font-medium capitalize text-gray-700 dark:text-gray-300">
-                      {status.toLocaleLowerCase().replaceAll("_", " ")} images
-                    </p> */}
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {images.map(
-                        (
-                          image: { id?: string; url?: string; status?: string },
-                          index: number,
-                        ) => (
-                          <div
-                            key={image.id ?? index}
-                            className="relative cursor-pointer rounded-lg"
-                          >
-                            <Image
-                              src={image.url ?? "/images/n-img.jpg"}
-                              alt={`Hazard Image ${index + 1}`}
-                              className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
-                              onClick={() =>
-                                image.url && window.open(image.url, "_blank")
-                              }
-                              width={112}
-                              height={112}
-                            />
-                            {/* <button
-                              onClick={() =>
-                                handleDownload(
-                                  image.url,
-                                  `incident_${index}.jpg`,
-                                )
-                              }
-                              className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
-                            >
-                              <DownloadIcon className="h-3 w-3" color="red" />
-                            </button> */}
-                          </div>
-                        ),
-                      )}
-                    </div>
-                  </div>
-                ) : null,
-              )}
+    <div className="mt-2 flex flex-wrap gap-2">
+      {hazard.media.map(
+        (
+          image: { id?: string; url?: string; status?: string },
+          index: number,
+        ) => (
+          <div
+            key={image.id ?? index}
+            className="relative cursor-pointer rounded-lg"
+          >
+            <Image
+              src={image.url ?? "/images/n-img.jpg"}
+              alt={`Hazard Image ${index + 1}`}
+              className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
+              onClick={() =>
+                image.url && window.open(image.url, "_blank")
+              }
+              width={112}
+              height={112}
+            />
+
+            {/* <button
+              onClick={() =>
+                handleDownload(
+                  image.url,
+                  `hazard_${index}.jpg`,
+                )
+              }
+              className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
+            >
+              <DownloadIcon className="h-3 w-3" color="red" />
+            </button> */}
+          </div>
+        ),
+      )}
+    </div>
+  </div>
+) : (
+  <p className="mt-6 text-sm text-gray-500">
+    No images available for this hazard.
+  </p>
+)}
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Linked Incident</h3>
             </div>
-          ) : null}
 
+            {hazard.links?.length ? (
+              <div className="space-y-4">
+                {hazard.links.map((link) => (
+                  <div
+                    key={link.linkId}
+                    className="flex items-center justify-between rounded-lg border p-4"
+                  >
+                    <div>
+                      <p className="font-medium">
+                        {link.reportTitle}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {link.linkType}
+                      </p>
+                      {link.reportDescription && (
+                        <p className="mt-1 text-sm text-gray-600">
+                          {link.reportDescription}
+                        </p>
+                      )}
+                      {link.linkDescription && (
+                        <p className="mt-1 text-sm text-gray-600">
+                          {link.linkDescription}
+                        </p>
+                      )}
+
+                    </div>
+          {hasPermission(user?.role!, "view:incidents") && (
+                    <Button
+                      variant="primary"
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/incidents/${link.reportId}?`
+                        )
+                      }
+                      title="View Incident"
+                    />
+                  )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No linked hazard found.</p>
+            )}
+          </div>
           <CommentsSection
             comments={hazard?.comments}
             reportId={hazard?.report.id}

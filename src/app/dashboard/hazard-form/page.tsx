@@ -7,7 +7,7 @@ import {
   SubmitHandler,
   useForm,
 } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import "react-datepicker/dist/react-datepicker.css";
 import { api } from "@/trpc/react";
 import { toast } from "react-toastify";
@@ -16,15 +16,23 @@ import {
   IconCircleCheckFilled,
 } from "@tabler/icons-react";
 import Button from "@/components/ui/Button";
-import { severityMapping } from "@/constants/severity";
+import {
+  severityMapping,
+  severityDisplayMapping,
+  severityDescriptionMapping,
+} from "@/constants/severity";
 import { Input } from "@/components/ui/input";
-import dynamic from "next/dynamic";
 import { NewHazardReport } from "@/types/report";
 import MediaPicker from "@/components/media/MediaPicker";
 import type { SelectedMedia } from "@/types/media";
 
-const Map = dynamic(() => import("@/components/Map"), { ssr: false });
+// const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 const HazardForm = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const inspectionId = searchParams.get("inspectionId");
+  const inspectionTitle = searchParams.get("inspectionTitle");
+
   const methods = useForm<NewHazardReport>({
     defaultValues: {
       reportTitle: "",
@@ -39,67 +47,67 @@ const HazardForm = () => {
   const severityKeys = useMemo(() => Object.keys(severityMapping), []);
 
   const { errors } = formState;
-  // const [date, setDate] = useState<Date | null>(null);
-  const [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>({
-    latitude: -34.405,
-    longitude: 150.644,
-  });
+
+  // Commented out Map state
+  // const [location, setLocation] = useState<{
+  //   latitude: number;
+  //   longitude: number;
+  // } | null>({
+  //   latitude: -34.405,
+  //   longitude: 150.644,
+  // });
   const [images, setImages] = useState<SelectedMedia[]>([]);
-  // const uploadMedia = api.media.uploadMedia.useMutation();
-  const router = useRouter();
   const reportHazard = api.incidents.reportHazard.useMutation();
-  const handleLocationSelect = (coords: {
-    latitude: number;
-    longitude: number;
-  }) => {
-    setLocation(coords);
-  };
+
+  // Commented out location select
+  // const handleLocationSelect = (coords: {
+  //   latitude: number;
+  //   longitude: number;
+  // }) => {
+  //   setLocation(coords);
+  // };
+
   const onSubmit: SubmitHandler<NewHazardReport> = async (data) => {
-    if (!data || !location) {
-      toast.error("Missing required data: location or images");
+    if (!data) {
+      toast.error("Missing required data");
       return;
+    }
+
+    // Append inspection details to the description if prefilled
+    let finalDesc = data.hazardDescription;
+    if (inspectionId) {
+      finalDesc += `\n\n[Inspection Link: ${inspectionId} | ${inspectionTitle || "Inspection Details"}]`;
     }
 
     const hazardData: NewHazardReport = {
       reportTitle: data.reportTitle,
-      reportDescription: data.reportDescription,
-      hazardDescription: data.hazardDescription,
+      reportDescription: data.reportDescription ?? "",
+      hazardDescription: finalDesc,
       status: "INITIATED",
       severity: data.severity,
       mainType: "HAZARD",
-      coordinates:
-        location?.latitude && location?.longitude
-          ? `${location.latitude},${location.longitude}`
-          : "",
+      coordinates: data.coordinates, // Free text location
+      address: data.coordinates,
 
       media: images.map((image) => image.id).filter(Boolean),
-      managerSignatureConfirmationDate: null, // or a valid date if available
-      dynamicQuestion: [], // or appropriate value if available
-      categoryType: data.categoryType,
+      managerSignatureConfirmationDate: null,
+      categoryType: data.categoryType || "HAZARD",
     };
 
     try {
-      await reportHazard.mutateAsync(hazardData, {
-        onSuccess: () => {
-          toast.success("Hazard reported successfully!");
-          router.push("/dashboard/hazards");
-          // reset({
-          //   incidentTitle: "",
-          //   generalHazardDescription: "",
-          //   hazardDescription: "",
-          //   incidentReportDescription: "",
-          // });
+      await reportHazard.mutateAsync(
+        { hazard: hazardData },
+        {
+          onSuccess: () => {
+            toast.success("Hazard reported successfully!");
+            router.push("/dashboard/hazards");
+          },
+          onError: (error) => {
+            console.error("Error reporting hazard:", error);
+            toast.error("Failed to report hazard");
+          },
         },
-        onError: (error) => {
-          console.error("Error reporting hazard:", error);
-          toast.error("Failed to report hazard");
-        },
-      });
-
-      // await reportIncident.mutateAsync(hazardData);
+      );
     } catch (error) {
       console.error("Error reporting hazard:", error);
       toast.error("Failed to report hazard");
@@ -108,13 +116,24 @@ const HazardForm = () => {
 
   return (
     <div className="flex flex-col p-6">
+      {/* Linked Safety Inspection Notice */}
+      {inspectionId && (
+        <div className="mb-6 rounded-lg border-l-4 border-emerald-400 bg-emerald-50 p-4 dark:border-emerald-700 dark:bg-emerald-950">
+          <p className="text-sm text-emerald-700 dark:text-emerald-200">
+            <strong>Linked to Safety Inspection:</strong>{" "}
+            {inspectionTitle || "Inspection Sheet"} (ID:{" "}
+            {inspectionId.substring(0, 8).toUpperCase()})
+          </p>
+        </div>
+      )}
+
       <div className="rounded-lg bg-white p-6 shadow dark:border-gray-500 dark:bg-gray-800 dark:text-white dark:shadow-gray-700">
         <FormProvider {...methods}>
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-6"
           >
-            {/* first row: title, hazard/incident type, incident type */}
+            {/* first row: title */}
             <div className="flex flex-wrap gap-4">
               <div className="min-w-[220px] flex-1">
                 <Controller
@@ -137,7 +156,8 @@ const HazardForm = () => {
 
             {/* Description row */}
             <div className="flex flex-wrap gap-4">
-              <div className="min-w-[280px] flex-1">
+              {/* Commented out Report Description (replaced by detailed description) */}
+              {/* <div className="min-w-[280px] flex-1">
                 <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                   Report Description <span className="text-red-500">*</span>
                 </label>
@@ -159,15 +179,19 @@ const HazardForm = () => {
                     {errors.reportDescription.message}
                   </p>
                 )}
-              </div>
+              </div> */}
 
               <div className="min-w-[280px] flex-1">
                 <label className="block pb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Detailed Hazard Description
+                  Detailed Hazard Description{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <Controller
                   name="hazardDescription"
                   control={control}
+                  rules={{
+                    required: "Detailed hazard description is required",
+                  }}
                   render={({ field }) => (
                     <textarea
                       {...field}
@@ -185,7 +209,7 @@ const HazardForm = () => {
               </div>
             </div>
 
-            {/* Severity selection (grid of buttons) */}
+            {/* Severity selection (grid of buttons with tooltips) */}
             <Controller
               name="severity"
               control={control}
@@ -199,35 +223,41 @@ const HazardForm = () => {
                     {severityKeys.map((key) => {
                       const color = severityMapping[key];
                       const isSelected = field.value === key;
+                      const displayName = severityDisplayMapping[key] || key;
+                      const description = severityDescriptionMapping[key] || "";
 
                       return (
-                        <div
-                          key={key}
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => {
-                            field.onChange(key);
-                          }}
-                          className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg bg-gray-50 p-4 text-center font-medium shadow-md transition-all duration-150 dark:bg-gray-700 ${
-                            isSelected ? "border" : "border border-transparent"
-                          }`}
-                          style={{
-                            backgroundColor: isSelected
-                              ? `${color}22`
-                              : undefined,
-                            borderColor: isSelected ? color : "transparent",
-                          }}
-                        >
-                          <IconAlertTriangleFilled size={25} color={color} />
-                          {isSelected && (
-                            <IconCircleCheckFilled
-                              className="absolute right-2 top-2"
-                              color={color}
-                            />
-                          )}
-                          <span className="mt-2 block">
-                            {key.charAt(0) + key.slice(1).toLowerCase()}
-                          </span>
+                        <div key={key} className="group relative">
+                          <div
+                            role="button"
+                            title={description}
+                            tabIndex={0}
+                            onClick={() => {
+                              field.onChange(key);
+                            }}
+                            className={`relative flex h-24 w-28 cursor-pointer flex-col items-center justify-center rounded-lg bg-gray-50 p-4 text-center font-medium shadow-md transition-all duration-150 dark:bg-gray-700 ${
+                              isSelected
+                                ? "border"
+                                : "border border-transparent"
+                            }`}
+                            style={{
+                              backgroundColor: isSelected
+                                ? `${color}22`
+                                : undefined,
+                              borderColor: isSelected ? color : "transparent",
+                            }}
+                          >
+                            <IconAlertTriangleFilled size={25} color={color} />
+                            {isSelected && (
+                              <IconCircleCheckFilled
+                                className="absolute right-2 top-2"
+                                color={color}
+                              />
+                            )}
+                            <span className="mt-2 block">{displayName}</span>
+                          </div>
+
+                          {/* Hover Tooltip Description */}
                         </div>
                       );
                     })}
@@ -242,25 +272,38 @@ const HazardForm = () => {
               )}
             />
 
-            {/* Map (location) */}
-            <div className="relative z-0 mt-4 h-60 overflow-hidden rounded-md border">
+            {/* Commented out Map (location) */}
+            {/* <div className="relative z-0 mt-4 h-60 overflow-hidden rounded-md border">
               <Map
                 height={240}
                 coordinates={location}
                 onLocationSelect={handleLocationSelect}
               />
+            </div> */}
+
+            {/* Location input field */}
+            <div className="min-w-[220px] flex-1">
+              <Controller
+                name="coordinates"
+                control={control}
+                rules={{ required: "Location is required" }}
+                render={({ field }) => (
+                  <Input
+                    type="text"
+                    label="Location"
+                    placeholder="E.g. Building 9, Sports Hub"
+                    required
+                    error={errors.coordinates?.message}
+                    {...field}
+                  />
+                )}
+              />
             </div>
 
-            {/* Image Upload */}
+            {/* Image Upload (Optional) */}
             <Controller
               name="media"
               control={control}
-              rules={{
-                required: "At least one image is required.",
-                validate: (value) =>
-                  (value && value.length > 0) ||
-                  "Please upload at least one image.",
-              }}
               render={({ field }) => (
                 <div>
                   <MediaPicker
@@ -269,7 +312,6 @@ const HazardForm = () => {
                       setImages(updatedImages);
                       field.onChange(updatedImages);
                     }}
-                    required
                     error={
                       errors.media ? String(errors.media.message) : undefined
                     }
@@ -300,4 +342,20 @@ const HazardForm = () => {
   );
 };
 
-export default HazardForm;
+// Export wrapped with Suspense to allow useSearchParams safely
+import { Suspense } from "react";
+const HazardFormPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-64 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        </div>
+      }
+    >
+      <HazardForm />
+    </Suspense>
+  );
+};
+
+export default HazardFormPage;

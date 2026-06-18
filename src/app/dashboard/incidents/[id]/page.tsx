@@ -6,27 +6,29 @@ import { Download, DownloadIcon, UserPlus } from "lucide-react";
 import { api } from "@/trpc/react";
 import { toast } from "react-toastify";
 import { useParams, useRouter } from "next/navigation";
-import { severityMapping } from "@/constants/severity";
+import { severityMapping, severityDisplayMapping } from "@/constants/severity";
 import Button from "@/components/ui/Button";
 import { ModalBody, useModal } from "@/components/ui/animated-modal";
 import { hasPermission } from "@/lib/auth";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { Select } from "@/components/ui/Select";
 import { type } from "os";
 import { User } from "@/types/user";
 import CommentsSection from "@/components/ui/CommentsSection";
 import FollowUpsSection from "@/components/ui/FollowUpsSection";
 import { Comment, IncidentMedia } from "@/types/report";
+import Image from "next/image";
+
+import LogsSection from "@/components/ui/LogsSection";
 export default function IncidentDetailScreen() {
   const params = useParams();
-  // const { data: departments, isLoading: isLoadingDepartments } =
-  //   api.groups.getGroupData.useQuery({ groupType: "DEPARTMENT" });
   const { data: officers, isLoading: isLoadingOfficers } =
     api.users.getUsersByRole.useQuery({ role: "P_AND_C_OFFICER" });
+  const { data: allUsersRes } = api.users.getUsers.useQuery();
   const { setOpen } = useModal();
   const session = useSession();
   const router = useRouter();
-  //   const incidentId = params.id as string;
   const { id } = params as { id: string };
   const {
     data: incidentData,
@@ -106,13 +108,7 @@ export default function IncidentDetailScreen() {
     a.remove();
   };
 
-  const groupedImages = statusOrder.map((status) => ({
-    status,
-    images:
-      incident?.media?.filter(
-        (image: IncidentMedia) => image.status === status,
-      ) ?? [],
-  }));
+
   const handleUpdateStatus = async (newStatus: string) => {
     if (!incident) return;
     await updateIncidentStatus.mutateAsync(
@@ -211,6 +207,9 @@ export default function IncidentDetailScreen() {
   const incidentMeta = incident.incident;
   const assignee = incident.incidentAssignee ?? null;
 
+  const reporter = allUsersRes?.data?.find((u) => u.id === report.userId);
+  const reporterText = reporter ? `${reporter.name} (${reporter.email})` : "N/A";
+
   return (
     <div className="flex w-full flex-col px-8 py-6">
       <button
@@ -222,21 +221,26 @@ export default function IncidentDetailScreen() {
 
       <div className="rounded-lg border bg-white p-6 shadow-md dark:border-gray-500 dark:bg-gray-900 dark:text-white dark:shadow-gray-700">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-row items-center gap-4">
-            <h2
-              className="text-xl font-semibold capitalize"
-              style={{
-                color: severityMapping[report.priority] ?? "black",
-              }}
-            >
-              {report.title}
-            </h2>
-
-            <span
-              className={`rounded-full px-3 py-1 text-xs ${statusMapping[incidentMeta?.status as keyof typeof statusMapping]}`}
-            >
-              {incidentMeta?.status.replaceAll("_", " ")}
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
+              INC-{report.id.substring(0, 8).toUpperCase()}
             </span>
+            <div className="flex flex-row items-center gap-4">
+              <h2
+                className="text-xl font-semibold capitalize"
+                style={{
+                  color: severityMapping[report.priority] ?? "black",
+                }}
+              >
+                {report.title}
+              </h2>
+
+              <span
+                className={`rounded-full px-3 py-1 text-xs ${statusMapping[incidentMeta?.status as keyof typeof statusMapping]}`}
+              >
+                {incidentMeta?.status.replaceAll("_", " ")}
+              </span>
+            </div>
           </div>
 
           <div className="flex flex-row items-center gap-4">
@@ -373,48 +377,55 @@ export default function IncidentDetailScreen() {
           </div>
 
           {/* Images */}
-          {groupedImages.length ? (
-            <div className="mt-6">
-              <h3 className="font-semibold text-gray-800 dark:text-gray-200">
-                Incident Gallery
-              </h3>
+         {/* Images */}
+{incident.media?.length > 0 ? (
+  <div className="mt-6">
+    <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+      Incident Gallery
+    </h3>
 
-              {groupedImages.map(({ status, images }) =>
-                images?.length ? (
-                  <div key={status} className="mt-2">
-                    {/* <p className="text-sm font-medium capitalize text-gray-700 dark:text-gray-300">
-                      {status.toLocaleLowerCase().replaceAll("_", " ")} images
-                    </p> */}
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {images.map((image: IncidentMedia, index: number) => (
-                        <div
-                          key={image.id ?? index}
-                          className="relative cursor-pointer rounded-lg"
-                        >
-                          <img
-                            src={image.url ?? "/images/n-img.jpg"}
-                            alt={`Incident Image ${index + 1}`}
-                            className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
-                            onClick={() =>
-                              image.url && window.open(image.url, "_blank")
-                            }
-                          />
-                          {/* <button
-                            onClick={() =>
-                              handleDownload(image.url, `incident_${index}.jpg`)
-                            }
-                            className="absolute right-1 top-1 z-50 rounded-full bg-white/90 p-1 text-xs shadow"
-                          >
-                            <DownloadIcon className="h-3 w-3" color="red" />
-                          </button> */}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : null,
-              )}
-            </div>
-          ) : null}
+    <div className="mt-2 flex flex-wrap gap-2">
+      {incident.media.map(
+        (
+          image: { id?: string; url?: string; status?: string },
+          index: number,
+        ) => (
+          <div
+            key={image.id ?? index}
+            className="relative cursor-pointer rounded-lg"
+          >
+            <Image
+              src={image.url ?? "/images/n-img.jpg"}
+              alt={`Incident Image ${index + 1}`}
+              className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
+              onClick={() =>
+                image.url && window.open(image.url, "_blank")
+              }
+              width={112}
+              height={112}
+            />
+            
+            {/* <button
+              onClick={() =>
+                handleDownload(
+                  image.url,
+                  `hazard_${index}.jpg`,
+                )
+              }
+              className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
+            >
+              <DownloadIcon className="h-3 w-3" color="red" />
+            </button> */}
+          </div>
+        ),
+      )}
+    </div>
+  </div>
+) : (
+  <p className="mt-6 text-sm text-gray-500">
+    No images available for this hazard.
+  </p>
+)}
 
           {/* Medical Details */}
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -450,7 +461,7 @@ export default function IncidentDetailScreen() {
                 </span>
               </div>
 
-              {/* <div className="flex gap-2">
+              <div className="flex gap-2">
                 <span className="font-medium text-gray-600 dark:text-gray-400">
                   Treatment Desc:
                 </span>
@@ -459,7 +470,7 @@ export default function IncidentDetailScreen() {
                     ? incidentMeta?.treatmentDescription
                     : "Not Provided"}
                 </span>
-              </div> */}
+              </div>
 
               <div className="flex gap-2">
                 <span className="font-medium text-gray-600 dark:text-gray-400">
@@ -473,6 +484,55 @@ export default function IncidentDetailScreen() {
               </div>
             </div>
           </div>
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Linked Hazard</h3>
+            </div>
+
+            {incident.links?.length ? (
+              <div className="space-y-4">
+                {incident.links.map((link) => (
+                  <div
+                    key={link.linkId}
+                    className="flex items-center justify-between rounded-lg border p-4"
+                  >
+                    <div>
+                      <p className="font-medium">
+                        {link.reportTitle}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {link.linkType}
+                      </p>
+                      {link.reportDescription && (
+                        <p className="mt-1 text-sm text-gray-600">
+                          {link.reportDescription}
+                        </p>
+                      )}
+                      {link.linkDescription && (
+                        <p className="mt-1 text-sm text-gray-600">
+                          {link.linkDescription}
+                        </p>
+                      )}
+
+                    </div>
+          {hasPermission(user?.role!, "view:hazards") && (
+                    <Button
+                      variant="primary"
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/hazards/${link.reportId}?`
+                        )
+                      }
+                      title="View Hazard"
+                    />
+                  )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No linked hazard found.</p>
+            )}
+          </div>
           <CommentsSection
             comments={incident?.comments}
             reportId={incident?.report.id}
@@ -485,6 +545,8 @@ export default function IncidentDetailScreen() {
               onFollowUpAdded={() => void refetch()}
             />
           )}
+          <LogsSection logs={incident?.logs ?? []} />
+
 
           {/* Role-based action buttons */}
           <div className="mt-4 flex items-center gap-4">
