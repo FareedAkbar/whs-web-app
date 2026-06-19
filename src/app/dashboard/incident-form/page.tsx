@@ -164,7 +164,6 @@ const HazardForm = () => {
 
       payload.hazard = newHazardData;
     }
-console.log("payload",payload);
 
     try {
       await reportIncident.mutateAsync(payload, {
@@ -587,6 +586,7 @@ console.log("payload",payload);
                     <Select
                       label="Treatment Type"
                       required
+                      error={errors.treatmentType?.message}
                       options={
                         Object.values(treatmentType).map((t) => ({
                           label: t.replaceAll("_", " "),
@@ -597,11 +597,7 @@ console.log("payload",payload);
                     />
                   )}
                 />
-                {errors.treatmentType && (
-                  <p className="text-sm text-red-500">
-                    {errors.treatmentType.message}
-                  </p>
-                )}
+             
               </div>
               {treatmentTypeValue === treatmentType.OTHER && (
                 <div className="min-w-[220px] flex-1">
@@ -615,14 +611,11 @@ console.log("payload",payload);
                         placeholder="Describe the treatment"
                         required
                         {...field}
+                        error={errors.treatmentDescription?.message}
                       />
                     )}
                   />
-                  {errors.treatmentDescription && (
-                    <p className="text-sm text-red-500">
-                      {errors.treatmentDescription.message}
-                    </p>
-                  )}
+                  
                 </div>
               )}
 
@@ -637,14 +630,11 @@ console.log("payload",payload);
                       placeholder="e.g., arm"
                       required
                       {...field}
+                      error={errors.injuredBodyPart?.message}
                     />
                   )}
                 />
-                {errors.injuredBodyPart && (
-                  <p className="text-sm text-red-500">
-                    {errors.injuredBodyPart.message}
-                  </p>
-                )}
+               
               </div>
             </div>
 
@@ -656,14 +646,10 @@ console.log("payload",payload);
                   control={control}
                   rules={{ required: "Injured person name is required" }}
                   render={({ field }) => (
-                    <Input label="Injured Person Name" {...field} required />
+                    <Input label="Injured Person Name" {...field} required error={errors.injuredPersonName?.message}/>
                   )}
                 />
-                {errors.injuredPersonName && (
-                  <p className="text-sm text-red-500">
-                    {errors.injuredPersonName.message}
-                  </p>
-                )}
+                
               </div>
               <div className="min-w-[220px] flex-1">
                 <Controller
@@ -677,14 +663,10 @@ console.log("payload",payload);
                     required: "Injured person phone number is required",
                   }}
                   render={({ field }) => (
-                    <Input label="Injured Person Phone" {...field} required />
+                    <Input label="Injured Person Phone" {...field} required error={errors.injuredPhoneNumber?.message} />
                   )}
                 />
-                {errors.injuredPhoneNumber && (
-                  <p className="text-sm text-red-500">
-                    {errors.injuredPhoneNumber.message}
-                  </p>
-                )}
+                
               </div>
 
               <div className="min-w-[220px] flex-1">
@@ -699,14 +681,10 @@ console.log("payload",payload);
                     required: "Injured person email is required",
                   }}
                   render={({ field }) => (
-                    <Input label="Injured Person Email" {...field} required />
+                    <Input label="Injured Person Email" {...field} required error={errors.injuredPersonEmail?.message} />
                   )}
                 />
-                {errors.injuredPersonEmail && (
-                  <p className="text-sm text-red-500">
-                    {errors.injuredPersonEmail.message}
-                  </p>
-                )}
+                
               </div>
             </div>
 

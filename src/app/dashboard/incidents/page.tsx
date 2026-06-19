@@ -96,7 +96,7 @@ export default function IncidentsList() {
         !priority.length || priority.includes(item.report.priority);
 
       const matchesStatus =
-        !status.length || status.includes(item.incident?.status ?? "");
+        !status.length || status.includes(item.report?.status ?? "");
 
       const matchesSearch =
         !searchTerm ||
@@ -373,9 +373,9 @@ export default function IncidentsList() {
                 </div>
                 <div className="flex flex-col items-end justify-end gap-2">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.incident?.status as keyof typeof statusMapping]}`}
+                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.report?.status as keyof typeof statusMapping]}`}
                   >
-                    {item.incident?.status.replace("_", " ")}
+                    {item.report?.status.replace("_", " ")}
                   </span>
                   <span
                     className="rounded px-2.5 py-0.5 text-xs font-semibold text-white"

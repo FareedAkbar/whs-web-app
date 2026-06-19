@@ -279,7 +279,6 @@ export const incidentRouter = createTRPCRouter({
             message: "Unauthorized",
           });
         }
-console.log("input icnident",input);
 
         const response = await fetch(`${env.BASE_URL}/incident`, {
           method: "POST",
@@ -350,7 +349,7 @@ console.log("input icnident",input);
           console.error("Incident report error:", errorData);
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: errorData.message || "Failed to report incident",
+            message: errorData.message || "Failed to report hazard",
           });
         }
 
@@ -365,13 +364,13 @@ console.log("input icnident",input);
           data: responseData.data,
         };
       } catch (error) {
-        console.error("Incident Report Error:", error);
+        console.error("Hazard Report Error:", error);
         return {
           status: false,
           error:
             error instanceof Error
               ? error.message
-              : "An error occurred while reporting the incident.",
+              : "An error occurred while reporting the hazard.",
         };
       }
     }),

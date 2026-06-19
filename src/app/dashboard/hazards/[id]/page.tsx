@@ -19,6 +19,7 @@ import FollowUpsSection from "@/components/ui/FollowUpsSection";
 import { Comment, IncidentMedia } from "@/types/report";
 import Image from "next/image";
 import { statusMapping } from "@/utils/statusColors";
+import LogsSection from "@/components/ui/LogsSection";
 export default function HazardDetailScreen() {
   const params = useParams();
   // const { data: departments, isLoading: isLoadingDepartments } =
@@ -102,16 +103,35 @@ export default function HazardDetailScreen() {
 
 
 
-  const handleUpdateStatus = (newStatus: string) => {
+  // const handleUpdateStatus = (newStatus: string) => {
+  //   if (!hazard) return;
+  //   updateIncidentStatus.mutate(
+  //     {
+  //       hazardId: hazardMeta?.id! ?? "",
+  //       status: newStatus,
+  //     },
+  //     {
+  //       onSuccess: () => {
+  //         toast.success(`Hazard ${newStatus.toLowerCase()} successfully`);
+  //         void refetch();
+  //       },
+  //       onError: (error) => {
+  //         toast.error(error.message ?? "Something went wrong");
+  //       },
+  //     },
+  //   );
+  // };
+  const closeHazard = () => {
     if (!hazard) return;
-    updateIncidentStatus.mutate(
+    updateReportStatus.mutate(
       {
-        hazardId: hazardMeta?.id! ?? "",
-        status: newStatus,
+        incidentReportId: hazard.report.id,
+        status: "CLOSED",
+        comments: `Hazard closed by ${user?.name} (${user?.email})`,
       },
       {
         onSuccess: () => {
-          toast.success(`Hazard ${newStatus.toLowerCase()} successfully`);
+          toast.success(`Hazard report has been closed`);
           void refetch();
         },
         onError: (error) => {
@@ -120,16 +140,17 @@ export default function HazardDetailScreen() {
       },
     );
   };
-  const closeIncident = () => {
+  const completeHazard = () => {
     if (!hazard) return;
     updateReportStatus.mutate(
       {
         incidentReportId: hazard.report.id,
-        status: "CLOSED",
+        status: "COMPLETED",
+        comments: `Hazard completed by ${user?.name} (${user?.email})`,
       },
       {
         onSuccess: () => {
-          toast.success(`Hazard report has been closed`);
+          toast.success(`Hazard report has been completed`);
           void refetch();
         },
         onError: (error) => {
@@ -294,10 +315,10 @@ export default function HazardDetailScreen() {
                       );
                       return;
                     }
-                    void handleUpdateStatus("COMPLETED");
+                    void completeHazard();
                   }}
-                  loading={updateIncidentStatus.isPending}
-                  disabled={updateIncidentStatus.isPending}
+                  loading={updateReportStatus.isPending}
+                  disabled={updateReportStatus.isPending}
                   // disabled={isUpdatingStatus}
                 />
               )}
@@ -307,9 +328,9 @@ export default function HazardDetailScreen() {
               report.status !== "CLOSED" && (
                 <Button
                   title={"Close Hazard"}
-                  onClick={() => handleUpdateStatus("CLOSED")}
-                  loading={updateIncidentStatus.isPending}
-                  disabled={updateIncidentStatus.isPending}
+                  onClick={() => closeHazard()}
+                  loading={updateReportStatus.isPending}
+                  disabled={updateReportStatus.isPending}
                   // disabled={isUpdatingStatus}
                   // variant="secondary"
                 />
@@ -422,7 +443,7 @@ export default function HazardDetailScreen() {
                 {hazard.links.map((link) => (
                   <div
                     key={link.linkId}
-                    className="flex items-center justify-between rounded-lg border p-4"
+                    className="flex items-center justify-between rounded-lg shadow dark:bg-gray-700 bg-gray-50 p-4"
                   >
                     <div>
                       <p className="font-medium">
@@ -432,12 +453,12 @@ export default function HazardDetailScreen() {
                         {link.linkType}
                       </p>
                       {link.reportDescription && (
-                        <p className="mt-1 text-sm text-gray-600">
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                           {link.reportDescription}
                         </p>
                       )}
                       {link.linkDescription && (
-                        <p className="mt-1 text-sm text-gray-600">
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                           {link.linkDescription}
                         </p>
                       )}
@@ -466,6 +487,7 @@ export default function HazardDetailScreen() {
             reportId={hazard?.report.id}
             onCommentAdded={() => void refetch()}
           />
+          <LogsSection logs={hazard?.reportLogs ?? []} />
 
           {/* Role-based action buttons */}
           <div className="mt-4 flex items-center gap-4">

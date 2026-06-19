@@ -41,6 +41,7 @@ const HazardForm = () => {
       categoryType: "",
       severity: undefined,
       coordinates: "",
+      address: "",
     },
   });
   const { control, handleSubmit, formState } = methods;
@@ -58,6 +59,7 @@ const HazardForm = () => {
   // });
   const [images, setImages] = useState<SelectedMedia[]>([]);
   const reportHazard = api.incidents.reportHazard.useMutation();
+  const utils = api.useUtils();
 
   // Commented out location select
   // const handleLocationSelect = (coords: {
@@ -87,7 +89,7 @@ const HazardForm = () => {
       severity: data.severity,
       mainType: "HAZARD",
       coordinates: data.coordinates, // Free text location
-      address: data.coordinates,
+      address: data.address,
 
       media: images.map((image) => image.id).filter(Boolean),
       managerSignatureConfirmationDate: null,
@@ -95,19 +97,16 @@ const HazardForm = () => {
     };
 
     try {
-      await reportHazard.mutateAsync(
-        { hazard: hazardData },
-        {
-          onSuccess: () => {
-            toast.success("Hazard reported successfully!");
-            router.push("/dashboard/hazards");
-          },
-          onError: (error) => {
-            console.error("Error reporting hazard:", error);
-            toast.error("Failed to report hazard");
-          },
-        },
-      );
+      const result = await reportHazard.mutateAsync({ hazard: hazardData });
+
+      if (!result.status) {
+        toast.error(result.error ?? "Failed to report hazard");
+        return;
+      }
+
+      await utils.incidents.getHazards.invalidate();
+      toast.success("Hazard reported successfully!");
+      router.push("/dashboard/hazards");
     } catch (error) {
       console.error("Error reporting hazard:", error);
       toast.error("Failed to report hazard");
@@ -284,7 +283,7 @@ const HazardForm = () => {
             {/* Location input field */}
             <div className="min-w-[220px] flex-1">
               <Controller
-                name="coordinates"
+                name="address"
                 control={control}
                 rules={{ required: "Location is required" }}
                 render={({ field }) => (
@@ -293,7 +292,7 @@ const HazardForm = () => {
                     label="Location"
                     placeholder="E.g. Building 9, Sports Hub"
                     required
-                    error={errors.coordinates?.message}
+                    error={errors.address?.message}
                     {...field}
                   />
                 )}

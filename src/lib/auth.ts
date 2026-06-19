@@ -91,7 +91,6 @@ const ROLES = {
     "complete:incident",
     "submit:inspection",
     "view:filled-inspections",
-    "create:incidents",
     "view:incidents",
     "fill:inspections",
   ],

@@ -109,16 +109,35 @@ export default function IncidentDetailScreen() {
   };
 
 
-  const handleUpdateStatus = async (newStatus: string) => {
+  // const handleUpdateStatus = async (newStatus: string) => {
+  //   if (!incident) return;
+  //   await updateIncidentStatus.mutateAsync(
+  //     {
+  //       incidentId: incidentMeta?.id! ?? "",
+  //       status: newStatus,
+  //     },
+  //     {
+  //       onSuccess: () => {
+  //         toast.success(`Incident ${newStatus.toLowerCase()} successfully`);
+  //         void refetch();
+  //       },
+  //       onError: (error) => {
+  //         toast.error(error.message ?? "Something went wrong");
+  //       },
+  //     },
+  //   );
+  // };
+  const closeIncident = async () => {
     if (!incident) return;
-    await updateIncidentStatus.mutateAsync(
+    await updateReportStatus.mutateAsync(
       {
-        incidentId: incidentMeta?.id! ?? "",
-        status: newStatus,
+        incidentReportId: incident.report.id,
+        comments:`Incident closed by ${user?.name} (${user?.email})`,
+        status: "CLOSED",
       },
       {
         onSuccess: () => {
-          toast.success(`Incident ${newStatus.toLowerCase()} successfully`);
+          toast.success(`Incident report has been closed`);
           void refetch();
         },
         onError: (error) => {
@@ -127,16 +146,17 @@ export default function IncidentDetailScreen() {
       },
     );
   };
-  const closeIncident = async () => {
+  const completeIncident = async () => {
     if (!incident) return;
     await updateReportStatus.mutateAsync(
       {
         incidentReportId: incident.report.id,
-        status: "CLOSED",
+        comments:`Incident completed by ${user?.name} (${user?.email})`,
+        status: "COMPLETED",
       },
       {
         onSuccess: () => {
-          toast.success(`Incident report has been closed`);
+          toast.success(`Incident report has been completed`);
           void refetch();
         },
         onError: (error) => {
@@ -234,9 +254,9 @@ export default function IncidentDetailScreen() {
               </h2>
 
               <span
-                className={`rounded-full px-3 py-1 text-xs ${statusMapping[incidentMeta?.status as keyof typeof statusMapping]}`}
+                className={`rounded-full px-3 py-1 text-xs ${statusMapping[report?.status as keyof typeof statusMapping]}`}
               >
-                {incidentMeta?.status.replaceAll("_", " ")}
+                {report?.status.replaceAll("_", " ")}
               </span>
             </div>
           </div>
@@ -296,10 +316,10 @@ export default function IncidentDetailScreen() {
                       );
                       return;
                     }
-                    void handleUpdateStatus("COMPLETED");
+                    void completeIncident();
                   }}
-                  loading={updateIncidentStatus.isPending}
-                  disabled={updateIncidentStatus.isPending}
+                  loading={updateReportStatus.isPending}
+                  disabled={updateReportStatus.isPending}
                   // disabled={isUpdatingStatus}
                 />
               )}
@@ -310,9 +330,9 @@ export default function IncidentDetailScreen() {
               report.status !== "CLOSED" && (
                 <Button
                   title={"Close Incident"}
-                  onClick={() => void handleUpdateStatus("CLOSED")}
-                  loading={updateIncidentStatus.isPending}
-                  disabled={updateIncidentStatus.isPending}
+                  onClick={() =>   void closeIncident() }
+                  loading={updateReportStatus.isPending}
+                  disabled={updateReportStatus.isPending}
                   // disabled={isUpdatingStatus}
                   // variant="secondary"
                 />
@@ -492,7 +512,7 @@ export default function IncidentDetailScreen() {
                 {incident.links.map((link) => (
                   <div
                     key={link.linkId}
-                    className="flex items-center justify-between rounded-lg border p-4"
+                    className="flex items-center justify-between rounded-lg shadow dark:bg-gray-700 bg-gray-50 p-4"
                   >
                     <div>
                       <p className="font-medium">
@@ -502,12 +522,12 @@ export default function IncidentDetailScreen() {
                         {link.linkType}
                       </p>
                       {link.reportDescription && (
-                        <p className="mt-1 text-sm text-gray-600">
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                           {link.reportDescription}
                         </p>
                       )}
                       {link.linkDescription && (
-                        <p className="mt-1 text-sm text-gray-600">
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                           {link.linkDescription}
                         </p>
                       )}
@@ -543,7 +563,7 @@ export default function IncidentDetailScreen() {
               onFollowUpAdded={() => void refetch()}
             />
           )}
-          <LogsSection logs={incident?.logs ?? []} />
+          <LogsSection logs={incident?.reportLogs ?? []} />
 
 
           {/* Role-based action buttons */}
