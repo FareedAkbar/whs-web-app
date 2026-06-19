@@ -47,6 +47,7 @@ const ROLES = {
     "view:filled-inspections",
     "create:hazards",
     "view:hazards",
+    "close:hazard",
   ],
   DEPARTMENT_MANAGER: ["view:homeCounters"],
   FACILITY_MANAGER: [
@@ -58,12 +59,13 @@ const ROLES = {
     "update:inspections",
     "view:inspections",
     "view:filled-inspections",
-        "create:incidents",
-"view:hazards",
+    "create:incidents",
+    "view:hazards",
     "submit:inspection",
     "fill:inspections",
-        "show/hide:comments",
-        "pick:hazard",
+    "show/hide:comments",
+    "pick:hazard",
+    "complete:hazard"
 
   ],
   // P_AND_C_MEMBER: ["view:homeCounters", "create:incidents"],
@@ -80,7 +82,8 @@ const ROLES = {
     "submit:inspection",
     "fill:inspections",
     "show/hide:comments",
-    "pick:incident"
+    "pick:incident",
+    "complete:incident"
   ],
   P_AND_C_OFFICER: [
     "view:homeCounters",

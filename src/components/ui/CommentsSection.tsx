@@ -86,8 +86,8 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
       </h2>
 
       <div className="space-y-4">
-        {sortedComments.length > 0 ? (
-          sortedComments.map((item) => (
+        {sortedComments.filter((item) => item.showToAll || item.userId === session?.user.id).length > 0 ? (
+          sortedComments.filter((item) => item.showToAll || item.userId === session?.user.id).map((item) => (
             <div
               key={item.id}
               className="rounded-lg border border-gray-100 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900"
@@ -109,7 +109,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
               </p>
 
               {/* Show to all toggle */}
-              {hasPermission(session?.user.role as any, "show/hide:comments") && (
+              {hasPermission(session?.user.role as any, "show/hide:comments") &&item.userId === session?.user.id && (
                 
               <div className="flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-700">
                 <div className="flex items-center gap-2">

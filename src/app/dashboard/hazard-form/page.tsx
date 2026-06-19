@@ -330,7 +330,7 @@ const HazardForm = () => {
               <Button
                 type="submit"
                 variant="primary"
-                title={"Submit"}
+                title={"Create Hazard"}
                 disabled={reportHazard.isPending}
                 loading={reportHazard.isPending}
               />
