@@ -1,27 +1,7 @@
-interface Question {
-  id: string;
-  questionNumber?: number;
-  title: string;
-  type: AnsType;
-  options?: string[];
-}
-interface NewQuestion {
-  questionNumber: number;
-  title: string;
-  type: AnsType;
-  options?: string[];
-  __editing?: boolean;
-}
 
-interface getInspectionsResponse {
-  data: Inspection[];
-  message: string;
-}
-interface getInspectionResponse {
-  data: InspectionDetail;
-  message: string;
-}
-type AnsType =
+// ── Primitives ────────────────────────────────────────────────────────────────
+
+ type AnsType =
   | "TEXT"
   | "YES_NO"
   | "SINGLE_OPTION"
@@ -29,43 +9,126 @@ type AnsType =
   | "DATE"
   | "DATE_RANGE"
   | "LONG_TEXT";
-type Inspection = {
+
+// ── Questions ─────────────────────────────────────────────────────────────────
+
+ interface Question {
   id: string;
+  sectionId?: string;
+  questionNumber?: number;
   title: string;
-  description: string;
-  questions: Question[];
-  status?: string;
-  dueDate?: string;
-  createdBy: string;
-};
-interface InspectionLog {
-  id: string;
-  inspectionId: string;
-  status:
-    | "INITIATED"
-    | "IN_PROGRESS"
-    | "COMPLETED"
-    | "CANCELLED"
-    | "ASSIGNED"
-    | "CLOSED";
-  userId: string;
-  comment: string;
-  createdAt: string; // ISO date string
+  type: AnsType;
+  options?: string[];
 }
 
-interface InspectionAnswer {
+ interface NewQuestion {
+  questionNumber: number;
+  title: string;
+  type: AnsType;
+  options?: string[];
+  __editing?: boolean;
+}
+
+/** Question with an embedded answer — inside InspectionItem.sections */
+ interface AnsweredQuestion extends Question {
+  answer?: EmbeddedAnswer;
+}
+
+// ── Answers ───────────────────────────────────────────────────────────────────
+
+/** Answer embedded directly on a question inside inspection.sections */
+ interface EmbeddedAnswer {
   id?: string;
+  inspectionId?: string;
   questionId?: string;
   answer?: string | string[] | null;
   createdAt?: string;
   updatedAt?: string;
 }
 
-interface InspectionAnswerWithQuestion {
-  inspectionId: string;
+ interface InspectionSectionAnswer {
+  sectionId: string;
+  hazard?: NewHazardReport | null;
+  hazardId?: string | null;
   answers: { questionId: string; answer: string | string[] }[];
 }
-interface InspectionItem {
+
+// ── Hazards ───────────────────────────────────────────────────────────────────
+
+ interface LinkedHazard {
+  linkId: string;
+  hazardId: string;
+  inspectionId: string;
+  sectionId: string;
+  isActive: boolean;
+  comment: string;
+  createdAt: string;
+  reportId: string;
+  reportTitle: string;
+  reportDescription: string;
+  linkType: string;
+  linkDescription: string;
+  reportStatus: string;
+  reportPriority: string;
+  reportCreatedAt: string;
+  ticket_number: number;
+}
+
+// ── Sections ──────────────────────────────────────────────────────────────────
+
+/** Template section — questions without answers */
+ interface InspectionSection {
+  id: string;
+  title: string;
+  description?: string;
+  order?: number;
+  questions: Question[];
+}
+
+/** Section inside a submitted InspectionItem — answered questions + linked hazards */
+ interface InspectionItemSection {
+  id: string;
+  title: string;
+  description?: string;
+  order?: number;
+  questions: AnsweredQuestion[];
+  linkedHazards?: LinkedHazard[];
+}
+
+// ── Logs ──────────────────────────────────────────────────────────────────────
+
+ interface InspectionLog {
+  id: string;
+  inspectionId: string;
+  status: InspectionStatus;
+  userId: string;
+  comment: string;
+  createdAt: string;
+}
+
+// ── Status ────────────────────────────────────────────────────────────────────
+
+ type InspectionStatus =
+  | "INITIATED"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "CANCELLED"
+  | "ASSIGNED"
+  | "CLOSED";
+
+// ── Core entities ─────────────────────────────────────────────────────────────
+
+ type Inspection = {
+  id: string;
+  title: string;
+  description: string;
+  questions?: Question[];
+  status?: string;
+  dueDate?: string;
+  createdBy: string;
+};
+
+ interface InspectionItem {
   id: string;
   surveyId: string;
   is_deleted: boolean;
@@ -74,39 +137,57 @@ interface InspectionItem {
     name: string;
     email: string;
     role: string;
-    providedImageUrl: string;
-    phoneNumber: string;
+    providerImageUrl?: string;
+    phoneNumber?: string;
   };
   assignedBy: string | null;
-  status:
-    | "INITIATED"
-    | "IN_PROGRESS"
-    | "COMPLETED"
-    | "CANCELLED"
-    | "ASSIGNED"
-    | "CLOSED";
-  dueDate: string; // ISO date string
+  status: InspectionStatus;
+  dueDate: string;
   acceptedAt: string | null;
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;
-  answers: InspectionAnswer[];
+  /** Populated when the inspection has been submitted */
+  sections?: InspectionItemSection[];
   logs: InspectionLog[];
 }
-type InspectionDetail = {
+
+ type InspectionDetail = {
   id: string;
   title: string;
   description: string;
-  questions: Question[];
+  createdBy: string;
   status?: string;
   dueDate?: string;
+  /** Template sections (no answers) */
+  sections?: InspectionSection[];
   inspections: InspectionItem[];
-  createdBy: string;
 };
-type NewInspection = {
+
+// ── Creation ──────────────────────────────────────────────────────────────────
+
+ type NewSection = {
   title: string;
   description: string;
+  order: number;
   questions: NewQuestion[];
-  status?: string;
-  // dueDate: string;
 };
+
+ type NewInspection = {
+  title: string;
+  description: string;
+  sections: NewSection[];
+  status?: string;
+};
+
+// ── API responses ─────────────────────────────────────────────────────────────
+
+ interface getInspectionsResponse {
+  data: Inspection[];
+  message: string;
+}
+
+ interface getInspectionResponse {
+  data: InspectionDetail;
+  message: string;
+}

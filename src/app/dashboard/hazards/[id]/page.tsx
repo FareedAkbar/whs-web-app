@@ -40,10 +40,7 @@ export default function HazardDetailScreen() {
     reportId: id,
     type: "HAZARD",
   });
-  // const { data: workers } = api.workers.getWorkers.useQuery();
-  // const { data: departments } = api.department.getDepartments.useQuery();
   const assignIncidentToOfficer = api.incidents.assignIncident.useMutation();
-  const updateIncidentStatus = api.incidents.updateIncidentStatus.useMutation();
   const updateReportStatus = api.reports.updateReportStatus.useMutation();
   const incidentAcceptance = api.incidents.incidentAcceptance.useMutation();
   const hazard = incidentData?.data;
@@ -251,11 +248,11 @@ export default function HazardDetailScreen() {
               className={`rounded-full px-3 py-1 text-xs ${
                 // try to use statusMapping constant, otherwise fallback styles
                 statusMapping[
-                  hazardMeta?.status as keyof typeof statusMapping
+                  report?.status as keyof typeof statusMapping
                 ] ?? "bg-gray-100 text-gray-700"
               }`}
             >
-              {hazardMeta?.status.replaceAll("_", " ")}
+              {report?.status.replaceAll("_", " ")}
             </span>
           </div>
 

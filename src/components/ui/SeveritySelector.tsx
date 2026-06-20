@@ -64,7 +64,7 @@ export function SeveritySelector({
                     color={color}
                   />
                 )}
-                <span className="mt-2 block text-xs">{displayName}</span>
+                <span className="mt-2 block text-xs dark:text-white">{displayName}</span>
               </div>
             </div>
           );

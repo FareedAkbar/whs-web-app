@@ -14,6 +14,9 @@ export const InspectionRouter = createTRPCRouter({
           message: "Unauthorized",
         });
       }
+
+      console.log("token",userToken);
+      
       const response = await fetch(`${env.BASE_URL}/inspection`, {
         method: "GET",
         headers: {
@@ -59,6 +62,9 @@ export const InspectionRouter = createTRPCRouter({
             message: "Unauthorized",
           });
         }
+
+        console.log("token insepction id",userToken);
+        
         const response = await fetch(
           `${env.BASE_URL}/inspection/inspection-survey`,
           {
@@ -96,20 +102,27 @@ export const InspectionRouter = createTRPCRouter({
     }),
   createInspection: publicProcedure
     .input(
+  z.object({
+    title: z.string().min(1, "Title is required"),
+    description: z.string().optional(),
+    status: z.string().optional(),
+    sections: z.array(
       z.object({
-        title: z.string().min(1, "Title is required"),
+        title: z.string().min(1, "Section title is required"),
         description: z.string().optional(),
+        order: z.number(),
         questions: z.array(
           z.object({
             questionNumber: z.number(),
-            title: z.string(),
-            type: z.string(), // or refine with z.enum([...]) if you have strict types
+            title: z.string().min(1, "Question title is required"),
+            type: z.string(),
             options: z.array(z.string()).optional(),
           }),
         ),
-        status: z.string().optional(),
       }),
-    )
+    ),
+  }),
+)
     .mutation(async ({ ctx, input }) => {
       try {
         const userToken = ctx.session?.user.token;
@@ -119,18 +132,15 @@ export const InspectionRouter = createTRPCRouter({
             message: "Unauthorized",
           });
         }
+        console.log("token",userToken);
+        
         const response = await fetch(`${env.BASE_URL}/inspection/create`, {
           method: "POST",
           headers: {
             authorization: `Bearer ${userToken}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            title: input.title,
-            description: input.description,
-            questions: input.questions,
-            status: input.status,
-          }),
+          body: JSON.stringify(input),
         });
         const responseData = (await response.json()) as {
           data?: Inspection[];
@@ -267,14 +277,21 @@ export const InspectionRouter = createTRPCRouter({
   submitInspection: publicProcedure
     .input(
       z.object({
-        inspectionId: z.string(),
-        answers: z.array(
-          z.object({
-            questionId: z.string(),
-            answer: z.any(), // array, string, boolean — allow all
-          }),
-        ),
-      }),
+  inspectionId: z.string(),
+  sections: z.array(
+    z.object({
+      sectionId: z.string(),
+      hazardId: z.string().nullable(),
+      hazard: z.any().nullable(),
+      answers: z.array(
+        z.object({
+          questionId: z.string(),
+          answer: z.any(),
+        })
+      ),
+    })
+  ),
+})
     )
     .mutation(async ({ ctx, input }) => {
       try {
@@ -294,7 +311,7 @@ export const InspectionRouter = createTRPCRouter({
           },
           body: JSON.stringify({
             inspectionId: input.inspectionId,
-            answers: input.answers,
+            sections: input.sections,
           }),
         });
 
