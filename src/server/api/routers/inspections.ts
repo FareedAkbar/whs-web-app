@@ -2,7 +2,6 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "@/env";
 import z from "zod";
-import { assign } from "nodemailer/lib/shared";
 
 export const InspectionRouter = createTRPCRouter({
   getInspections: publicProcedure.query(async ({ ctx }) => {
@@ -15,8 +14,8 @@ export const InspectionRouter = createTRPCRouter({
         });
       }
 
-      console.log("token",userToken);
-      
+      console.log("token", userToken);
+
       const response = await fetch(`${env.BASE_URL}/inspection`, {
         method: "GET",
         headers: {
@@ -47,6 +46,7 @@ export const InspectionRouter = createTRPCRouter({
       };
     }
   }),
+
   getInspectionById: publicProcedure
     .input(
       z.object({
@@ -63,8 +63,8 @@ export const InspectionRouter = createTRPCRouter({
           });
         }
 
-        console.log("token insepction id",userToken);
-        
+        console.log("token inspection id", userToken);
+
         const response = await fetch(
           `${env.BASE_URL}/inspection/inspection-survey`,
           {
@@ -100,29 +100,30 @@ export const InspectionRouter = createTRPCRouter({
         };
       }
     }),
+
   createInspection: publicProcedure
     .input(
-  z.object({
-    title: z.string().min(1, "Title is required"),
-    description: z.string().optional(),
-    status: z.string().optional(),
-    sections: z.array(
       z.object({
-        title: z.string().min(1, "Section title is required"),
+        title: z.string().min(1, "Title is required"),
         description: z.string().optional(),
-        order: z.number(),
-        questions: z.array(
+        status: z.string().optional(),
+        sections: z.array(
           z.object({
-            questionNumber: z.number(),
-            title: z.string().min(1, "Question title is required"),
-            type: z.string(),
-            options: z.array(z.string()).optional(),
+            title: z.string().min(1, "Section title is required"),
+            description: z.string().optional(),
+            order: z.number(),
+            questions: z.array(
+              z.object({
+                questionNumber: z.number(),
+                title: z.string().min(1, "Question title is required"),
+                type: z.string(),
+                options: z.array(z.string()).optional(),
+              }),
+            ),
           }),
         ),
       }),
-    ),
-  }),
-)
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         const userToken = ctx.session?.user.token;
@@ -132,8 +133,8 @@ export const InspectionRouter = createTRPCRouter({
             message: "Unauthorized",
           });
         }
-        console.log("token",userToken);
-        
+        console.log("token", userToken);
+
         const response = await fetch(`${env.BASE_URL}/inspection/create`, {
           method: "POST",
           headers: {
@@ -169,6 +170,7 @@ export const InspectionRouter = createTRPCRouter({
         };
       }
     }),
+
   deleteInspection: publicProcedure
     .input(
       z.object({
@@ -208,7 +210,6 @@ export const InspectionRouter = createTRPCRouter({
 
         return {
           status: true,
-          // data: responseData?.data ? [responseData?.data] : [],
         };
       } catch (error) {
         console.error("Error deleting inspections:", error);
@@ -218,6 +219,7 @@ export const InspectionRouter = createTRPCRouter({
         };
       }
     }),
+
   assignInspection: publicProcedure
     .input(
       z.object({
@@ -264,7 +266,6 @@ export const InspectionRouter = createTRPCRouter({
 
         return {
           status: true,
-          // data: (responseData as getInspectionsResponse).data,
         };
       } catch (error) {
         console.error("Error assigning inspections:", error);
@@ -274,24 +275,32 @@ export const InspectionRouter = createTRPCRouter({
         };
       }
     }),
+
   submitInspection: publicProcedure
     .input(
       z.object({
-  inspectionId: z.string(),
-  sections: z.array(
-    z.object({
-      sectionId: z.string(),
-      hazardId: z.string().nullable(),
-      hazard: z.any().nullable(),
-      answers: z.array(
-        z.object({
-          questionId: z.string(),
-          answer: z.any(),
-        })
-      ),
-    })
-  ),
-})
+        inspectionId: z.string(),
+        // ── New meta fields ──
+        areaBuilding: z.string().min(1, "Area Building is required"),
+        /** Comma-separated descriptions, e.g. "Cleaners Office, UniHall" */
+        areaDescriptions: z.string().min(1, "At least one area description is required"),
+        businessUnit: z.string().min(1, "Business unit is required"),
+        inspectionBuddy: z.string().min(1, "Inspection buddy is required"),
+        // ── Sections ──
+        sections: z.array(
+          z.object({
+            sectionId: z.string(),
+            hazardId: z.string().nullable(),
+            hazard: z.any().nullable(),
+            answers: z.array(
+              z.object({
+                questionId: z.string(),
+                answer: z.any(),
+              }),
+            ),
+          }),
+        ),
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
@@ -311,6 +320,10 @@ export const InspectionRouter = createTRPCRouter({
           },
           body: JSON.stringify({
             inspectionId: input.inspectionId,
+            areaBuilding: input.areaBuilding,
+            areaDescriptions: input.areaDescriptions,
+            businessUnit: input.businessUnit,
+            inspectionBuddy: input.inspectionBuddy,
             sections: input.sections,
           }),
         });

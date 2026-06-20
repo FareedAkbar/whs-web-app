@@ -1,4 +1,3 @@
-
 // ── Primitives ────────────────────────────────────────────────────────────────
 
  type AnsType =
@@ -150,6 +149,13 @@
   /** Populated when the inspection has been submitted */
   sections?: InspectionItemSection[];
   logs: InspectionLog[];
+  // ── New meta fields ──
+  areaBuilding?: string;
+  /** Comma-separated area descriptions as stored/returned by API */
+  areaDescriptions?: string;
+  businessUnit?: string;
+  inspectionBuddy?: string;
+  nextInspectionDue?: string;
 }
 
  type InspectionDetail = {
@@ -190,4 +196,9 @@
  interface getInspectionResponse {
   data: InspectionDetail;
   message: string;
+}
+
+interface AreaData {
+  areaBuilding: string; // e.g. "Area 1 - 11"
+  descriptions: string[];
 }

@@ -21,9 +21,16 @@ import { toast } from "react-toastify";
 import { UserRole } from "@/types/roles";
 import type { NewHazardReport } from "@/types/report";
 import HazardLinker, { HazardLinkValue } from "@/components/ui/HazardLinker";
+import { AREA_DATA } from "@/constants/area";
 
 
-// ── Local-only types (UI concerns only, not shared) ───────────────────────────
+// ── Area data ─────────────────────────────────────────────────────────────────
+
+
+
+
+
+// ── Local-only types ──────────────────────────────────────────────────────────
 
 type FormValue = string | string[];
 
@@ -33,6 +40,15 @@ interface SectionFormState {
   hazardLink: HazardLinkValue;
 }
 
+
+
+interface InspectionMetaFields {
+  areaBuilding: string;
+  areaDescriptions: string[];
+  businessUnit: string;
+  inspectionBuddy: string;
+  nextInspectionDue: string;
+}
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const defaultSectionState = (): SectionFormState => ({
@@ -41,10 +57,14 @@ const defaultSectionState = (): SectionFormState => ({
   hazardLink: { mode: "existing" },
 });
 
-/**
- * Returns true if the InspectionItem has submitted answers.
- * Answers live inside item.sections[].questions[].answer with the new API shape.
- */
+const defaultMetaFields = (): InspectionMetaFields => ({
+  areaBuilding: "",
+  areaDescriptions: [],
+  businessUnit: "",
+  inspectionBuddy: "",
+  nextInspectionDue: "",
+});
+
 function itemHasAnswers(item: InspectionItem): boolean {
   return (
     Array.isArray(item.sections) &&
@@ -56,9 +76,8 @@ function itemHasAnswers(item: InspectionItem): boolean {
 // ── Main component ────────────────────────────────────────────────────────────
 
 const InspectionChecklist = () => {
-  const [sectionForms, setSectionForms] = useState<
-    Record<string, SectionFormState>
-  >({});
+  const [sectionForms, setSectionForms] = useState<Record<string, SectionFormState>>({});
+  const [metaFields, setMetaFields] = useState<InspectionMetaFields>(defaultMetaFields());
   const [modal, setModal] = useState<{
     type: "view" | "delete" | "assign" | null;
     data?: InspectionDetail | null | Inspection;
@@ -67,11 +86,8 @@ const InspectionChecklist = () => {
   const router = useRouter();
   const { setOpen } = useModal();
 
-  const {
-    data: inspections,
-    isLoading,
-    refetch,
-  } = api.inspections.getInspections.useQuery();
+  const { data: inspections, isLoading, refetch } =
+    api.inspections.getInspections.useQuery();
 
   const { data: inspectionDetail } =
     api.inspections.getInspectionById.useQuery(
@@ -111,9 +127,7 @@ const InspectionChecklist = () => {
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState("");
   const [assignedTab, setAssignedTab] = useState("All");
-  const [filteredInspections, setFilteredInspections] = useState<Inspection[]>(
-    [],
-  );
+  const [filteredInspections, setFilteredInspections] = useState<Inspection[]>([]);
 
   useEffect(() => {
     if (!inspections?.data) return;
@@ -126,7 +140,6 @@ const InspectionChecklist = () => {
     setFilteredInspections(data);
   }, [assignedTab, inspections?.data, user?.id]);
 
-  // Initialise sectionForms when detail loads
   useEffect(() => {
     if (!inspectionDetail?.data?.sections) return;
     const init: Record<string, SectionFormState> = {};
@@ -173,6 +186,32 @@ const InspectionChecklist = () => {
     [searchTerm, verifiedUsers, inspectionDetail],
   );
 
+  // ── Area helpers ──────────────────────────────────────────────────────────
+
+  const selectedAreaData = AREA_DATA.find(
+    (a) => a.areaBuilding === metaFields.areaBuilding,
+  );
+
+  const handleAreaBuildingChange = (areaBuilding: string) => {
+    setMetaFields((prev) => ({
+      ...prev,
+      areaBuilding,
+      areaDescriptions: [],
+    }));
+  };
+
+  const toggleAreaDescription = (desc: string) => {
+    setMetaFields((prev) => {
+      const already = prev.areaDescriptions.includes(desc);
+      return {
+        ...prev,
+        areaDescriptions: already
+          ? prev.areaDescriptions.filter((d) => d !== desc)
+          : [...prev.areaDescriptions, desc],
+      };
+    });
+  };
+
   // ── Section form helpers ──────────────────────────────────────────────────
 
   const getSectionState = (sectionId: string): SectionFormState =>
@@ -208,10 +247,7 @@ const InspectionChecklist = () => {
     }));
   };
 
-  const updateSectionHazardLink = (
-    sectionId: string,
-    val: HazardLinkValue,
-  ) => {
+  const updateSectionHazardLink = (sectionId: string, val: HazardLinkValue) => {
     setSectionForms((prev) => ({
       ...prev,
       [sectionId]: {
@@ -223,10 +259,7 @@ const InspectionChecklist = () => {
 
   // ── Validation ────────────────────────────────────────────────────────────
 
-  const isSectionValid = (
-    sectionId: string,
-    questions: Question[],
-  ): boolean => {
+  const isSectionValid = (sectionId: string, questions: Question[]): boolean => {
     const state = getSectionState(sectionId);
     const answersOk = questions.every((q) => {
       if (q.type === "MULTI_OPTION") {
@@ -250,10 +283,7 @@ const InspectionChecklist = () => {
       if (state.hazardLink.mode === "new") {
         const nh = state.hazardLink.newHazard;
         return Boolean(
-          nh?.reportTitle &&
-            nh?.hazardDescription &&
-            nh?.severity &&
-            nh?.address,
+          nh?.reportTitle && nh?.hazardDescription && nh?.severity && nh?.address,
         );
       }
     }
@@ -261,7 +291,15 @@ const InspectionChecklist = () => {
     return true;
   };
 
+  const isMetaValid = (): boolean =>
+    Boolean(metaFields.areaBuilding) &&
+    metaFields.areaDescriptions.length > 0 &&
+    Boolean(metaFields.businessUnit.trim()) &&
+    Boolean(metaFields.inspectionBuddy.trim()) &&
+    Boolean(metaFields.nextInspectionDue.trim());
+
   const isFullFormValid = (): boolean => {
+    if (!isMetaValid()) return false;
     const sections = inspectionDetail?.data?.sections ?? [];
     return sections.every((sec) => isSectionValid(sec.id, sec.questions));
   };
@@ -300,15 +338,9 @@ const InspectionChecklist = () => {
       let hazard: NewHazardReport | null = null;
 
       if (state.linkHazard) {
-        if (
-          state.hazardLink.mode === "existing" &&
-          state.hazardLink.hazardId
-        ) {
+        if (state.hazardLink.mode === "existing" && state.hazardLink.hazardId) {
           hazardId = state.hazardLink.hazardId;
-        } else if (
-          state.hazardLink.mode === "new" &&
-          state.hazardLink.newHazard
-        ) {
+        } else if (state.hazardLink.mode === "new" && state.hazardLink.newHazard) {
           const nh = state.hazardLink.newHazard;
           hazard = {
             ...nh,
@@ -324,17 +356,30 @@ const InspectionChecklist = () => {
       return { sectionId: sec.id, answers, hazardId, hazard };
     });
 
-    return { inspectionId: inspectionItem.id, sections };
+    return {
+      inspectionId: inspectionItem.id,
+      areaBuilding: metaFields.areaBuilding,
+      areaDescriptions: metaFields.areaDescriptions.join(", "),
+      businessUnit: metaFields.businessUnit,
+      inspectionBuddy: metaFields.inspectionBuddy,
+      nextInspectionDue: metaFields.nextInspectionDue,
+      sections,
+    };
   };
 
   const handleSubmit = () => {
+    if (!isMetaValid()) {
+      toast.error(
+        "Please fill out Area/Building, Area Descriptions, Business Unit, Inspection Buddy and Next Inspection Due.",
+      );
+      return;
+    }
     if (!isFullFormValid()) {
       toast.error("Please fill out all questions before submitting.");
       return;
     }
 
     const payload = buildPayload();
-    console.log("payload", payload);
     if (!payload) return;
 
     submitInspection.mutate(payload as any, {
@@ -346,6 +391,7 @@ const InspectionChecklist = () => {
         }
         setModal({ type: null, data: null });
         setSectionForms({});
+        setMetaFields(defaultMetaFields());
         setOpen(false);
       },
       onError: () => {
@@ -354,7 +400,6 @@ const InspectionChecklist = () => {
     });
   };
 
-  // canFill: user has an INITIATED assignment AND hasn't submitted yet
   const canFill =
     hasPermission(user?.role!, "fill:inspections") &&
     inspectionDetail?.data?.inspections?.some(
@@ -409,18 +454,15 @@ const InspectionChecklist = () => {
           >
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-bold capitalize">
-                  {inspection.title}
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {inspection.description}
-                </p>
+                <h2 className="text-xl font-bold capitalize">{inspection.title}</h2>
+                <p className="text-gray-600 dark:text-gray-400">{inspection.description}</p>
               </div>
               <div className="flex flex-col items-end justify-center gap-2">
                 <div className="flex justify-end space-x-3">
                   <button
                     onClick={() => {
                       setSectionForms({});
+                      setMetaFields(defaultMetaFields());
                       setModal({ type: "view", data: inspection });
                       setOpen(true);
                     }}
@@ -473,7 +515,7 @@ const InspectionChecklist = () => {
               {modal.data.description}
             </p>
 
-            {/* 1. View-only: template questions, no answers, not assigned to me */}
+            {/* 1. View-only: template questions */}
             {inspectionDetail.data?.sections &&
               inspectionDetail.data.sections.length > 0 &&
               !canFill &&
@@ -495,11 +537,7 @@ const InspectionChecklist = () => {
                           </p>
                         )}
                         {sec.questions
-                          .sort(
-                            (a, b) =>
-                              (a.questionNumber ?? 0) -
-                              (b.questionNumber ?? 0),
-                          )
+                          .sort((a, b) => (a.questionNumber ?? 0) - (b.questionNumber ?? 0))
                           .map((q) => (
                             <div
                               key={q.id}
@@ -511,14 +549,10 @@ const InspectionChecklist = () => {
                               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                 Type: {q.type.replaceAll("_", " ")}
                               </p>
-                              {(q.type === "SINGLE_OPTION" ||
-                                q.type === "MULTI_OPTION") && (
+                              {(q.type === "SINGLE_OPTION" || q.type === "MULTI_OPTION") && (
                                 <div className="ml-3 mt-1">
                                   {q.options?.map((opt, i) => (
-                                    <p
-                                      key={i}
-                                      className="text-xs text-gray-500 dark:text-gray-400"
-                                    >
+                                    <p key={i} className="text-xs text-gray-500 dark:text-gray-400">
                                       • {opt}
                                     </p>
                                   ))}
@@ -542,9 +576,109 @@ const InspectionChecklist = () => {
                 />
               )}
 
-            {/* 3. Fill form – section by section */}
+            {/* 3. Fill form */}
             {canFill && inspectionDetail.data?.sections && (
               <div className="mt-4 space-y-6">
+                {/* ── Meta fields ── */}
+                <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                  <h3 className="mb-4 text-lg font-semibold dark:text-white">
+                    Inspection Details
+                  </h3>
+                  <div className="space-y-4">
+                    {/* Area - Building combined dropdown */}
+                    <Select
+                      label="Area - Building"
+                      options={[
+                        
+                        ...AREA_DATA.map((a) => ({
+                          label: a.areaBuilding,
+                          value: a.areaBuilding,
+                        })),
+                      ]}
+                      value={metaFields.areaBuilding}
+                      onChange={(e) => handleAreaBuildingChange(e.target.value)}
+                    />
+
+                    {/* Area Descriptions checkboxes */}
+                    {selectedAreaData && (
+                      <div>
+                        <Label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Area Description{" "}
+                          <span className="text-xs font-normal text-gray-400">
+                            (select all that apply)
+                          </span>
+                        </Label>
+                        <div className="space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+                          {selectedAreaData.descriptions.map((desc) => (
+                            <label
+                              key={desc}
+                              className="flex cursor-pointer items-center gap-3"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={metaFields.areaDescriptions.includes(desc)}
+                                onChange={() => toggleAreaDescription(desc)}
+                                className="h-4 w-4 cursor-pointer accent-primary"
+                              />
+                              <span className="text-sm text-gray-700 dark:text-gray-200">
+                                {desc}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                        {metaFields.areaDescriptions.length > 0 && (
+                          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                            Selected: {metaFields.areaDescriptions.join(", ")}
+                          </p>
+                        )}
+                      </div>
+                    )}
+<div className="flex flex-col gap-4 sm:flex-row">
+
+
+                    {/* Business Unit */}
+                    <Input
+                      label="Business Unit"
+                      value={metaFields.businessUnit}
+                      onChange={(e) =>
+                        setMetaFields((prev) => ({
+                          ...prev,
+                          businessUnit: e.target.value,
+                        }))
+                      }
+                      placeholder="Enter business unit"
+                    />
+
+                    {/* Inspection Buddy */}
+                    <Input
+                      label="Inspection Buddy"
+                      value={metaFields.inspectionBuddy}
+                      onChange={(e) =>
+                        setMetaFields((prev) => ({
+                          ...prev,
+                          inspectionBuddy: e.target.value,
+                        }))
+                      }
+                      placeholder="Enter inspection buddy name"
+                    />
+
+                    {/* Next Inspection Due */}
+                    <Input
+                      label="Next Inspection Due"
+                      value={metaFields.nextInspectionDue}
+                      onChange={(e) =>
+                        setMetaFields((prev) => ({
+                          ...prev,
+                          nextInspectionDue: e.target.value,
+                        }))
+                      }
+                      placeholder="e.g. July 2025 or 3 months"
+                    />
+</div>
+                  </div>
+                </div>
+
+                {/* ── Section forms ── */}
                 {inspectionDetail.data.sections
                   .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
                   .map((sec) => {
@@ -565,17 +699,10 @@ const InspectionChecklist = () => {
 
                         <div className="space-y-4">
                           {sec.questions
-                            .sort(
-                              (a, b) =>
-                                (a.questionNumber ?? 0) -
-                                (b.questionNumber ?? 0),
-                            )
+                            .sort((a, b) => (a.questionNumber ?? 0) - (b.questionNumber ?? 0))
                             .map((q) =>
-                              renderQuestion(
-                                q,
-                                state.answers,
-                                (qId, val) =>
-                                  updateSectionAnswer(sec.id, qId, val),
+                              renderQuestion(q, state.answers, (qId, val) =>
+                                updateSectionAnswer(sec.id, qId, val),
                               ),
                             )}
                         </div>
@@ -628,21 +755,17 @@ const InspectionChecklist = () => {
       {modal.type === "delete" && modal.data && (
         <ModalBody className="mx-3 w-full">
           <ModalContent className="w-full">
-            <h2 className="mb-4 text-xl font-bold dark:text-white">
-              Delete Inspection
-            </h2>
+            <h2 className="mb-4 text-xl font-bold dark:text-white">Delete Inspection</h2>
             <p className="mb-6 text-gray-600 dark:text-gray-300">
               Are you sure you want to delete{" "}
-              <span className="font-semibold">{modal.data.title}</span>? This
-              action cannot be undone.
+              <span className="font-semibold">{modal.data.title}</span>? This action cannot be
+              undone.
             </p>
             <div className="flex justify-end gap-3">
               <Button
                 title="Delete"
                 loading={deleteInspection.isPending}
-                onClick={() =>
-                  deleteInspection.mutate({ id: modal.data?.id! })
-                }
+                onClick={() => deleteInspection.mutate({ id: modal.data?.id! })}
                 disabled={deleteInspection.isPending}
               />
               <Button
@@ -714,9 +837,7 @@ const InspectionChecklist = () => {
               />
               <Button
                 title="Assign"
-                disabled={
-                  !selectedUser || !dueDate || assignMutation.isPending
-                }
+                disabled={!selectedUser || !dueDate || assignMutation.isPending}
                 onClick={() =>
                   assignMutation.mutate({
                     surveyId: modal.data?.id!,
@@ -751,9 +872,7 @@ function ViewFilledInspections({
 
   if (completed.length === 0) {
     return (
-      <p className="text-sm text-gray-500 dark:text-gray-400">
-        No submissions yet.
-      </p>
+      <p className="text-sm text-gray-500 dark:text-gray-400">No submissions yet.</p>
     );
   }
 
@@ -786,6 +905,71 @@ function ViewFilledInspections({
             </span>
           </div>
 
+          {/* Meta fields display */}
+          {(item.areaBuilding ||
+            item.areaDescriptions ||
+            item.businessUnit ||
+            item.inspectionBuddy ||
+            item.nextInspectionDue) && (
+            <div className="mb-5 rounded-lg border border-blue-100 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
+                Inspection Details
+              </p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                {item.areaBuilding && (
+                  <div>
+                    <span className="font-medium text-gray-600 dark:text-gray-400">
+                      Area - Building:{" "}
+                    </span>
+                    <span className="text-gray-800 dark:text-gray-200">
+                      {item.areaBuilding}
+                    </span>
+                  </div>
+                )}
+                {item.businessUnit && (
+                  <div>
+                    <span className="font-medium text-gray-600 dark:text-gray-400">
+                      Business Unit:{" "}
+                    </span>
+                    <span className="text-gray-800 dark:text-gray-200">
+                      {item.businessUnit}
+                    </span>
+                  </div>
+                )}
+                {item.inspectionBuddy && (
+                  <div>
+                    <span className="font-medium text-gray-600 dark:text-gray-400">
+                      Inspection Buddy:{" "}
+                    </span>
+                    <span className="text-gray-800 dark:text-gray-200">
+                      {item.inspectionBuddy}
+                    </span>
+                  </div>
+                )}
+                {item.nextInspectionDue && (
+                  <div>
+                    <span className="font-medium text-gray-600 dark:text-gray-400">
+                      Next Inspection Due:{" "}
+                    </span>
+                    <span className="text-gray-800 dark:text-gray-200">
+                      {item.nextInspectionDue}
+                    </span>
+                  </div>
+                )}
+                {item.areaDescriptions && (
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-600 dark:text-gray-400">
+                      Area Descriptions:{" "}
+                    </span>
+                    <span className="text-gray-800 dark:text-gray-200">
+                      {item.areaDescriptions}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Sections with answers */}
           <div className="space-y-5">
             {(item.sections ?? [])
@@ -803,14 +987,9 @@ function ViewFilledInspections({
                       {sec.description}
                     </p>
                   )}
-
-                  {/* Questions + answers */}
                   <div className="space-y-3">
                     {sec.questions
-                      .sort(
-                        (a, b) =>
-                          (a.questionNumber ?? 0) - (b.questionNumber ?? 0),
-                      )
+                      .sort((a, b) => (a.questionNumber ?? 0) - (b.questionNumber ?? 0))
                       .map((q) => (
                         <div
                           key={q.id}
@@ -819,10 +998,7 @@ function ViewFilledInspections({
                           <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                             {q.questionNumber}. {q.title}
                           </p>
-                          <AnswerDisplay
-                            answer={q.answer?.answer ?? null}
-                            type={q.type}
-                          />
+                          <AnswerDisplay answer={q.answer?.answer ?? null} type={q.type} />
                         </div>
                       ))}
                   </div>
@@ -888,8 +1064,7 @@ function ViewFilledInspections({
                   >
                     <span className="mt-0.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
                     <span>
-                      <span className="font-medium">{log.status}</span> —{" "}
-                      {log.comment}{" "}
+                      <span className="font-medium">{log.status}</span> — {log.comment}{" "}
                       <span className="text-gray-400">
                         ({new Date(log.createdAt).toLocaleString()})
                       </span>
@@ -956,9 +1131,7 @@ function AnswerDisplay({
     );
   }
 
-  return (
-    <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{answer}</p>
-  );
+  return <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{answer}</p>;
 }
 
 // ── Question renderer ─────────────────────────────────────────────────────────
@@ -982,9 +1155,7 @@ function renderQuestion(
               <textarea
                 className="w-full rounded-md border bg-gray-50 p-3 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 dark:bg-gray-700 dark:text-white"
                 rows={4}
-                value={
-                  typeof formValues[q.id] === "string" ? formValues[q.id] : ""
-                }
+                value={typeof formValues[q.id] === "string" ? formValues[q.id] : ""}
                 onChange={(e) => onChange(q.id, e.target.value)}
                 placeholder={`Enter ${q.title}`}
               />
@@ -994,9 +1165,7 @@ function renderQuestion(
               key={q.id}
               type={q.type === "TEXT" ? "text" : "date"}
               label={q.title}
-              value={
-                typeof formValues[q.id] === "string" ? formValues[q.id] : ""
-              }
+              value={typeof formValues[q.id] === "string" ? formValues[q.id] : ""}
               onChange={(e) => onChange(q.id, e.target.value)}
             />
           )}
@@ -1039,9 +1208,7 @@ function renderQuestion(
           question={q.title}
           onChange={(val) => onChange(q.id, val)}
           value={
-            typeof formValues[q.id] === "string"
-              ? (formValues[q.id] as string)
-              : ""
+            typeof formValues[q.id] === "string" ? (formValues[q.id] as string) : ""
           }
         />
       );
@@ -1052,14 +1219,9 @@ function renderQuestion(
           key={q.id}
           label={q.title}
           options={
-            q?.options?.map((opt: string) => ({
-              label: opt,
-              value: opt,
-            })) ?? []
+            q?.options?.map((opt: string) => ({ label: opt, value: opt })) ?? []
           }
-          value={
-            typeof formValues[q.id] === "string" ? formValues[q.id] : ""
-          }
+          value={typeof formValues[q.id] === "string" ? formValues[q.id] : ""}
           onChange={(e) => onChange(q.id, e.target.value)}
         />
       );
@@ -1072,10 +1234,7 @@ function renderQuestion(
           <Label className="mb-1 block">{q.title}</Label>
           <div className="space-y-2">
             {q?.options?.map((opt: string) => (
-              <label
-                key={opt}
-                className="flex cursor-pointer items-center space-x-2"
-              >
+              <label key={opt} className="flex cursor-pointer items-center space-x-2">
                 <input
                   type="checkbox"
                   checked={selectedValues.includes(opt)}
