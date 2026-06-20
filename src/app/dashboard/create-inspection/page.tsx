@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import { IconChecklist } from "@tabler/icons-react";
 import { toast } from "react-toastify";
-
+import SectionTableEditor, { NewTable } from "@/components/table/SectionTableEditor";
 
 
 export default function CreateInspectionPage() {
@@ -32,14 +32,14 @@ export default function CreateInspectionPage() {
   const addSection = () => {
     setSections((prev): NewSection[] => [
       ...prev,
-      { title: "", description: "", order: prev.length + 1, questions: [] },
+      { title: "", description: "", order: prev.length + 1, questions: [],notes: "",tables: [] },
     ]);
   };
 
   const updateSection = (
     index: number,
-    field: keyof Pick<NewSection, "title" | "description">,
-    value: string
+    field: keyof Pick<NewSection, "title" | "description"|"notes">,
+    value: string,
   ) => {
     setSections((prev) =>
       prev.map((s, i): NewSection =>
@@ -64,6 +64,14 @@ export default function CreateInspectionPage() {
       return next;
     });
   };
+
+
+// 3. Add a handler to update tables for a section
+const updateSectionTables = (index: number, tables: NewTable[]) => {
+  setSections((prev) =>
+    prev.map((s, i): NewSection => (i === index ? { ...s, tables } : s)),
+  );
+};
 
   // ── Question helpers ─────────────────────────────────────────────
 
@@ -206,6 +214,7 @@ export default function CreateInspectionPage() {
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
+         
         </div>
       </div>
 
@@ -238,7 +247,17 @@ export default function CreateInspectionPage() {
                     }
                     className=""
                   />
-                 
+                  <div className="flex flex-col gap-1 md:col-span-2">
+            <Label className="text-md text-gray-500">
+              Additional notes (optional)
+            </Label>
+            <textarea
+              placeholder="Additional notes (optional)"
+              className="min-h-24 w-full rounded-lg border bg-gray-50 p-2 shadow focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 dark:bg-gray-700 dark:text-white"
+              value={section.notes ?? ""}
+              onChange={(e) => updateSection(sIdx, "notes", e.target.value)}
+            />
+          </div>
                 </div>
 
                 <div className="flex shrink-0 items-center gap-1 pt-1">
@@ -345,7 +364,15 @@ export default function CreateInspectionPage() {
 
                   {/* Add question button */}
                   <Button title="Add Question" variant="secondary" onClick={() => addQuestion(sIdx)} disabled={isEditingAnywhere} className="mt-4" />
-                  
+                  <div className="mt-5 border-t border-gray-100 pt-4 dark:border-gray-700">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                      Tables
+                    </p>
+                    <SectionTableEditor
+                      tables={section.tables ?? []}
+                      onChange={(tables) => updateSectionTables(sIdx, tables)}
+                    />
+                  </div>
                 </div>
               )}
 

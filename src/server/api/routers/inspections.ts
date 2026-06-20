@@ -120,6 +120,13 @@ export const InspectionRouter = createTRPCRouter({
                 options: z.array(z.string()).optional(),
               }),
             ),
+            tables: z.array(                    // ← new
+      z.object({
+        name: z.string().min(1),
+        columns: z.array(z.string().min(1)),
+      }),
+    ).optional(),
+
           }),
         ),
       }),
@@ -298,6 +305,13 @@ export const InspectionRouter = createTRPCRouter({
                 answer: z.any(),
               }),
             ),
+            comments: z.string().optional(),
+            tables: z.array(             // ← new
+      z.object({
+        tableId: z.string(),
+        rows: z.array(z.record(z.string(), z.string())),
+      }),
+    ).optional(),
           }),
         ),
       }),

@@ -82,6 +82,8 @@
   description?: string;
   order?: number;
   questions: Question[];
+  notes?: string; // optional additional comments for the section
+  tables?: NewTable[]; // optional tables for the section
 }
 
 /** Section inside a submitted InspectionItem — answered questions + linked hazards */
@@ -92,6 +94,7 @@
   order?: number;
   questions: AnsweredQuestion[];
   linkedHazards?: LinkedHazard[];
+  comments?: string;
 }
 
 // ── Logs ──────────────────────────────────────────────────────────────────────
@@ -177,6 +180,8 @@
   description: string;
   order: number;
   questions: NewQuestion[];
+  notes?: string; // optional additional comments for the section
+  tables?: NewTable[]; // optional tables for the section
 };
 
  type NewInspection = {
@@ -202,3 +207,10 @@ interface AreaData {
   areaBuilding: string; // e.g. "Area 1 - 11"
   descriptions: string[];
 }
+
+// In your types file (e.g. types/inspection.ts)
+interface NewTable {
+  name: string;
+  columns: string[];
+}
+
