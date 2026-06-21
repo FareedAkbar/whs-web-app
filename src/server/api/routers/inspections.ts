@@ -287,32 +287,33 @@ export const InspectionRouter = createTRPCRouter({
     .input(
       z.object({
         inspectionId: z.string(),
-        // ── New meta fields ──
-        areaBuilding: z.string().min(1, "Area Building is required"),
-        /** Comma-separated descriptions, e.g. "Cleaners Office, UniHall" */
-        areaDescriptions: z.string().min(1, "At least one area description is required"),
-        businessUnit: z.string().min(1, "Business unit is required"),
-        inspectionBuddy: z.string().min(1, "Inspection buddy is required"),
+      areaBuilding: z.string().min(1, "Area Building is required"),
+      areaDescriptions: z.string().min(1, "At least one area description is required"),
+      businessUnit: z.string().optional().default(""),
+      inspectionBuddy: z.string().optional().default(""),
+      nextInspectionDue: z.string().optional().default(""),
+      comments: z.string().optional().default(""),
         // ── Sections ──
         sections: z.array(
-          z.object({
-            sectionId: z.string(),
-            hazardId: z.string().nullable(),
-            hazard: z.any().nullable(),
-            answers: z.array(
-              z.object({
-                questionId: z.string(),
-                answer: z.any(),
-              }),
-            ),
-            comments: z.string().optional(),
-            tables: z.array(             // ← new
-      z.object({
-        tableId: z.string(),
-        rows: z.array(z.record(z.string(), z.string())),
-      }),
-    ).optional(),
-          }),
+          // inside sections z.array(...)
+z.object({
+  sectionId: z.string(),
+  hazardId: z.array(z.string()),          // ← replaces hazardId + additionalHazards
+  hazard: z.array(z.any()),               // ← replaces hazard + additionalHazards
+  answers: z.array(
+    z.object({
+      questionId: z.string(),
+      answer: z.any(),
+    }),
+  ),
+  comments: z.string().optional(),
+  tables: z.array(
+    z.object({
+      tableId: z.string(),
+      rows: z.array(z.record(z.string(), z.string())),
+    }),
+  ).optional(),
+})
         ),
       }),
     )

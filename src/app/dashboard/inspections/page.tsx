@@ -345,10 +345,7 @@ const isSectionValid = (sectionId: string, questions: Question[]): boolean => {
 
   const isMetaValid = (): boolean =>
     Boolean(metaFields.areaBuilding) &&
-    metaFields.areaDescriptions.length > 0 &&
-    Boolean(metaFields.businessUnit.trim()) &&
-    Boolean(metaFields.inspectionBuddy.trim()) &&
-    Boolean(metaFields.nextInspectionDue.trim());
+    metaFields.areaDescriptions.length > 0 ;
 
   const isFullFormValid = (): boolean => {
     if (!isMetaValid()) return false;
@@ -388,27 +385,23 @@ const sections = (detail.sections ?? []).map((sec) => {
     };
   });
 
-  const hazardEntries = state.hazardLinks.map((link) => {
-    if (link.mode === "existing" && link.hazardId) {
-      return { hazardId: link.hazardId, hazard: null };
-    }
-    if (link.mode === "new" && link.newHazard) {
-      return {
-        hazardId: null,
-        hazard: {
-          ...link.newHazard,
-          status: "INITIATED",
-          mainType: "HAZARD",
-          managerSignatureConfirmationDate: null,
-          categoryType: link.newHazard.categoryType ?? "",
-          reportDescription: link.newHazard.reportDescription ?? "",
-        } as NewHazardReport,
-      };
-    }
-    return { hazardId: null, hazard: null };
-  });
+// ── NEW ──
+const hazardIds: string[] = state.hazardLinks
+  .filter((link) => link.mode === "existing" && link.hazardId)
+  .map((link) => link.hazardId!);
 
-  const [first, ...rest] = hazardEntries;
+const newHazards = state.hazardLinks
+  .filter((link) => link.mode === "new" && link.newHazard)
+  .map((link) => ({
+    ...link.newHazard!,
+    status: "INITIATED",
+    mainType: "HAZARD",
+    managerSignatureConfirmationDate: null,
+    categoryType: link.newHazard!.categoryType ?? "",
+    reportDescription: link.newHazard!.reportDescription ?? "",
+  }));
+
+
 
   // ── Tables ──────────────────────────────────────────────────────
   const tables: FilledTable[] = (sec.tables ?? []).map((tbl: any) => ({
@@ -419,14 +412,14 @@ const sections = (detail.sections ?? []).map((sec) => {
     ),
   }));
 
-  return {
-    sectionId: sec.id,
-    answers,
-    hazardId: first?.hazardId ?? null,
-    hazard: first?.hazard ?? null,
-    additionalHazards: rest,
-    tables,   // ← new
-  };
+
+return {
+  sectionId: sec.id,
+  answers,
+  hazardId:hazardIds,        // string[]
+  hazard: newHazards,  // NewHazardReport[]
+  tables,
+};
 });
 
     return {
@@ -773,28 +766,28 @@ const sections = (detail.sections ?? []).map((sec) => {
                             </div>
                           )}
                           {/* ── Tables ── */}
-{sec.tables && sec.tables.length > 0 && (
-  <div className="mt-5 space-y-4">
-    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-      Tables
-    </p>
-    {sec.tables.map((tbl: any) => (
-      <TableFiller
-        key={tbl.id}
-        tableId={tbl.id}
-        tableName={tbl.name}
-    columns={tbl.columns.map((c: any) => c.name)}  // ← extract .name
-        rows={
-          state.tableRows[tbl.id] ??
-          Array.from({ length: 3 }, () =>
-            Object.fromEntries((tbl.columns ?? []).map((c: string) => [c, ""])),
-          )
-        }
-        onChange={(rows) => updateTableRows(sec.id, tbl.id, rows)}
-      />
-    ))}
-  </div>
-)}
+                        {sec.tables && sec.tables.length > 0 && (
+                          <div className="mt-5 space-y-4">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                              Tables
+                            </p>
+                            {sec.tables.map((tbl: any) => (
+                              <TableFiller
+                                key={tbl.id}
+                                tableId={tbl.id}
+                                tableName={tbl.name}
+                            columns={tbl.columns.map((c: any) => c.name)}  // ← extract .name
+                                rows={
+                                  state.tableRows[tbl.id] ??
+                                  Array.from({ length: 3 }, () =>
+                                    Object.fromEntries((tbl.columns ?? []).map((c: string) => [c, ""])),
+                                  )
+                                }
+                                onChange={(rows) => updateTableRows(sec.id, tbl.id, rows)}
+                              />
+                            ))}
+                          </div>
+                        )}
                         {/* Hazard linking */}
                       <div className="mt-5 space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
                         <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
