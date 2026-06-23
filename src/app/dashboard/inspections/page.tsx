@@ -11,7 +11,7 @@ import {
   useModal,
 } from "@/components/ui/animated-modal";
 import Button from "@/components/ui/Button";
-import { PlusIcon, UserPlus } from "lucide-react";
+import { Bell, PlusIcon, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { hasPermission } from "@/lib/auth";
 import { useSession } from "next-auth/react";
@@ -23,6 +23,7 @@ import type { NewHazardReport } from "@/types/report";
 import HazardLinker, { HazardLinkValue } from "@/components/ui/HazardLinker";
 import { AREA_DATA } from "@/constants/area";
 import TableFiller, { FilledTable, TableRow } from "@/components/table/TableFiller";
+import DateField from "@/components/ui/DateField";
 
 // ── Local-only types ──────────────────────────────────────────────────────────
 
@@ -81,27 +82,60 @@ const InspectionChecklist = () => {
   const [sectionForms, setSectionForms] = useState<Record<string, SectionFormState>>({});
   const [metaFields, setMetaFields] = useState<InspectionMetaFields>(defaultMetaFields());
   const [modal, setModal] = useState<{
-    type: "view" | "delete" | "assign" | null;
+    type: "view" | "delete" | "assign" | "reminder" | null;
     data?: InspectionDetail | null | Inspection;
   }>({ type: null, data: null });
 
+
+const [reminderForm, setReminderForm] = useState({
+  users: [] as { name: string; email: string; expiry_date: string }[],
+  title: "",
+  message: "Kindly complete this inspection",
+  email_title: "Inspection reminder update",
+  subject: "Inspection reminder",
+  subtitle: "",
+});
+
+const sendReminderMutation = api.inspections.sendReminder.useMutation({
+  onSuccess: (res) => {
+    if (res.status) {
+      toast.success("Reminder sent successfully!");
+    } else {
+      toast.error(res.error ?? "Failed to send reminder");
+    }
+    setModal({ type: null, data: null });
+    setOpen(false);
+  },
+  onError: () => toast.error("Something went wrong!"),
+});
+const openReminderModal = (inspection: Inspection) => {
+  // users will be populated reactively once inspectionDetail loads
+  setReminderForm({
+    users: [],
+    title: inspection.title,
+    message: "Kindly complete this inspection",
+    email_title: "Inspection reminder update",
+    subject: "Inspection reminder",
+    subtitle: "",
+  });
+  setModal({ type: "reminder", data: inspection });
+  setOpen(true);
+};
   const router = useRouter();
   const { setOpen } = useModal();
 
   const { data: inspections, isLoading, refetch } =
     api.inspections.getInspections.useQuery();
-
-  const { data: inspectionDetail } =
-    api.inspections.getInspectionById.useQuery(
-      { id: modal.data?.id ?? "" },
-      {
-        enabled:
-          (modal.type === "view" || modal.type === "assign") &&
-          Boolean(modal.data?.id),
-        staleTime: 0,
-      },
-    );
-
+const { data: inspectionDetail } =
+  api.inspections.getInspectionById.useQuery(
+    { id: modal.data?.id ?? "" },
+    {
+      enabled:
+        (modal.type === "view" || modal.type === "assign" || modal.type === "reminder") &&
+        Boolean(modal.data?.id),
+      staleTime: 0,
+    },
+  );
   const submitInspection = api.inspections.submitInspection.useMutation();
   const deleteInspection = api.inspections.deleteInspection.useMutation({
     onSuccess: () => {
@@ -124,6 +158,21 @@ const InspectionChecklist = () => {
 
   const session = useSession();
   const user = session.data?.user;
+
+useEffect(() => {
+  if (modal.type !== "reminder" || !inspectionDetail?.data?.inspections) return;
+
+  const initiatedUsers: { name: string; email: string; expiry_date: string }[] =
+    inspectionDetail.data.inspections
+      .filter((i) => i.status === "INITIATED")
+      .map((i) => ({
+        name: i.assignedTo.name ?? "",
+        email: i.assignedTo.email ?? "",
+        expiry_date: (i.dueDate ?? "").split("T")[0] ?? "",
+      }));
+
+  setReminderForm((prev) => ({ ...prev, users: initiatedUsers }));
+}, [modal.type, inspectionDetail?.data?.inspections]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
@@ -546,6 +595,15 @@ return {
                       className="text-primary hover:scale-105"
                     >
                       <Trash2 size={20} />
+                    </button>
+                  )}
+                  {user?.id === inspection.createdBy && (
+                    <button
+                      onClick={() => openReminderModal(inspection)}
+                      className="text-primary hover:scale-105"
+                      title="Send Reminder"
+                    >
+                      <Bell size={20} />
                     </button>
                   )}
                 </div>
@@ -998,6 +1056,184 @@ return {
                   })
                 }
                 loading={assignMutation.isPending}
+              />
+            </div>
+          </ModalContent>
+        </ModalBody>
+      )}
+
+      {/* ── Reminder Modal ── */}
+{/* ── Reminder Modal ── */}
+      {modal.type === "reminder" && modal.data && (
+        <ModalBody className="mx-3 w-full">
+          <ModalContent className="w-full">
+            <h2 className="mb-1 text-xl font-bold capitalize dark:text-white">
+              Send Reminder
+            </h2>
+            <p className="mb-5 text-sm text-gray-500 dark:text-gray-400">
+              {modal.data.title}
+            </p>
+
+            {/* Loading state while inspectionDetail fetches */}
+            {!inspectionDetail ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary" />
+              </div>
+            ) : (
+              <div className="space-y-5">
+
+                {/* Recipients — INITIATED assignees */}
+                <div>
+                  <Label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Recipients{" "}
+                    <span className="text-xs font-normal text-gray-400">
+                      (only pending / initiated assignees)
+                    </span>
+                  </Label>
+
+                  {reminderForm.users.length === 0 ? (
+                    <p className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                      No pending assignees found for this inspection.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {reminderForm.users.map((u, idx) => (
+                        <div
+                          key={idx}
+                          className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800"
+                        >
+                          <div className="mb-2 flex items-center justify-between">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                              Recipient {idx + 1}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setReminderForm((prev) => ({
+                                  ...prev,
+                                  users: prev.users.filter((_, i) => i !== idx),
+                                }))
+                              }
+                            >
+                              <Trash2 size={15} color="red"/>
+                            </button>
+                          </div>
+                          <div className="flex flex-col gap-3 sm:flex-row">
+                            <Input
+                              label="Name"
+                              value={u.name}
+                              onChange={(e) => {
+                                const updated = [...reminderForm.users];
+                                updated[idx] = { ...updated[idx]!, name: e.target.value };
+                                setReminderForm((prev) => ({ ...prev, users: updated }));
+                              }}
+                              placeholder="Recipient name"
+                            />
+                            <Input
+                              label="Email"
+                              value={u.email}
+                              onChange={(e) => {
+                                const updated = [...reminderForm.users];
+                                updated[idx] = { ...updated[idx]!, email: e.target.value };
+                                setReminderForm((prev) => ({ ...prev, users: updated }));
+                              }}
+                              placeholder="Recipient email"
+                            />
+                            
+                          
+                            <Input
+                              label="Due Date"
+                              type="date"
+                              value={u.expiry_date}
+                              onChange={(e) => {
+                                const updated = [...reminderForm.users];
+                                updated[idx] = { ...updated[idx]!, expiry_date: e.target.value };
+                                setReminderForm((prev) => ({ ...prev, users: updated }));
+                              }}
+                              placeholder="e.g. 24/6/2026"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Shared fields */}
+                <Input
+                  label="Inspection Title"
+                  value={reminderForm.title}
+                  onChange={(e) =>
+                    setReminderForm((prev) => ({ ...prev, title: e.target.value }))
+                  }
+                  placeholder="e.g. Fire Inspection"
+                />
+
+                <div className="flex flex-col gap-4 sm:flex-row">
+                  <Input
+                    label="Email Subject"
+                    value={reminderForm.subject}
+                    onChange={(e) =>
+                      setReminderForm((prev) => ({ ...prev, subject: e.target.value }))
+                    }
+                    placeholder="e.g. Inspection reminder"
+                  />
+                  <Input
+                    label="Email Header Title"
+                    value={reminderForm.email_title}
+                    onChange={(e) =>
+                      setReminderForm((prev) => ({ ...prev, email_title: e.target.value }))
+                    }
+                    placeholder="e.g. Inspection reminder update"
+                  />
+                </div>
+
+                <Input
+                  label="Subtitle"
+                  value={reminderForm.subtitle}
+                  onChange={(e) =>
+                    setReminderForm((prev) => ({ ...prev, subtitle: e.target.value }))
+                  }
+                  placeholder="Optional subtitle"
+                />
+
+                <div>
+                  <Label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Message
+                  </Label>
+                  <textarea
+                    rows={3}
+                    value={reminderForm.message}
+                    onChange={(e) =>
+                      setReminderForm((prev) => ({ ...prev, message: e.target.value }))
+                    }
+                    placeholder="Enter reminder message"
+                    className="w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-end gap-3">
+              <Button
+                title="Cancel"
+                variant="secondary"
+                onClick={() => {
+                  setModal({ type: null, data: null });
+                  setOpen(false);
+                }}
+              />
+              <Button
+                title="Send Reminder"
+                icon={<Bell size={15} />}
+                loading={sendReminderMutation.isPending}
+                disabled={
+                  reminderForm.users.length === 0 ||
+                  reminderForm.users.some((u) => !u.name || !u.email || !u.expiry_date) ||
+                  !reminderForm.title ||
+                  sendReminderMutation.isPending
+                }
+                onClick={() => sendReminderMutation.mutate(reminderForm)}
               />
             </div>
           </ModalContent>

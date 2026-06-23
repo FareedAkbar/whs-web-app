@@ -249,7 +249,7 @@ export default function IncidentDetailScreen() {
                 style={{
                   color: severityMapping[report.priority] ?? "black",
                 }}
-              >{incident.incident?.ticket_number}-
+              >#{incident.incident?.ticket_number} - 
                 {report.title}
               </h2>
 
