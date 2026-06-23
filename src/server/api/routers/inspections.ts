@@ -2,7 +2,6 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "@/env";
 import z from "zod";
-import { assign } from "nodemailer/lib/shared";
 
 export const InspectionRouter = createTRPCRouter({
   getInspections: publicProcedure.query(async ({ ctx }) => {
@@ -14,6 +13,9 @@ export const InspectionRouter = createTRPCRouter({
           message: "Unauthorized",
         });
       }
+
+      console.log("token", userToken);
+
       const response = await fetch(`${env.BASE_URL}/inspection`, {
         method: "GET",
         headers: {
@@ -44,6 +46,7 @@ export const InspectionRouter = createTRPCRouter({
       };
     }
   }),
+
   getInspectionById: publicProcedure
     .input(
       z.object({
@@ -59,6 +62,9 @@ export const InspectionRouter = createTRPCRouter({
             message: "Unauthorized",
           });
         }
+
+        console.log("token inspection id", userToken);
+
         const response = await fetch(
           `${env.BASE_URL}/inspection/inspection-survey`,
           {
@@ -94,20 +100,36 @@ export const InspectionRouter = createTRPCRouter({
         };
       }
     }),
+
   createInspection: publicProcedure
     .input(
       z.object({
         title: z.string().min(1, "Title is required"),
         description: z.string().optional(),
-        questions: z.array(
+        status: z.string().optional(),
+        sections: z.array(
           z.object({
-            questionNumber: z.number(),
-            title: z.string(),
-            type: z.string(), // or refine with z.enum([...]) if you have strict types
-            options: z.array(z.string()).optional(),
+            title: z.string().min(1, "Section title is required"),
+            description: z.string().optional(),
+            order: z.number(),
+            notes: z.string().optional(),
+            questions: z.array(
+              z.object({
+                questionNumber: z.number(),
+                title: z.string().min(1, "Question title is required"),
+                type: z.string(),
+                options: z.array(z.string()).optional(),
+              }),
+            ),
+            tables: z.array(                    // ← new
+      z.object({
+        name: z.string().min(1),
+        columns: z.array(z.string().min(1)),
+      }),
+    ).optional(),
+
           }),
         ),
-        status: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -119,18 +141,15 @@ export const InspectionRouter = createTRPCRouter({
             message: "Unauthorized",
           });
         }
+        console.log("token", userToken);
+
         const response = await fetch(`${env.BASE_URL}/inspection/create`, {
           method: "POST",
           headers: {
             authorization: `Bearer ${userToken}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            title: input.title,
-            description: input.description,
-            questions: input.questions,
-            status: input.status,
-          }),
+          body: JSON.stringify(input),
         });
         const responseData = (await response.json()) as {
           data?: Inspection[];
@@ -159,6 +178,7 @@ export const InspectionRouter = createTRPCRouter({
         };
       }
     }),
+
   deleteInspection: publicProcedure
     .input(
       z.object({
@@ -198,7 +218,6 @@ export const InspectionRouter = createTRPCRouter({
 
         return {
           status: true,
-          // data: responseData?.data ? [responseData?.data] : [],
         };
       } catch (error) {
         console.error("Error deleting inspections:", error);
@@ -208,6 +227,7 @@ export const InspectionRouter = createTRPCRouter({
         };
       }
     }),
+
   assignInspection: publicProcedure
     .input(
       z.object({
@@ -254,7 +274,6 @@ export const InspectionRouter = createTRPCRouter({
 
         return {
           status: true,
-          // data: (responseData as getInspectionsResponse).data,
         };
       } catch (error) {
         console.error("Error assigning inspections:", error);
@@ -264,15 +283,38 @@ export const InspectionRouter = createTRPCRouter({
         };
       }
     }),
+
   submitInspection: publicProcedure
     .input(
       z.object({
         inspectionId: z.string(),
-        answers: z.array(
+      areaBuilding: z.string().min(1, "Area Building is required"),
+      areaDescription: z.string().min(1, "Area description is required"),
+      businessUnit: z.string().optional().default(""),
+      inspectionBuddy: z.string().optional().default(""),
+      nextInspectionDue: z.string().optional().default(""),
+      comments: z.string().optional().default(""),
+        // ── Sections ──
+        sections: z.array(
+          // inside sections z.array(...)
           z.object({
-            questionId: z.string(),
-            answer: z.any(), // array, string, boolean — allow all
-          }),
+            sectionId: z.string(),
+            hazardId: z.array(z.string()),          // ← replaces hazardId + additionalHazards
+            hazard: z.array(z.any()),               // ← replaces hazard + additionalHazards
+            answers: z.array(
+              z.object({
+                questionId: z.string(),
+                answer: z.any(),
+              }),
+            ),
+            comments: z.string().optional(),
+            tables: z.array(
+              z.object({
+                tableId: z.string(),
+                rows: z.array(z.record(z.string(), z.string())),
+              }),
+            ).optional(),
+          })
         ),
       }),
     )
@@ -294,7 +336,13 @@ export const InspectionRouter = createTRPCRouter({
           },
           body: JSON.stringify({
             inspectionId: input.inspectionId,
-            answers: input.answers,
+            areaBuilding: input.areaBuilding,
+            areaDescription: input.areaDescription,
+            businessUnit: input.businessUnit,
+            inspectionBuddy: input.inspectionBuddy,
+            nextInspectionDue: input.nextInspectionDue,
+            comments: input.comments,
+            sections: input.sections,
           }),
         });
 

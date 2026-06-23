@@ -9,7 +9,7 @@ import { Select } from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
 import { set } from "zod";
 import { useSession } from "next-auth/react";
-import { severityMapping } from "@/constants/severity";
+import { severityMapping, severityDisplayMapping } from "@/constants/severity";
 import { useRouter } from "next/navigation";
 import { ReportResponse } from "@/types/report";
 import { IconAlertCircle } from "@tabler/icons-react";
@@ -96,7 +96,7 @@ export default function IncidentsList() {
         !priority.length || priority.includes(item.report.priority);
 
       const matchesStatus =
-        !status.length || status.includes(item.incident?.status ?? "");
+        !status.length || status.includes(item.report?.status ?? "");
 
       const matchesSearch =
         !searchTerm ||
@@ -333,11 +333,16 @@ export default function IncidentsList() {
             >
               <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
                 <div className="flex gap-3">
+                  <div>
+                    <span className=" font-bold text-gray-500 block dark:text-gray-400 text-center">
+                      {item.incident?.ticket_number ?? item.report.ticketNumber ?? "No Ticket Number"}
+                    </span>
                   <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
                     <AlertTriangle
                       size={40}
                       color={`${severityMapping[item?.report?.priority] ?? "black"}`}
                     />
+                  </div>
                   </div>
                   {/* <img
                     src={item.media[0]?.url ?? "https://placehold.co/150x150"}
@@ -348,6 +353,7 @@ export default function IncidentsList() {
                   /> */}
 
                   <div>
+                    
                     <h2
                       className="font-semibold capitalize"
                       style={{
@@ -365,23 +371,20 @@ export default function IncidentsList() {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-col items-center justify-end gap-4">
+                <div className="flex flex-col items-end justify-end gap-2">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.incident?.status as keyof typeof statusMapping]}`}
+                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.report?.status as keyof typeof statusMapping]}`}
                   >
-                    {item.incident?.status.replace("_", " ")}
+                    {item.report?.status.replace("_", " ")}
                   </span>
-                  {/* <div
-                    className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium text-white ${
-                      severityMapping[
-                        item?.report
-                          ?.priority as keyof typeof severityMapping
-                      ] || "bg-gray-400"
-                    }`}
+                  <span
+                    className="rounded px-2.5 py-0.5 text-xs font-semibold text-white"
+                    style={{
+                      backgroundColor: severityMapping[item.report.priority] || "#ccc"
+                    }}
                   >
-                    <AlertTriangle size={18} />
-                    <span>{item?.report?.priority}</span>
-                  </div> */}
+                    {severityDisplayMapping[item.report.priority] || item.report.priority}
+                  </span>
                 </div>
               </div>
 

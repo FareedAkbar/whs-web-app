@@ -19,6 +19,7 @@ import FollowUpsSection from "@/components/ui/FollowUpsSection";
 import { Comment, IncidentMedia } from "@/types/report";
 import Image from "next/image";
 import { statusMapping } from "@/utils/statusColors";
+import LogsSection from "@/components/ui/LogsSection";
 export default function HazardDetailScreen() {
   const params = useParams();
   // const { data: departments, isLoading: isLoadingDepartments } =
@@ -39,10 +40,7 @@ export default function HazardDetailScreen() {
     reportId: id,
     type: "HAZARD",
   });
-  // const { data: workers } = api.workers.getWorkers.useQuery();
-  // const { data: departments } = api.department.getDepartments.useQuery();
   const assignIncidentToOfficer = api.incidents.assignIncident.useMutation();
-  const updateIncidentStatus = api.incidents.updateIncidentStatus.useMutation();
   const updateReportStatus = api.reports.updateReportStatus.useMutation();
   const incidentAcceptance = api.incidents.incidentAcceptance.useMutation();
   const hazard = incidentData?.data;
@@ -100,24 +98,37 @@ export default function HazardDetailScreen() {
     a.remove();
   };
 
-  const groupedImages = statusOrder.map((status) => ({
-    status,
-    images:
-      hazard?.media?.filter(
-        (image: IncidentMedia) => image.status === status,
-      ) ?? [],
-  }));
 
-  const handleUpdateStatus = (newStatus: string) => {
+
+  // const handleUpdateStatus = (newStatus: string) => {
+  //   if (!hazard) return;
+  //   updateIncidentStatus.mutate(
+  //     {
+  //       hazardId: hazardMeta?.id! ?? "",
+  //       status: newStatus,
+  //     },
+  //     {
+  //       onSuccess: () => {
+  //         toast.success(`Hazard ${newStatus.toLowerCase()} successfully`);
+  //         void refetch();
+  //       },
+  //       onError: (error) => {
+  //         toast.error(error.message ?? "Something went wrong");
+  //       },
+  //     },
+  //   );
+  // };
+  const closeHazard = () => {
     if (!hazard) return;
-    updateIncidentStatus.mutate(
+    updateReportStatus.mutate(
       {
-        hazardId: hazardMeta?.id! ?? "",
-        status: newStatus,
+        incidentReportId: hazard.report.id,
+        status: "CLOSED",
+        comments: `Hazard closed by ${user?.name} (${user?.email})`,
       },
       {
         onSuccess: () => {
-          toast.success(`Hazard ${newStatus.toLowerCase()} successfully`);
+          toast.success(`Hazard report has been closed`);
           void refetch();
         },
         onError: (error) => {
@@ -126,16 +137,17 @@ export default function HazardDetailScreen() {
       },
     );
   };
-  const closeIncident = () => {
+  const completeHazard = () => {
     if (!hazard) return;
     updateReportStatus.mutate(
       {
         incidentReportId: hazard.report.id,
-        status: "CLOSED",
+        status: "COMPLETED",
+        comments: `Hazard completed by ${user?.name} (${user?.email})`,
       },
       {
         onSuccess: () => {
-          toast.success(`Hazard report has been closed`);
+          toast.success(`Hazard report has been completed`);
           void refetch();
         },
         onError: (error) => {
@@ -227,7 +239,8 @@ export default function HazardDetailScreen() {
               style={{
                 color: severityMapping[report.priority] ?? "black",
               }}
-            >
+            >{hazard.hazard?.ticket_number}-
+                
               {report.title}
             </h2>
 
@@ -235,11 +248,11 @@ export default function HazardDetailScreen() {
               className={`rounded-full px-3 py-1 text-xs ${
                 // try to use statusMapping constant, otherwise fallback styles
                 statusMapping[
-                  hazardMeta?.status as keyof typeof statusMapping
+                  report?.status as keyof typeof statusMapping
                 ] ?? "bg-gray-100 text-gray-700"
               }`}
             >
-              {hazardMeta?.status.replaceAll("_", " ")}
+              {report?.status.replaceAll("_", " ")}
             </span>
           </div>
 
@@ -299,10 +312,10 @@ export default function HazardDetailScreen() {
                       );
                       return;
                     }
-                    void handleUpdateStatus("COMPLETED");
+                    void completeHazard();
                   }}
-                  loading={updateIncidentStatus.isPending}
-                  disabled={updateIncidentStatus.isPending}
+                  loading={updateReportStatus.isPending}
+                  disabled={updateReportStatus.isPending}
                   // disabled={isUpdatingStatus}
                 />
               )}
@@ -312,9 +325,9 @@ export default function HazardDetailScreen() {
               report.status !== "CLOSED" && (
                 <Button
                   title={"Close Hazard"}
-                  onClick={() => handleUpdateStatus("CLOSED")}
-                  loading={updateIncidentStatus.isPending}
-                  disabled={updateIncidentStatus.isPending}
+                  onClick={() => closeHazard()}
+                  loading={updateReportStatus.isPending}
+                  disabled={updateReportStatus.isPending}
                   // disabled={isUpdatingStatus}
                   // variant="secondary"
                 />
@@ -336,19 +349,13 @@ export default function HazardDetailScreen() {
         <div className="mt-4 space-y-4">
           {/* Report Description */}
           <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
-            <p>
-              <span className="font-medium text-primary">
-                Report Description:
-              </span>
-              <br />
-              {report.description}
-            </p>
+            
 
             {/* Detailed description from hazard object (if present) */}
             {hazardMeta?.hazardDescription && (
               <p>
                 <span className="font-medium text-primary">
-                  Hazard Detailed Description:
+                  Hazard Detailed Description:{" "}
                 </span>
                 {hazardMeta.hazardDescription}
               </p>
@@ -374,64 +381,110 @@ export default function HazardDetailScreen() {
           </div>
 
           {/* Images */}
-          {groupedImages.length ? (
-            <div className="mt-6">
-              <h3 className="font-semibold text-gray-800 dark:text-gray-200">
-                Hazard Gallery
-              </h3>
+         {/* Images */}
+{hazard.media?.length > 0 ? (
+  <div className="mt-6">
+    <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+      Hazard Gallery
+    </h3>
 
-              {groupedImages.map(({ status, images }) =>
-                images?.length ? (
-                  <div key={status} className="mt-2">
-                    {/* <p className="text-sm font-medium capitalize text-gray-700 dark:text-gray-300">
-                      {status.toLocaleLowerCase().replaceAll("_", " ")} images
-                    </p> */}
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {images.map(
-                        (
-                          image: { id?: string; url?: string; status?: string },
-                          index: number,
-                        ) => (
-                          <div
-                            key={image.id ?? index}
-                            className="relative cursor-pointer rounded-lg"
-                          >
-                            <Image
-                              src={image.url ?? "/images/n-img.jpg"}
-                              alt={`Hazard Image ${index + 1}`}
-                              className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
-                              onClick={() =>
-                                image.url && window.open(image.url, "_blank")
-                              }
-                              width={112}
-                              height={112}
-                            />
-                            {/* <button
-                              onClick={() =>
-                                handleDownload(
-                                  image.url,
-                                  `incident_${index}.jpg`,
-                                )
-                              }
-                              className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
-                            >
-                              <DownloadIcon className="h-3 w-3" color="red" />
-                            </button> */}
-                          </div>
-                        ),
-                      )}
-                    </div>
-                  </div>
-                ) : null,
-              )}
+    <div className="mt-2 flex flex-wrap gap-2">
+      {hazard.media.map(
+        (
+          image: { id?: string; url?: string; status?: string },
+          index: number,
+        ) => (
+          <div
+            key={image.id ?? index}
+            className="relative cursor-pointer rounded-lg"
+          >
+            <Image
+              src={image.url ?? "/images/n-img.jpg"}
+              alt={`Hazard Image ${index + 1}`}
+              className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
+              onClick={() =>
+                image.url && window.open(image.url, "_blank")
+              }
+              width={112}
+              height={112}
+            />
+
+            {/* <button
+              onClick={() =>
+                handleDownload(
+                  image.url,
+                  `hazard_${index}.jpg`,
+                )
+              }
+              className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
+            >
+              <DownloadIcon className="h-3 w-3" color="red" />
+            </button> */}
+          </div>
+        ),
+      )}
+    </div>
+  </div>
+) : (
+  <p className="mt-6 text-sm text-gray-500">
+    No images available for this hazard.
+  </p>
+)}
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Linked Incident</h3>
             </div>
-          ) : null}
 
+            {hazard.links?.length ? (
+              <div className="space-y-4">
+                {hazard.links.map((link) => (
+                  <div
+                    key={link.linkId}
+                    className="flex items-center justify-between rounded-lg shadow dark:bg-gray-700 bg-gray-50 p-4"
+                  >
+                    <div>
+                      <p className="font-medium">
+                        {link.reportTitle}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {link.linkType}
+                      </p>
+                      {link.reportDescription && (
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                          {link.reportDescription}
+                        </p>
+                      )}
+                      {link.linkDescription && (
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                          {link.linkDescription}
+                        </p>
+                      )}
+
+                    </div>
+          {hasPermission(user?.role!, "view:incidents") && (
+                    <Button
+                      variant="primary"
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/incidents/${link.reportId}?`
+                        )
+                      }
+                      title="View Incident"
+                    />
+                  )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No linked hazard found.</p>
+            )}
+          </div>
           <CommentsSection
             comments={hazard?.comments}
             reportId={hazard?.report.id}
             onCommentAdded={() => void refetch()}
           />
+          <LogsSection logs={hazard?.reportLogs ?? []} />
 
           {/* Role-based action buttons */}
           <div className="mt-4 flex items-center gap-4">
@@ -463,36 +516,51 @@ export default function HazardDetailScreen() {
                 </div>
               </ModalBody>
             )}
-            {modalMode == "reassign-officer" && (
-              <ModalBody className="max-w-2xl p-4">
-                <div className="mt-4">
-                  <Select
-                    label="Reassign Officer"
-                    className="mt-2 w-full rounded border p-2"
-                    onChange={(e) => setSelectedOfficer(e.target.value)}
-                    value={selectedOfficer}
-                    options={
-                      officers?.data
-                        ?.filter(
-                          (o: User) => o.id !== hazard?.incidentAssignee?.id,
-                        )
-                        ?.map((o: User) => ({
-                          value: o.id,
-                          label: `${o.name} (${o.email.replaceAll("_", " ")})`,
-                        })) ?? []
-                    }
-                  />
-                  <div className="mt-4 flex justify-end">
-                    <Button
-                      title="Confirm Reassignment"
-                      onClick={handleDone}
-                      loading={assignIncidentToOfficer.isPending}
-                      disabled={!selectedOfficer}
-                    />
-                  </div>
-                </div>
-              </ModalBody>
-            )}
+          {modalMode == "reassign-officer" && (
+  <ModalBody className="max-w-2xl p-4">
+    <div className="mt-4">
+      <Select
+        label="Reassign Officer"
+        className="mt-2 w-full rounded border p-2"
+        onChange={(e) => setSelectedOfficer(e.target.value)}
+        value={selectedOfficer}
+        options={
+          (
+            officers?.data
+              ?.filter(
+                (o: User) =>
+                  o.id !== hazard?.incidentAssignee?.id &&
+                  o.id !== user?.id
+              )
+              .map((o: User) => ({
+                value: o.id,
+                label: o.name,
+              }))
+              .concat(
+                user?.id
+                  ? [
+                      {
+                        value: user.id,
+                        label: `${user.name} (You)`,
+                      },
+                    ]
+                  : []
+              ) ?? []
+          )
+        }
+      />
+
+      <div className="mt-4 flex justify-end">
+        <Button
+          title="Confirm Reassignment"
+          onClick={handleDone}
+          loading={assignIncidentToOfficer.isPending}
+          disabled={!selectedOfficer}
+        />
+      </div>
+    </div>
+  </ModalBody>
+)}
             {/* Capture / Upload (for staff when hazard is completed but report not closed) */}
             {/* {user?.role === "STAFF" &&
               hazardMeta?.status === "COMPLETED" &&

@@ -40,6 +40,7 @@ enum status {}
 export interface Comment {
   id: string;
   comment?: string;
+  showToAll: boolean;
   followUpDescription?: string;
   createdAt: string; // ISO date string
   name: string;
@@ -64,12 +65,15 @@ export interface ReportResponse {
   reportLogs: IncidentLog[];
   comments: Comment[];
   followUps?: Comment[];
+  links?: IncidentLink[];
 }
 
 // Report object
 export interface Report {
   id: string;
   title: string;
+  ticket_number?: string;
+  ticketNumber?: string;
   description: string;
   mainType: "INCIDENT" | "HAZARD";
   status: ("INITIATED" | "IN_PROGRESS" | "RESOLVED") | (string & {});
@@ -81,7 +85,9 @@ export interface Report {
   updatedBy: string;
   createdAt: string;
   updatedAt: string;
-  followUp: boolean;
+  followUp?: boolean;
+    links?: IncidentLink[];
+
 }
 
 // Incident object
@@ -89,6 +95,7 @@ export interface Incident {
   id: string;
   name: string;
   incidentDescription: string;
+  ticket_number: string;
   status: ("INITIATED" | "IN_PROGRESS" | "RESOLVED") | (string & {});
   treatmentType:
     | "FIRST_AID"
@@ -101,6 +108,23 @@ export interface Incident {
   createdAt: string;
   updatedAt: string;
 }
+export interface IncidentLink {
+  linkId: string;
+  incidentId: string;
+  hazardId: string;
+  isActive: boolean;
+  comment: string;
+  createdAt: string;
+  reportId: string;
+  reportTitle: string;
+  reportDescription: string;
+  linkType: string;
+  linkDescription: string;
+  reportStatus: string;
+  reportPriority: string;
+  reportCreatedAt: string;
+  ticket_number: number;
+}
 export interface Hazard {
   id: string;
   name: string;
@@ -109,6 +133,7 @@ export interface Hazard {
   groupId: string | null;
   createdAt: string;
   updatedAt: string;
+  ticket_number: string;
 }
 
 // Media (attached to incident status log)
@@ -166,12 +191,12 @@ export interface IncidentAssignee {
 export interface NewIncidentReport {
   // Report Data
   reportTitle: string;
-  coordinates: string;
+  address?: string;
   reportDescription: string;
-  severity: "LOW" | "MEDIUM" | "HIGH" | "EXTREME"; // assuming possible values
+  severity: severity; // assuming possible values
   mainType: "INCIDENT";
   status: ("INITIATED" | "IN_PROGRESS" | "RESOLVED") | (string & {});
-  followUp: boolean;
+  followUp?: boolean;
   // Incident Data
   categoryType: IncidentCategoryType;
   incidentDescription: string;
@@ -190,19 +215,49 @@ export interface NewIncidentReport {
   injuredPhoneNumber: string;
   injuredPersonEmail: string;
   managerSignatureConfirmationDate: string | null;
-  dynamicQuestion: {
+  dynamicQuestion?: {
     questionId: string;
     answer: string;
   }[];
   // Media (UUIDs or URLs)
   media: string[];
+  hazardId?: string;
+  linkToHazard?: boolean;
+  hazardLinkMode?: "existing" | "new";
+  hazardReportTitle?: string;
+  hazardReportDescription?: string;
+  hazardSeverity?: severity;
+  hazardCoordinates?: string;
+  hazardAddress?: string;
+  hazardCategoryType?: string;
+  hazardDescription?: string;
+  hazardMedia?: string[];
 }
+
+export interface CreateIncidentPayload {
+  incident: Omit<
+    NewIncidentReport,
+    | "linkToHazard"
+    | "hazardLinkMode"
+    | "hazardReportTitle"
+    | "hazardReportDescription"
+    | "hazardSeverity"
+    | "hazardCoordinates"
+    | "hazardCategoryType"
+    | "hazardDescription"
+    | "hazardMedia"
+  >;
+  hazard?: NewHazardReport;
+  hazardId?: string;
+}
+
 export interface NewHazardReport {
   // Report Data
   reportTitle: string;
-  coordinates: string;
-  reportDescription: string;
-  severity: "LOW" | "MEDIUM" | "HIGH" | "EXTREME"; // assuming possible values
+  coordinates?: string;
+  address?: string;
+  reportDescription?: string;
+  severity: severity; // assuming possible values
   mainType: "HAZARD";
   status: ("INITIATED" | "IN_PROGRESS" | "RESOLVED") | (string & {});
 
@@ -211,7 +266,7 @@ export interface NewHazardReport {
   hazardDescription: string;
 
   managerSignatureConfirmationDate: string | null;
-  dynamicQuestion: {
+  dynamicQuestion?: {
     questionId: string;
     answer: string;
   }[];
@@ -246,10 +301,10 @@ export enum treatmentType {
 }
 
 export enum severity {
-  LOW = "LOW",
-  MEDIUM = "MEDIUM",
-  HIGH = "HIGH",
-  EXTREME = "EXTREME",
+  MINOR = "MINOR",
+  MODERATE = "MODERATE",
+  MAJOR = "MAJOR",
+  SEVERE = "SEVERE",
 }
 export interface reportStatus {
   incidentReportId?: string;

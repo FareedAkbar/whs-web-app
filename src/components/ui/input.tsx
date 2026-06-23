@@ -83,7 +83,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         </motion.div>
 
         {error && (
-          <p className="mt-1 text-sm not-italic text-red-600">{error}</p>
+          <p className="mt-1 text-sm not-italic text-red-500">{error}</p>
         )}
       </div>
     );

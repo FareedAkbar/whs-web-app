@@ -2,7 +2,58 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "@/env";
 import { z } from "zod";
-import { ReportResponse } from "@/types/report";
+import { ReportResponse, severity } from "@/types/report";
+
+const dynamicQuestionSchema = z.array(
+  z.object({
+    questionId: z.string(),
+    answer: z.string(),
+  }),
+);
+
+
+const incidentCreateSchema = z.object({
+  reportTitle: z.string(),
+  coordinates: z.string().optional(),
+  address: z.string().optional(),
+  reportDescription: z.string(),
+  severity: z.enum(Object.keys(severity) as [keyof typeof severity]),
+  mainType: z.literal("INCIDENT"),
+  status: z.string(),
+  followUp: z.boolean().optional(),
+  categoryType: z.string(),
+  incidentDescription: z.string(),
+  treatmentType: z.string(),
+  treatmentDescription: z.string(),
+  injuredBodyPart: z.string(),
+  firstAiderName: z.string().optional(),
+  firstAiderPhone: z.string().optional(),
+  firstAiderEmail: z.string().optional(),
+  firstAidDate: z.string().optional(),
+  injuredPersonName: z.string(),
+  injuredPhoneNumber: z.string(),
+  injuredPersonEmail: z.string(),
+  managerSignatureConfirmationDate: z.string().nullable(),
+  dynamicQuestion: dynamicQuestionSchema.optional(),
+  media: z.array(z.string()),
+});
+
+const hazardCreateSchema = z.object({
+  reportTitle: z.string(),
+  coordinates: z.string().optional(),
+  address: z.string().optional(),
+  reportDescription: z.string().optional(),
+  severity: z.enum(Object.keys(severity) as [keyof typeof severity]),
+  mainType: z.literal("HAZARD"),
+  status: z.string(),
+  categoryType: z.string(),
+  action: z.string().optional(),
+  actionDescription: z.string().optional(),
+  hazardDescription: z.string().optional(),
+  managerSignatureConfirmationDate: z.string().nullable(),
+  dynamicQuestion: dynamicQuestionSchema.optional(),
+  media: z.array(z.string()),
+});
 
 export const incidentRouter = createTRPCRouter({
   getIncidents: publicProcedure.query(async ({ ctx }) => {
@@ -14,7 +65,8 @@ export const incidentRouter = createTRPCRouter({
           message: "Unauthorized",
         });
       }
-
+      console.log("token", userToken);
+      
       const response = await fetch(`${env.BASE_URL}/incident?type=INCIDENT`, {
         method: "GET",
         headers: {
@@ -61,7 +113,6 @@ export const incidentRouter = createTRPCRouter({
           message: "Unauthorized",
         });
       }
-      console.log("Fetching hazards with token:", userToken);
 
       const response = await fetch(`${env.BASE_URL}/incident?type=HAZARD`, {
         method: "GET",
@@ -214,40 +265,9 @@ export const incidentRouter = createTRPCRouter({
   reportIncident: publicProcedure
     .input(
       z.object({
-        // Report Data
-        reportTitle: z.string(),
-        coordinates: z.string(),
-        reportDescription: z.string(),
-        severity: z.enum(["LOW", "MEDIUM", "HIGH", "EXTREME"]),
-        mainType: z.literal("INCIDENT"),
-        status: z.string(),
-        followUp: z.boolean(),
-
-        // Incident Data
-        categoryType: z.string(),
-        incidentDescription: z.string(),
-        treatmentType: z.string(),
-        treatmentDescription: z.string(),
-        injuredBodyPart: z.string(),
-
-        // First Aider Details (optional)
-        firstAiderName: z.string().optional(),
-        firstAiderPhone: z.string().optional(),
-        firstAiderEmail: z.string().optional(),
-        firstAidDate: z.string().optional(),
-
-        // Injured Person Data
-        injuredPersonName: z.string(),
-        injuredPhoneNumber: z.string(),
-        injuredPersonEmail: z.string(),
-        managerSignatureConfirmationDate: z.string().nullable(),
-        dynamicQuestion: z.array(
-          z.object({
-            questionId: z.string(),
-            answer: z.string(),
-          }),
-        ),
-        media: z.array(z.string()),
+        incident: incidentCreateSchema,
+        hazard: hazardCreateSchema.optional(),
+        hazardId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -302,24 +322,7 @@ export const incidentRouter = createTRPCRouter({
   reportHazard: publicProcedure
     .input(
       z.object({
-        // Report Data
-        reportTitle: z.string(),
-        coordinates: z.string(),
-        reportDescription: z.string(),
-        severity: z.enum(["LOW", "MEDIUM", "HIGH", "EXTREME"]),
-        mainType: z.literal("HAZARD"),
-        status: z.string(),
-
-        categoryType: z.string(),
-
-        managerSignatureConfirmationDate: z.string().nullable(),
-        dynamicQuestion: z.array(
-          z.object({
-            questionId: z.string(),
-            answer: z.string(),
-          }),
-        ),
-        media: z.array(z.string()),
+        hazard: hazardCreateSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -346,7 +349,7 @@ export const incidentRouter = createTRPCRouter({
           console.error("Incident report error:", errorData);
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: errorData.message || "Failed to report incident",
+            message: errorData.message || "Failed to report hazard",
           });
         }
 
@@ -361,13 +364,13 @@ export const incidentRouter = createTRPCRouter({
           data: responseData.data,
         };
       } catch (error) {
-        console.error("Incident Report Error:", error);
+        console.error("Hazard Report Error:", error);
         return {
           status: false,
           error:
             error instanceof Error
               ? error.message
-              : "An error occurred while reporting the incident.",
+              : "An error occurred while reporting the hazard.",
         };
       }
     }),
