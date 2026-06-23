@@ -112,6 +112,7 @@ export const InspectionRouter = createTRPCRouter({
             title: z.string().min(1, "Section title is required"),
             description: z.string().optional(),
             order: z.number(),
+            notes: z.string().optional(),
             questions: z.array(
               z.object({
                 questionNumber: z.number(),
@@ -288,7 +289,7 @@ export const InspectionRouter = createTRPCRouter({
       z.object({
         inspectionId: z.string(),
       areaBuilding: z.string().min(1, "Area Building is required"),
-      areaDescriptions: z.string().min(1, "At least one area description is required"),
+      areaDescription: z.string().min(1, "Area description is required"),
       businessUnit: z.string().optional().default(""),
       inspectionBuddy: z.string().optional().default(""),
       nextInspectionDue: z.string().optional().default(""),
@@ -296,24 +297,24 @@ export const InspectionRouter = createTRPCRouter({
         // ── Sections ──
         sections: z.array(
           // inside sections z.array(...)
-z.object({
-  sectionId: z.string(),
-  hazardId: z.array(z.string()),          // ← replaces hazardId + additionalHazards
-  hazard: z.array(z.any()),               // ← replaces hazard + additionalHazards
-  answers: z.array(
-    z.object({
-      questionId: z.string(),
-      answer: z.any(),
-    }),
-  ),
-  comments: z.string().optional(),
-  tables: z.array(
-    z.object({
-      tableId: z.string(),
-      rows: z.array(z.record(z.string(), z.string())),
-    }),
-  ).optional(),
-})
+          z.object({
+            sectionId: z.string(),
+            hazardId: z.array(z.string()),          // ← replaces hazardId + additionalHazards
+            hazard: z.array(z.any()),               // ← replaces hazard + additionalHazards
+            answers: z.array(
+              z.object({
+                questionId: z.string(),
+                answer: z.any(),
+              }),
+            ),
+            comments: z.string().optional(),
+            tables: z.array(
+              z.object({
+                tableId: z.string(),
+                rows: z.array(z.record(z.string(), z.string())),
+              }),
+            ).optional(),
+          })
         ),
       }),
     )
@@ -336,9 +337,11 @@ z.object({
           body: JSON.stringify({
             inspectionId: input.inspectionId,
             areaBuilding: input.areaBuilding,
-            areaDescriptions: input.areaDescriptions,
+            areaDescription: input.areaDescription,
             businessUnit: input.businessUnit,
             inspectionBuddy: input.inspectionBuddy,
+            nextInspectionDue: input.nextInspectionDue,
+            comments: input.comments,
             sections: input.sections,
           }),
         });

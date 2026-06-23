@@ -155,10 +155,11 @@
   // ── New meta fields ──
   areaBuilding?: string;
   /** Comma-separated area descriptions as stored/returned by API */
-  areaDescriptions?: string;
+  areaDescription?: string;
   businessUnit?: string;
   inspectionBuddy?: string;
   nextInspectionDue?: string;
+  comments?: string;
 }
 
  type InspectionDetail = {

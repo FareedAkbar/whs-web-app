@@ -400,7 +400,7 @@ const updateSectionTables = (index: number, tables: NewTable[]) => {
           <Button
             onClick={handleSubmit}
             variant="secondary"
-            title="Submit Inspection"
+            title="Create Inspection"
             disabled={createInspection.isPending || isEditingAnywhere}
             loading={createInspection.isPending}
           />

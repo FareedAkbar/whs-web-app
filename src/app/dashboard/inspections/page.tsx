@@ -425,7 +425,7 @@ return {
     return {
       inspectionId: inspectionItem.id,
       areaBuilding: metaFields.areaBuilding,
-      areaDescriptions: metaFields.areaDescriptions.join(", "),
+      areaDescription: metaFields.areaDescriptions.join(", "),
       businessUnit: metaFields.businessUnit,
       inspectionBuddy: metaFields.inspectionBuddy,
       nextInspectionDue: metaFields.nextInspectionDue,
@@ -1057,10 +1057,11 @@ function ViewFilledInspections({
 
           {/* Meta fields display */}
           {(item.areaBuilding ||
-            item.areaDescriptions ||
+            item.areaDescription ||
             item.businessUnit ||
             item.inspectionBuddy ||
-            item.nextInspectionDue) && (
+            item.nextInspectionDue ||
+            item.comments) && (
             <div className="mb-5 rounded-lg border border-blue-100 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
                 Inspection Details
@@ -1074,6 +1075,23 @@ function ViewFilledInspections({
                     <span className="text-gray-800 dark:text-gray-200">{item.areaBuilding}</span>
                   </div>
                 )}
+                {item.areaDescription && (
+                  <div>
+                    <span className="font-medium text-gray-600 dark:text-gray-400">
+                      Area Description:{" "}
+                    </span>
+                    <span className="text-gray-800 dark:text-gray-200">{item.areaDescription}</span>
+                  </div>
+                )}
+                {item.businessUnit && (
+                  <div>
+                    <span className="font-medium text-gray-600 dark:text-gray-400">
+                      Business Unit:{" "}
+                    </span>
+                    <span className="text-gray-800 dark:text-gray-200">{item.businessUnit}</span>
+                  </div>
+                )}
+                 
                 {item.businessUnit && (
                   <div>
                     <span className="font-medium text-gray-600 dark:text-gray-400">
@@ -1102,16 +1120,7 @@ function ViewFilledInspections({
                     </span>
                   </div>
                 )}
-                {item.areaDescriptions && (
-                  <div className="col-span-2">
-                    <span className="font-medium text-gray-600 dark:text-gray-400">
-                      Area Descriptions:{" "}
-                    </span>
-                    <span className="text-gray-800 dark:text-gray-200">
-                      {item.areaDescriptions}
-                    </span>
-                  </div>
-                )}
+                
               </div>
             </div>
           )}
@@ -1198,8 +1207,18 @@ function ViewFilledInspections({
                 </div>
               ))}
           </div>
-
+          
           {/* Activity log */}
+          {item.logs && item.logs.length > 0 && (
+            <div className="mt-5">
+              <p className="mb-2 text-xs font-semibold  tracking-wide text-gray-500 dark:text-gray-400">
+                COMMENTS: {" "}
+               <p className="font-normal">{item.comments}
+                </p> 
+              </p>
+              
+            </div>
+          )}
           {item.logs && item.logs.length > 0 && (
             <div className="mt-5">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
