@@ -19,6 +19,7 @@ const ROLES = {
     "cancel:incidents",
     "assign:departments",
     "assign:inspections",
+    "send:reminders",
     "view:filled-inspections",
   ],
   WORKER: [
@@ -65,8 +66,8 @@ const ROLES = {
     "fill:inspections",
     "show/hide:comments",
     "pick:hazard",
-    "complete:hazard"
-
+    "complete:hazard",
+    "send:reminders"
   ],
   // P_AND_C_MEMBER: ["view:homeCounters", "create:incidents"],
   P_AND_C_MANAGER: [
@@ -82,6 +83,7 @@ const ROLES = {
     "submit:inspection",
     "fill:inspections",
     "show/hide:comments",
+    "send:reminders",
     "pick:incident",
     "complete:incident"
   ],

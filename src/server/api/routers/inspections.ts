@@ -369,4 +369,45 @@ export const InspectionRouter = createTRPCRouter({
         };
       }
     }),
+   sendReminder: publicProcedure
+  .input(
+    z.object({
+      users: z.array(
+        z.object({
+          name: z.string(),
+          email: z.string().email(),
+          expiry_date: z.string(),
+        }),
+      ),
+      title: z.string(),
+      message: z.string(),
+      email_title: z.string(),
+      subject: z.string(),
+      subtitle: z.string().optional().default(""),
+    }),
+  )
+  .mutation(async ({ ctx, input }) => {
+    try {
+      const userToken = ctx.session?.user.token;
+      if (!userToken) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
+      }
+      const response = await fetch(`${env.BASE_URL}/inspection/send-reminder`, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(input),
+      });
+      const responseData = (await response.json()) as { message?: string };
+      if (!response.ok) {
+        return { status: false, error: responseData.message ?? "Failed to send reminder" };
+      }
+      return { status: true };
+    } catch (error) {
+      console.error("Send reminder error:", error);
+      return { status: false, error: "Failed to send reminder" };
+    }
+  }),
 });
