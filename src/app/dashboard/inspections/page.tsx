@@ -86,7 +86,7 @@ const InspectionChecklist = () => {
     data?: InspectionDetail | null | Inspection;
   }>({ type: null, data: null });
 
-
+const [selectedReminderUsers, setSelectedReminderUsers] = useState<number[]>([]);
 const [reminderForm, setReminderForm] = useState({
   users: [] as { name: string; email: string; expiry_date: string }[],
   title: "",
@@ -172,6 +172,7 @@ useEffect(() => {
       }));
 
   setReminderForm((prev) => ({ ...prev, users: initiatedUsers }));
+  setSelectedReminderUsers(initiatedUsers.map((_, i) => i)); // all selected by default
 }, [modal.type, inspectionDetail?.data?.inspections]);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -1083,81 +1084,47 @@ return {
               <div className="space-y-5">
 
                 {/* Recipients — INITIATED assignees */}
-                <div>
-                  <Label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Recipients{" "}
-                    <span className="text-xs font-normal text-gray-400">
-                      (only pending / initiated assignees)
-                    </span>
-                  </Label>
+          <div>
+            <Label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Recipients{" "}
+              <span className="text-xs font-normal text-gray-400">
+                (only pending assignees)
+              </span>
+            </Label>
 
-                  {reminderForm.users.length === 0 ? (
-                    <p className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-                      No pending assignees found for this inspection.
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {reminderForm.users.map((u, idx) => (
-                        <div
-                          key={idx}
-                          className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800"
-                        >
-                          <div className="mb-2 flex items-center justify-between">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                              Recipient {idx + 1}
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setReminderForm((prev) => ({
-                                  ...prev,
-                                  users: prev.users.filter((_, i) => i !== idx),
-                                }))
-                              }
-                            >
-                              <Trash2 size={15} color="red"/>
-                            </button>
-                          </div>
-                          <div className="flex flex-col gap-3 sm:flex-row">
-                            <Input
-                              label="Name"
-                              value={u.name}
-                              onChange={(e) => {
-                                const updated = [...reminderForm.users];
-                                updated[idx] = { ...updated[idx]!, name: e.target.value };
-                                setReminderForm((prev) => ({ ...prev, users: updated }));
-                              }}
-                              placeholder="Recipient name"
-                            />
-                            <Input
-                              label="Email"
-                              value={u.email}
-                              onChange={(e) => {
-                                const updated = [...reminderForm.users];
-                                updated[idx] = { ...updated[idx]!, email: e.target.value };
-                                setReminderForm((prev) => ({ ...prev, users: updated }));
-                              }}
-                              placeholder="Recipient email"
-                            />
-                            
-                          
-                            <Input
-                              label="Due Date"
-                              type="date"
-                              value={u.expiry_date}
-                              onChange={(e) => {
-                                const updated = [...reminderForm.users];
-                                updated[idx] = { ...updated[idx]!, expiry_date: e.target.value };
-                                setReminderForm((prev) => ({ ...prev, users: updated }));
-                              }}
-                              placeholder="e.g. 24/6/2026"
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+          {reminderForm.users.length === 0 ? (
+            <p className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+              No pending assignees found for this inspection.
+            </p>
+          ) : (
+            <div className="space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+          {reminderForm.users.map((u, idx) => (
+            <label
+              key={idx}
+              className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <input
+                type="checkbox"
+                checked={selectedReminderUsers.includes(idx)}
+                onChange={(e) => {
+                  setSelectedReminderUsers((prev) =>
+                    e.target.checked
+                      ? [...prev, idx]
+                      : prev.filter((i) => i !== idx),
+                  );
+                }}
+                className="h-4 w-4 accent-primary"
+              />
+              <div className="flex flex-1 flex-wrap gap-x-6 gap-y-0.5 text-sm">
+                <span className="font-medium text-gray-800 dark:text-gray-100">{u.name}</span>
+                <span className="text-gray-500 dark:text-gray-400">{u.email}</span>
+                <span className="text-gray-400 dark:text-gray-500">Due: {u.expiry_date}</span>
+              </div>
+            </label>
+          ))}
+            </div>
+          )}
+        </div>
 
                 {/* Shared fields */}
                 <Input
@@ -1227,14 +1194,18 @@ return {
                 title="Send Reminder"
                 icon={<Bell size={15} />}
                 loading={sendReminderMutation.isPending}
-                disabled={
-                  reminderForm.users.length === 0 ||
-                  reminderForm.users.some((u) => !u.name || !u.email || !u.expiry_date) ||
+               disabled={
+                  selectedReminderUsers.length === 0 ||
                   !reminderForm.title ||
                   sendReminderMutation.isPending
                 }
-                onClick={() => sendReminderMutation.mutate(reminderForm)}
-              />
+                onClick={() =>
+                  sendReminderMutation.mutate({
+                    ...reminderForm,
+                    users: reminderForm.users.filter((_, i) => selectedReminderUsers.includes(i)),
+                  })
+                }              
+                />
             </div>
           </ModalContent>
         </ModalBody>
