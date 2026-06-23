@@ -239,8 +239,7 @@ export default function HazardDetailScreen() {
               style={{
                 color: severityMapping[report.priority] ?? "black",
               }}
-            >{hazard.hazard?.ticket_number}-
-                
+            >#{hazard.hazard?.ticket_number} - 
               {report.title}
             </h2>
 

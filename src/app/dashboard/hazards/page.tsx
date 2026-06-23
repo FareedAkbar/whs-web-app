@@ -320,7 +320,7 @@ export default function HazardsList() {
                  <div className="flex gap-3">
                   <div>
                     <span className=" font-bold text-gray-500 block dark:text-gray-400 text-center">
-                      {item.hazard?.ticket_number ?? item.report.ticketNumber ?? "No Ticket Number"}
+                      #{item.hazard?.ticket_number ?? item.report.ticketNumber ?? "No Ticket Number"}
                     </span>
                   <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
                     <AlertTriangle
