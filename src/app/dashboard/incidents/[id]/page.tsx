@@ -165,55 +165,69 @@ export default function IncidentDetailScreen() {
       },
     );
   };
-  const handleDone = async () => {
-    if (!incident) return;
+ // Dedicated pick handler — uses session user id directly
+const handlePickIncident = () => {
+  if (!incident || !user?.id) return;
 
-    try {
-      // if (modalMode === "cancel") {
-      //   await updateIncidentStatus.mutateAsync({
-      //     incidentReportId: incident.report.id,
-      //     status: "CANCELLED",
-      //     comments: comment,
-      //   });
-      //   toast.success("Incident cancelled successfully");
-      //   void refetch();
-      // } else
-      // if (
-      //   modalMode === "assign-officer"
-      //   // ||
-      //   // (assignees.length > 0 &&
-      //   //   assignees.every((assignee) => assignee.acceptanceStatus === false))
-      // ) {
-      assignIncidentToOfficer.mutate(
-        {
-          assignedTo:
-            user?.role === "P_AND_C_MANAGER"
-              ? selectedOfficer
-              : (user?.id! ?? ""),
-          incidentId: incident.incident?.id! ?? "",
-          reportId: incident.report.id,
-        },
-        {
-          onSuccess: () => {
-            void refetch();
+  assignIncidentToOfficer.mutate(
+    {
+      assignedTo: user.id,
+      incidentId: incident.incident?.id ?? "",
+      reportId: incident.report.id,
+      comments:`Incident is picked by ${user.name}(${user.email})`
+    },
+    {
+      onSuccess: () => {
+        toast.success("Hazard picked successfully");
+        void refetch();
+      },
+      onError: (error: any) => {
+        toast.error(error.message ?? "Something went wrong");
+      },
+    },
+  );
+};
 
-            setOpen(false);
-            setModalMode("");
-            toast.success(
-              `${user?.role == "P_AND_C_MANAGER" ? `Incident ${incident.incidentAssignee ? " reassigned " : " assigned "}  successfully` : "Incident picked successfully"} `,
-            );
-          },
-          onError: (error: ErrorResponse) => {
-            toast.error(error.message ?? "Something went wrong");
-          },
-        },
-      );
-      // }
-    } catch (error) {
-      toast.error("Failed to update incident");
-      console.error(error);
-    }
-  };
+// Assign / Reassign handler — uses selectedOfficer from dropdown
+const handleDone = () => {
+  if (!incident || !selectedOfficer) return;
+const isSelectingSelf = selectedOfficer === user?.id;
+
+const assignedToName = isSelectingSelf
+  ? user?.name
+  : officers?.data?.find((o: User) => o.id === selectedOfficer)?.name;
+
+const assignedToEmail = isSelectingSelf
+  ? user?.email
+  : officers?.data?.find((o: User) => o.id === selectedOfficer)?.email;
+  const isReassign = modalMode === "reassign-officer";
+
+  assignIncidentToOfficer.mutate(
+    {
+      assignedTo: selectedOfficer,
+      incidentId: incident.incident?.id ?? "",
+      reportId: incident.report.id,
+      comments:`incident ${isReassign ? "reassigned" : "assigned"} to ${assignedToName} (${assignedToEmail}) by ${user?.name} (${user?.email})`
+
+    },
+    {
+      onSuccess: () => {
+        toast.success(
+          modalMode === "reassign-officer"
+            ? "Officer reassigned successfully"
+            : "Officer assigned successfully",
+        );
+        setOpen(false);
+        setModalMode("");
+        setSelectedOfficer("");
+        void refetch();
+      },
+      onError: (error: any) => {
+        toast.error(error.message ?? "Something went wrong");
+      },
+    },
+  );
+};
 
   if (isLoading || !incident) {
     return (
@@ -249,7 +263,7 @@ export default function IncidentDetailScreen() {
                 style={{
                   color: severityMapping[report.priority] ?? "black",
                 }}
-              >T#{incident.incident?.ticket_number} - 
+              >T#{incident.incident?.ticket_number} - {" "}
                 {report.title}
               </h2>
 
@@ -276,7 +290,7 @@ export default function IncidentDetailScreen() {
               )}
             {hasPermission(user?.role!, "assign:officer") &&
               incident?.incidentAssignee &&
-              incident.incident?.status === "ASSIGNED" && (
+              incident.report?.status === "ASSIGNED" && (
                 <Button
                   title="Reassign Officer"
                   onClick={() => {
@@ -289,10 +303,7 @@ export default function IncidentDetailScreen() {
               !incident?.incidentAssignee && (
                 <Button
                   title="Pick Incident"
-                  onClick={() => {
-                    setSelectedOfficer(user?.id ?? "");
-                    void handleDone();
-                  }}
+                  onClick={handlePickIncident}
                   loading={assignIncidentToOfficer.isPending}
                   disabled={assignIncidentToOfficer.isPending}
                 />
@@ -300,7 +311,7 @@ export default function IncidentDetailScreen() {
             {/* Complete Incident - allowed roles & when assigned / in progress */}
             {user &&
               hasPermission(user.role, "complete:incident") &&
-              incidentMeta?.status === "ASSIGNED" &&
+              incident.report?.status === "ASSIGNED" &&
               incident?.incidentAssignee.id === user.id && (
                 <Button
                   title={"Complete Incident"}
@@ -326,8 +337,8 @@ export default function IncidentDetailScreen() {
 
             {/* Close Incident - P_AND_C_MANAGER when incident completed */}
             {hasPermission(user?.role!, "close:incident") &&
-              incidentMeta?.status === "COMPLETED" &&
-              report.status !== "CLOSED" && (
+              report?.status === "COMPLETED" &&
+               (
                 <Button
                   title={"Close Incident"}
                   onClick={() =>   void closeIncident() }

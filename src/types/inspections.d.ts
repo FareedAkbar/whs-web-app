@@ -96,7 +96,18 @@
   linkedHazards?: LinkedHazard[];
   comments?: string;
 }
-
+ interface LinkedInspection {
+  linkId: string;
+  inspectionId: string;
+  inspectionStatus: string;
+  inspectionComments?: string;
+  inspectionExpiryDate?: string;
+  areaBuilding?: string;
+  areaDescription?: string;
+  businessUnit?: string;
+  survey: LinkedInspectionSurvey;
+  sections: LinkedInspectionSection[];
+}
 // ── Logs ──────────────────────────────────────────────────────────────────────
 
  interface InspectionLog {

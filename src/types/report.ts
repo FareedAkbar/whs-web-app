@@ -1,5 +1,4 @@
 // import { MediaItem } from "./media";
-import { User } from "./user";
 
 // Define the type for the incident report
 export interface FormQuestion {
@@ -66,6 +65,7 @@ export interface ReportResponse {
   comments: Comment[];
   followUps?: Comment[];
   links?: IncidentLink[];
+  linkedInspections?:LinkedInspection[];
 }
 
 // Report object
