@@ -220,6 +220,9 @@ const Sidebar = ({
               <p className="text-sm font-medium capitalize text-gray-700 dark:text-white">
                 {session.data.user.name ?? "User"}
               </p>
+              <p className="text-sm font-medium capitalize text-gray-500 ">
+                {session.data.user.role.replaceAll("_"," ") ?? "role"}
+              </p>
             </div>
           </div>
         )}

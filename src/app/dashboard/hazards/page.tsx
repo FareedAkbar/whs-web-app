@@ -6,7 +6,7 @@ import { api } from "@/trpc/react";
 import Dropdown from "@/components/ui/Dropdown";
 import Button from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
-import { severityMapping, severityDisplayMapping } from "@/constants/severity";
+import { severityMapping, severityDisplayMapping, severityKeys } from "@/constants/severity";
 import { ReportResponse } from "@/types/report";
 import { useSession } from "next-auth/react";
 import { hasPermission } from "@/lib/auth";
@@ -171,7 +171,7 @@ export default function HazardsList() {
               <div>
                 <label className="text-sm font-medium">Priority</label>
                 <div className="mt-1 flex flex-wrap gap-2">
-                  {["LOW", "MEDIUM", "HIGH", "EXTREME"].map((p) => (
+                  {severityKeys.map((p) => (
                     <label
                       key={p}
                       className="flex items-center gap-1 text-sm capitalize"
@@ -320,7 +320,7 @@ export default function HazardsList() {
                  <div className="flex gap-3">
                   <div>
                     <span className=" font-bold text-gray-500 block dark:text-gray-400 text-center">
-                      #{item.hazard?.ticket_number ?? item.report.ticketNumber ?? "No Ticket Number"}
+                      T#{item.hazard?.ticket_number ?? item.report.ticketNumber ?? "No Ticket Number"}
                     </span>
                   <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
                     <AlertTriangle

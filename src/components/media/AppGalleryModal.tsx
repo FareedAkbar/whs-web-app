@@ -87,17 +87,24 @@ export default function AppGalleryModal({
                   process.env.NEXT_PUBLIC_MEDIA_URL ??
                     process.env.NEXT_PUBLIC_BASE_URL,
                 );
-                const isSelected = selected.some(
-                  (selectedItem) => selectedItem.id === item.id,
-                );
+               // Change the isSelected check to include already-added IDs
+              const isAlreadyAdded = selectedIds.includes(item.id);
+              const isSelected = isAlreadyAdded || selected.some(
+                (selectedItem) => selectedItem.id === item.id,
+              );
 
                 return (
                   <button
                     type="button"
                     key={item.id}
-                    onClick={() => toggleItem(item)}
+                    onClick={() => !isAlreadyAdded && toggleItem(item)}  // guard here
+                    disabled={isAlreadyAdded}                            // and here
                     className={`group relative aspect-square overflow-hidden rounded-lg border bg-gray-100 text-left shadow-sm transition dark:border-gray-700 dark:bg-gray-800 ${
-                      isSelected ? "ring-2 ring-primary" : "hover:shadow-md"
+                      isAlreadyAdded
+                        ? "cursor-not-allowed opacity-50 ring-2 ring-gray-300 dark:ring-gray-600"  // greyed out
+                        : isSelected
+                          ? "ring-2 ring-primary"
+                          : "hover:shadow-md"
                     }`}
                   >
                     {url ? (
@@ -113,11 +120,15 @@ export default function AppGalleryModal({
                       </div>
                     )}
 
-                    {isSelected && (
+                    {isAlreadyAdded ? (
+                      <span className="absolute right-2 top-2 rounded-full bg-gray-400 p-1 text-white">
+                        <IconCheck size={16} />
+                      </span>
+                    ) : isSelected ? (
                       <span className="absolute right-2 top-2 rounded-full bg-primary p-1 text-white">
                         <IconCheck size={16} />
                       </span>
-                    )}
+                    ) : null}
                   </button>
                 );
               })}

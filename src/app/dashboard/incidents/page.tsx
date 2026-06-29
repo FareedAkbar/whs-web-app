@@ -9,7 +9,7 @@ import { Select } from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
 import { set } from "zod";
 import { useSession } from "next-auth/react";
-import { severityMapping, severityDisplayMapping } from "@/constants/severity";
+import { severityMapping, severityDisplayMapping, severityKeys } from "@/constants/severity";
 import { useRouter } from "next/navigation";
 import { ReportResponse } from "@/types/report";
 import { IconAlertCircle } from "@tabler/icons-react";
@@ -185,7 +185,7 @@ export default function IncidentsList() {
               <div>
                 <label className="text-sm font-medium">Priority</label>
                 <div className="mt-1 flex flex-wrap gap-2">
-                  {["LOW", "MEDIUM", "HIGH", "EXTREME"].map((p) => (
+                  {severityKeys?.map((p) => (
                     <label
                       key={p}
                       className="flex cursor-pointer items-center gap-1 text-sm capitalize"
@@ -335,7 +335,7 @@ export default function IncidentsList() {
                 <div className="flex gap-3">
                   <div>
                     <span className=" font-bold text-gray-500 block dark:text-gray-400 text-center">
-                      #{item.incident?.ticket_number ?? item.report.ticketNumber ?? "No Ticket Number"}
+                      T#{item.incident?.ticket_number ?? item.report.ticketNumber ?? "No Ticket Number"}
                     </span>
                   <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
                     <AlertTriangle
@@ -355,13 +355,15 @@ export default function IncidentsList() {
                   <div>
                     
                     <h2
-                      className="font-semibold capitalize"
+                      className="font-semibold capitalize truncate"
                       style={{
                         color:
                           severityMapping[item?.report?.priority] ?? "#000",
                       }}
                     >
-                      {item.report.title}
+                      {item.report.title.length > 25
+                        ? `${item.report.title.slice(0, 25)}...`
+                        : item.report.title}
                     </h2>
 
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -419,12 +421,13 @@ export default function IncidentsList() {
               )} */}
             </div>
           ))}
-        {filteredIncidents.length === 0 && (
-          <div className="flex h-[60vh] w-full items-center justify-center text-gray-500">
+       
+      </div>
+       {filteredIncidents.length === 0 && (
+        <div className="flex h-[60vh] w-full items-center justify-center text-gray-500">
             No incidents found
           </div>
         )}
-      </div>
     </div>
   );
 }

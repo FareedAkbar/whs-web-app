@@ -16,6 +16,7 @@ export const severityDisplayMapping: Record<string, string> = {
   MAJOR: "MAJOR",
   SEVERE: "SEVERE",
 };
+export const severityKeys = ["MINOR", "MODERATE", "MAJOR", "SEVERE"] as const;
 
 export const severityDescriptionMapping: Record<string, string> = {
   MINOR: "No injury or damage occurs i.e. near miss/hit",

@@ -95,13 +95,16 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
         <MenuIcon size={28} />
       </button>
       <div
-        className="flex cursor-pointer text-2xl"
+        className="flex pl-6 cursor-pointer flex-col "
         // onClick={() => router.push("/dashboard")}
       >
-        <span className="pl-6 font-semibold capitalize">
+        <span className=" font-semibold capitalize text-2xl">
           {path.split("/")[2]?.replaceAll("-", " ") ??
             path.split("/")[1]?.replaceAll("-", " ")}
         </span>
+         <p className="text-sm font-medium capitalize text-gray-500 ">
+                ({session.data?.user.role.replaceAll("_"," ") ?? "role"})
+              </p>
       </div>
       <div className="flex">
         {session.data?.user.email ? (

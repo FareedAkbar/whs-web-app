@@ -22,7 +22,7 @@ import {
   severityDescriptionMapping,
 } from "@/constants/severity";
 import { Input } from "@/components/ui/input";
-import { NewHazardReport } from "@/types/report";
+import { HazardCategoryType, NewHazardReport } from "@/types/report";
 import MediaPicker from "@/components/media/MediaPicker";
 import type { SelectedMedia } from "@/types/media";
 
@@ -90,7 +90,6 @@ const HazardForm = () => {
       mainType: "HAZARD",
       coordinates: data.coordinates, // Free text location
       address: data.address,
-
       media: images.map((image) => image.id).filter(Boolean),
       managerSignatureConfirmationDate: null,
       categoryType: data.categoryType || "HAZARD",
@@ -281,7 +280,27 @@ const HazardForm = () => {
             </div> */}
 
             {/* Location input field */}
-            <div className="min-w-[220px] flex-1">
+                      <div className="grid gap-4 md:grid-cols-2">
+
+            <div className="min-w-[220px] ">
+               <Controller
+                        name="categoryType"
+                        control={control}
+                        rules={{ required: "Hazard type is required" }}
+                        render={({ field }) => (
+                          <Select
+                            label="Hazard Type"
+                            required
+                            options={Object.keys(HazardCategoryType)?.map(
+                              (t: string) => ({ label: t.replaceAll("_"," "), value: t }),
+                            )}
+                            error={errors.categoryType?.message}
+                            {...field}
+                          />
+                        )}
+                       />
+            </div>
+            <div className="min-w-[220px] ">
               <Controller
                 name="address"
                 control={control}
@@ -297,6 +316,7 @@ const HazardForm = () => {
                   />
                 )}
               />
+            </div>
             </div>
 
             {/* Image Upload (Optional) */}
@@ -343,6 +363,7 @@ const HazardForm = () => {
 
 // Export wrapped with Suspense to allow useSearchParams safely
 import { Suspense } from "react";
+import { Select } from "@/components/ui/Select";
 const HazardFormPage = () => {
   return (
     <Suspense

@@ -1,5 +1,4 @@
 // import { MediaItem } from "./media";
-import { User } from "./user";
 
 // Define the type for the incident report
 export interface FormQuestion {
@@ -66,6 +65,7 @@ export interface ReportResponse {
   comments: Comment[];
   followUps?: Comment[];
   links?: IncidentLink[];
+  linkedInspections?:LinkedInspection[];
 }
 
 // Report object
@@ -290,6 +290,24 @@ export enum IncidentCategoryType {
   BRUISE = "BRUISE",
   TRIP = "TRIP",
   OTHER = "OTHER",
+}
+export enum HazardCategoryType {
+  FIRE = 'FIRE',
+  NEAR_MISS = 'NEAR_MISS',
+  PROPERTY_DAMAGE = 'PROPERTY_DAMAGE',
+  EXPLOSION = 'EXPLOSION',
+  SLIP = 'SLIP',
+  FALL = 'FALL',
+  COLLISION = 'COLLISION',
+  ELECTRICAL = 'ELECTRICAL',
+  CHEMICAL = 'CHEMICAL',
+  BIOLOGICAL = 'BIOLOGICAL',
+  PHYSICAL = 'PHYSICAL',
+  PSYCHOLOGICAL = 'PSYCHOLOGICAL',
+  ERGONOMIC = 'ERGONOMIC',
+  MECHANICAL = 'MECHANICAL',
+  ENVIRONMENTAL = 'ENVIRONMENTAL',
+  OTHER = 'OTHER',
 }
 export enum treatmentType {
   FIRST_AID = "FIRST_AID",

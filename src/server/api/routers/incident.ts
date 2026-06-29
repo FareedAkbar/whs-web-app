@@ -159,6 +159,7 @@ export const incidentRouter = createTRPCRouter({
         incidentId: z.string().optional(),
         assignedTo: z.string(),
         hazardId: z.string().optional(),
+        comments:z.string().optional()
       }),
     )
     .mutation(async ({ ctx, input }) => {
