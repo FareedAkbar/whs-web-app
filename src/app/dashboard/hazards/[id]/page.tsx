@@ -189,9 +189,9 @@ export default function HazardDetailScreen() {
           onSuccess: () => {
             toast.success(
               `${
-                user?.role === "FACILITY_MANAGER"
-                  ? "Hazard assigned successfully"
-                  : "Hazard picked successfully"
+                selectedOfficer==user?.id
+                  ? "Hazard picked successfully"
+                  : "Hazard assigned successfully"
               }`,
             );
             setOpen(false); // ✅ This will now close the modal
@@ -239,7 +239,7 @@ export default function HazardDetailScreen() {
               style={{
                 color: severityMapping[report.priority] ?? "black",
               }}
-            >#{hazard.hazard?.ticket_number} - 
+            >T#{hazard.hazard?.ticket_number} - 
               {report.title}
             </h2>
 

@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/Select";
 import {
   CreateIncidentPayload,
+  HazardCategoryType,
   IncidentCategoryType,
   NewHazardReport,
   NewIncidentReport,
@@ -330,7 +331,7 @@ const HazardForm = () => {
                             {hazardsList.map((item) => {
                               const hazardId = item.hazard?.id ?? "";
                               const ticketNumber =
-                                item.report.ticket_number ??
+                                item.hazard?.ticket_number ??
                                 item.report.ticketNumber ??
                                 `HZ-${item.report.id.substring(0, 8).toUpperCase()}`;
                               const isSelected = field.value === hazardId;
@@ -352,7 +353,7 @@ const HazardForm = () => {
                                   <div className="flex items-start justify-between gap-3">
                                     <div>
                                       <p className="text-xs font-semibold uppercase text-primary">
-                                        {ticketNumber}
+                                        #{ticketNumber}
                                       </p>
                                       <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
                                         {item.report.title}
@@ -412,16 +413,21 @@ const HazardForm = () => {
                           )}
                         />
                         <Controller
-                          name="hazardCategoryType"
-                          control={control}
-                          render={({ field }) => (
-                            <Input
-                              label="Hazard Type"
-                              placeholder="e.g. CHEMICAL"
-                              {...field}
-                            />
-                          )}
-                        />
+                        name="hazardCategoryType"
+                        control={control}
+                        rules={{ required: "Hazard type is required" }}
+                        render={({ field }) => (
+                          <Select
+                            label="Hazard Type"
+                            required
+                            options={Object.keys(HazardCategoryType)?.map(
+                              (t: string) => ({ label: t.replaceAll("_"," "), value: t }),
+                            )}
+                            error={errors.hazardCategoryType?.message}
+                            {...field}
+                          />
+                        )}
+                       />
                         <Controller
                           name="hazardAddress"
                           control={control}

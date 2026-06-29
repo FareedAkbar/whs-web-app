@@ -249,7 +249,7 @@ export default function IncidentDetailScreen() {
                 style={{
                   color: severityMapping[report.priority] ?? "black",
                 }}
-              >#{incident.incident?.ticket_number} - 
+              >T#{incident.incident?.ticket_number} - 
                 {report.title}
               </h2>
 
@@ -518,8 +518,8 @@ export default function IncidentDetailScreen() {
                       <p className="font-medium">
                         {link.reportTitle}
                       </p>
-                      <p className="text-sm text-gray-500">
-                        {link.linkType}
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Type: {link.linkType}
                       </p>
                       {link.reportDescription && (
                         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">

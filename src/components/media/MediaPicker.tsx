@@ -191,8 +191,11 @@ export default function MediaPicker({
         open={galleryOpen}
         selectedIds={value.map((item) => item.id)}
         onClose={() => setGalleryOpen(false)}
-        onSelect={(items) => onChange([...value, ...items])}
-      />
+onSelect={(items) => {
+  const existingIds = new Set(value.map((item) => item.id));
+  const newItems = items.filter((item) => !existingIds.has(item.id));
+  onChange([...value, ...newItems]);
+}}      />
     </div>
   );
 }

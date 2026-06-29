@@ -1416,7 +1416,7 @@ function ViewFilledInspections({
           </div>
           
           {/* Activity log */}
-          {item.logs && item.logs.length > 0 && (
+          {item.comments && (
             <div className="mt-5">
               <p className="mb-2 text-xs font-semibold  tracking-wide text-gray-500 dark:text-gray-400">
                 COMMENTS: {" "}
