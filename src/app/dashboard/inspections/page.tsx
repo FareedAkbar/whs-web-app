@@ -1460,8 +1460,65 @@ function ViewFilledInspections({
                         </div>
                       ))}
                   </div>
-
-                 
+                {/* Tables */}
+                  {sec.tables && sec.tables.length > 0 && (
+                    <div className="mt-4">
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        Tables
+                      </p>
+                      <div className="space-y-3">
+                        {sec.tables.map((tbl: any) => (
+                          <div
+                            key={tbl.id}
+                            className="rounded-lg border border-gray-100 bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
+                          >
+                            <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              {tbl.name}
+                            </p>
+                            {(!tbl.rows || tbl.rows.length === 0) ? (
+                              <p className="text-xs italic text-gray-400 dark:text-gray-500">
+                                No data entered
+                              </p>
+                            ) : (
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-xs border-collapse">
+                                  <thead>
+                                    <tr>
+                                      {tbl.columns.map((c: any, i: number) => (
+                                        <th
+                                          key={i}
+                                          className="border-b border-gray-200 px-2 py-1 text-left font-semibold text-gray-500 dark:border-gray-600 dark:text-gray-400"
+                                        >
+                                          {c.name ?? c}
+                                        </th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {tbl.rows.map((row: any) => (
+                                      <tr key={row.id}>
+                                        {tbl.columns.map((c: any, i: number) => {
+                                          const colName = c.name ?? c;
+                                          return (
+                                            <td
+                                              key={i}
+                                              className="border-b border-gray-100 px-2 py-1 text-gray-700 dark:border-gray-800 dark:text-gray-300"
+                                            >
+                                              {row.data?.[colName] || "—"}
+                                            </td>
+                                          );
+                                        })}
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Linked hazards */}
                   {sec.linkedHazards && sec.linkedHazards.length > 0 && (
