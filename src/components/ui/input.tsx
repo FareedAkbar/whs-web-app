@@ -57,7 +57,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               type={isPassword && showPassword ? "text" : type}
               id={id}
               className={cn(
-                `shadow-input dark:placeholder-text-neutral-600 duration-400 dark flex h-10 w-full rounded-md border bg-gray-50 px-3 py-2 text-sm text-black transition file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white dark:autofill:text-white`,
+                `shadow-input dark:placeholder-text-neutral-600 duration-400 dark flex h-10 w-full rounded-md border bg-gray-50 px-3 py-2 text-sm text-black transition file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white dark:autofill:text-white dark:[color-scheme:dark]
+                [&::-webkit-calendar-picker-indicator]:cursor-pointer
+                dark:[&::-webkit-calendar-picker-indicator]:invert`,
                 error && "border-red-500 focus-visible:ring-red-500",
                 className,
               )}

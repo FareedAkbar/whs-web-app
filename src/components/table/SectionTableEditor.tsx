@@ -84,7 +84,7 @@ export default function SectionTableEditor({
               <span className="flex-1 truncate text-sm font-medium text-gray-800 dark:text-white">
                 {table.name.trim() || (
                   <span className="text-gray-400 dark:text-gray-500">
-                    Untitled table
+                    Untitled table {tIdx+1}
                   </span>
                 )}
               </span>
@@ -156,7 +156,7 @@ export default function SectionTableEditor({
                   <div className="mt-4 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
                     <table className="w-full text-left text-xs">
                       <thead>
-                        <tr className="bg-primary/5">
+                        <tr className="bg-primary/20 border-b border-gray-500">
                           {table.columns
                             .filter((c) => c.trim())
                             .map((col, ci) => (

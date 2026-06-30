@@ -19,6 +19,7 @@ export default function CreateInspectionPage() {
     sectionIndex: number;
     questionIndex: number;
   } | null>(null);
+  
   const [collapsedSections, setCollapsedSections] = useState<Set<number>>(
     new Set()
   );
@@ -128,7 +129,7 @@ const updateSectionTables = (index: number, tables: NewTable[]) => {
 
   const handleSubmit = async () => {
     if (!title.trim() || !description.trim()) {
-      toast.error("Please fill in both title and description.");
+      toast.error("Please fill in both inspection title and description.");
       return;
     }
     if (sections.length === 0) {
@@ -139,8 +140,27 @@ const updateSectionTables = (index: number, tables: NewTable[]) => {
       toast.error("Please ensure all sections have a title.");
       return;
     }
-    if (sections.every((s) => s.questions.length === 0)) {
-      toast.error("Please add at least one question to a section.");
+   const hasQuestionsOrTables = sections.some(
+    (s) => s.questions.length > 0 || (s.tables?.length ?? 0) > 0
+    );
+
+    if (!hasQuestionsOrTables) {
+      toast.error("Please add at least one question or table.");
+      return;
+    }
+    const invalidTable = sections.some((section) =>
+      (section.tables ?? []).some(
+        (table) =>
+          !table.name.trim() ||
+          table.columns.length === 0 ||
+          table.columns.some((column) => !column.trim())
+      )
+    );
+
+    if (invalidTable) {
+      toast.error(
+        "Please ensure all tables have a name and at least one valid column."
+      );
       return;
     }
     if (sections.some((s) => s.questions.some((q) => !q.title.trim()))) {
@@ -174,19 +194,22 @@ const updateSectionTables = (index: number, tables: NewTable[]) => {
     (acc, s) => acc + s.questions.length,
     0
   );
-
+  const totalTables = sections.reduce(
+    (acc, s) => acc + (s.tables?.length ?? 0),
+    0
+  );
   return (
     <div className="p-4 md:p-8">
       {/* Header */}
-      <div className="mb-6 flex w-full items-center justify-between">
+      <div className="mb-2">
         <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
           Create Inspection
         </h1>
-        <Button
+        {/* <Button
           onClick={() => router.push("/dashboard/inspections")}
           title="Inspections List"
           icon={<IconChecklist />}
-        />
+        /> */}
       </div>
 
       {/* Inspection meta */}
@@ -200,12 +223,13 @@ const updateSectionTables = (index: number, tables: NewTable[]) => {
             placeholder="Inspection Title"
             label="Inspection Title"
             className="rounded-lg p-2 shadow"
+            required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
           <div className="flex flex-col gap-1 md:col-span-2">
             <Label className="text-md text-gray-500">
-              Inspection Description
+              Inspection Description <span className="text-red-500">*</span>
             </Label>
             <textarea
               placeholder="Inspection Description"
@@ -235,7 +259,7 @@ const updateSectionTables = (index: number, tables: NewTable[]) => {
                 </span>
 
                 <div className="flex-1 space-y-2">
-                  <Input type="text" label="Section Title" placeholder="Section Title" value={section.title} onChange={(e) => updateSection(sIdx, "title", e.target.value)} />
+                  <Input type="text" required label="Section Title" placeholder="Section Title" value={section.title} onChange={(e) => updateSection(sIdx, "title", e.target.value)} />
                   
                   <Input
                     type="text"
@@ -363,8 +387,14 @@ const updateSectionTables = (index: number, tables: NewTable[]) => {
                   </div>
 
                   {/* Add question button */}
-                  <Button title="Add Question" variant="secondary" onClick={() => addQuestion(sIdx)} disabled={isEditingAnywhere} className="mt-4" />
-                  <div className="mt-5 border-t border-gray-100 pt-4 dark:border-gray-700">
+                    <Button
+                      title="Add Question"
+                      variant="secondary"
+                      onClick={() => addQuestion(sIdx)}
+                      disabled={editingQuestion !== null && editingQuestion.sectionIndex === sIdx}
+                      className="mt-4"
+                    />                  
+                    <div className="mt-5 border-t border-gray-100 pt-4 dark:border-gray-700">
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                       Tables
                     </p>
@@ -396,15 +426,24 @@ const updateSectionTables = (index: number, tables: NewTable[]) => {
           icon={<Plus size={16} />}
           disabled={isEditingAnywhere}
         />
-        {sections.length > 0 && totalQuestions > 0 && (
+        <div className="mt-4 flex w-full justify-start gap-4">
           <Button
-            onClick={handleSubmit}
             variant="secondary"
-            title="Create Inspection"
-            disabled={createInspection.isPending || isEditingAnywhere}
-            loading={createInspection.isPending}
-          />
-        )}
+            title="Back"
+            onClick={() => router.back()}
+            />
+            <Button
+              onClick={handleSubmit}
+              title="Create Inspection"
+              disabled={
+                createInspection.isPending ||
+                isEditingAnywhere ||
+                sections.length === 0 ||
+                (totalQuestions === 0 && totalTables === 0)
+              }              
+              loading={createInspection.isPending}
+            />
+         </div>
       </div>
     </div>
   );

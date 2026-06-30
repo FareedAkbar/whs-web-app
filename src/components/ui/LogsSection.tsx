@@ -29,7 +29,7 @@ const LogsSection: FC<{ logs: IncidentLog[] }> = ({ logs }) => {
   return (
     <div className="mt-6">
       <h3 className="mb-3 text-base font-semibold text-gray-800 dark:text-gray-200">
-        Activity Log
+        Activity Log(s)
       </h3>
 
       <div className="flex flex-col gap-3">

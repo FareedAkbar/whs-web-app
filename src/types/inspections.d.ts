@@ -74,7 +74,23 @@
 }
 
 // ── Sections ──────────────────────────────────────────────────────────────────
+interface TableColumn {
+  id: string;
+  name: string;
+  order: number;
+}
 
+interface FilledTableRow {
+  id: string;
+  data: Record<string, string>;
+}
+
+interface FilledSectionTable {
+  id: string;
+  name: string;
+  columns: TableColumn[];
+  rows: FilledTableRow[];
+}
 /** Template section — questions without answers */
  interface InspectionSection {
   id: string;
@@ -95,6 +111,7 @@
   questions: AnsweredQuestion[];
   linkedHazards?: LinkedHazard[];
   comments?: string;
+  tables?: FilledSectionTable[];        // template-level (no rows, but rows optional anyway)
 }
  interface LinkedInspection {
   linkId: string;
