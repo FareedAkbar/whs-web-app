@@ -109,21 +109,24 @@ const updateSectionTables = (index: number, tables: NewTable[]) => {
     );
   };
 
-  const deleteQuestion = (sectionIndex: number, questionIndex: number) => {
-    setSections((prev) =>
-      prev.map((s, i): NewSection =>
-        i === sectionIndex
-          ? { ...s, questions: s.questions.filter((_, qi) => qi !== questionIndex) }
-          : s
-      )
-    );
-    if (
-      editingQuestion?.sectionIndex === sectionIndex &&
-      editingQuestion?.questionIndex === questionIndex
-    ) {
-      setEditingQuestion(null);
+const deleteQuestion = (sectionIndex: number, questionIndex: number) => {
+  setSections((prev) =>
+    prev.map((s, i): NewSection =>
+      i === sectionIndex
+        ? { ...s, questions: s.questions.filter((_, qi) => qi !== questionIndex) }
+        : s
+    )
+  );
+
+  setEditingQuestion((prev) => {
+    if (!prev || prev.sectionIndex !== sectionIndex) return prev;
+    if (prev.questionIndex === questionIndex) return null;
+    if (prev.questionIndex > questionIndex) {
+      return { ...prev, questionIndex: prev.questionIndex - 1 };
     }
-  };
+    return prev;
+  });
+};
 
   // ── Submit ───────────────────────────────────────────────────────
 
