@@ -55,7 +55,7 @@ interface InspectionMetaFields {
 const defaultSectionState = (): SectionFormState => ({
   answers: {},
   linkHazard: false,
-  hazardLinks: [{ mode: "existing" }],
+  hazardLinks: [],
   tableRows: {},
 });
 
@@ -85,11 +85,20 @@ const InspectionChecklist = () => {
     type: "view" | "delete" | "assign" | "reminder" | null;
     data?: InspectionDetail | null | Inspection;
   }>({ type: null, data: null });
-
+const { data: inspectionDetail } =
+  api.inspections.getInspectionById.useQuery(
+    { id: modal.data?.id ?? "" },
+    {
+      enabled:
+        (modal.type === "view" || modal.type === "assign" || modal.type === "reminder") &&
+        Boolean(modal.data?.id),
+      staleTime: 0,
+    },
+  );
 const [selectedReminderUsers, setSelectedReminderUsers] = useState<number[]>([]);
 const [reminderForm, setReminderForm] = useState({
   users: [] as { name: string; email: string; expiry_date: string }[],
-  title: "",
+  title: inspectionDetail?.data?.title,
   message: "Kindly complete this inspection",
   email_title: "Inspection reminder update",
   subject: "Inspection reminder",
@@ -126,16 +135,7 @@ const openReminderModal = (inspection: Inspection) => {
 
   const { data: inspections, isLoading, refetch } =
     api.inspections.getInspections.useQuery();
-const { data: inspectionDetail } =
-  api.inspections.getInspectionById.useQuery(
-    { id: modal.data?.id ?? "" },
-    {
-      enabled:
-        (modal.type === "view" || modal.type === "assign" || modal.type === "reminder") &&
-        Boolean(modal.data?.id),
-      staleTime: 0,
-    },
-  );
+
   const submitInspection = api.inspections.submitInspection.useMutation();
   const deleteInspection = api.inspections.deleteInspection.useMutation({
     onSuccess: () => {
@@ -720,6 +720,7 @@ return {
                         })),
                       ]}
                       value={metaFields.areaBuilding}
+                      required
                       onChange={(e) => handleAreaBuildingChange(e.target.value)}
                     />
 
@@ -876,15 +877,12 @@ return {
                             />
                           </div>
                         ))}
-
-                        <button
-                          type="button"
+                        <Button
                           onClick={() => addHazardLink(sec.id)}
-                          className="flex items-center gap-2 rounded-md border border-dashed border-primary/60 px-4 py-2 text-sm text-primary transition hover:border-primary hover:bg-primary/5"
-                        >
-                          <PlusIcon size={15} />
-                          {state.hazardLinks.length === 0 ? "Link a hazard" : "Add another hazard"}
-                        </button>
+                          icon={ <PlusIcon size={15} />}
+                          title={state.hazardLinks.length === 0 ? "Link a hazard" : "Add another hazard"}
+                          />
+                       
                       </div>
 
                       </div>
@@ -958,6 +956,97 @@ return {
                 )}
               </div>
             )}
+            {inspectionDetail.data?.sections &&
+              inspectionDetail.data.sections.length > 0 &&
+              (
+                (!canFill && !hasPermission(user?.role!, "view:filled-inspections")) ||
+                (
+                  user?.id === modal.data.createdBy &&
+                  !inspectionDetail.data?.inspections?.some((i) => itemHasAnswers(i))
+                )
+              ) && (
+                <div className="my-3 space-y-4">
+                  {inspectionDetail.data.sections
+                    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                    .map((sec) => (
+                      <div
+                        key={sec.id}
+                        className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900"
+                      >
+                        <h3 className="mb-1 text-lg font-semibold dark:text-white">
+                          {sec.title}
+                        </h3>
+                        {sec.description && (
+                          <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
+                            {sec.description}
+                          </p>
+                        )}
+
+                        {sec.questions
+                          .sort((a, b) => (a.questionNumber ?? 0) - (b.questionNumber ?? 0))
+                          .map((q) => (
+                            <div
+                              key={q.id}
+                              className="mb-3 border-b border-gray-200 pb-3 dark:border-gray-700"
+                            >
+                              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                {q.questionNumber}. {q.title}
+                              </p>
+                              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Type: {q.type.replaceAll("_", " ")}
+                              </p>
+                              {(q.type === "SINGLE_OPTION" || q.type === "MULTI_OPTION") && (
+                                <div className="ml-3 mt-1">
+                                  {q.options?.map((opt, i) => (
+                                    <p key={i} className="text-xs text-gray-500 dark:text-gray-400">
+                                      • {opt}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+
+                        {/* ── NEW: Tables (template view — column names only) ── */}
+                        {sec.tables && sec.tables.length > 0 && (
+                          <div className="mt-4">
+                            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                              Tables
+                            </p>
+                            <div className="space-y-3">
+                              {sec.tables.map((tbl: any) => (
+                                <div
+                                  key={tbl.id}
+                                  className="rounded-lg border border-gray-100 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800"
+                                >
+                                  <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {tbl.name}
+                                  </p>
+                                  <div className="overflow-x-auto">
+                                    <table className="w-full text-xs">
+                                      <thead>
+                                        <tr>
+                                          {tbl.columns.map((c: any, i: number) => (
+                                            <th
+                                              key={i}
+                                              className="border-b border-gray-200 px-2 py-1 text-left font-semibold text-gray-500 dark:border-gray-600 dark:text-gray-400"
+                                            >
+                                              {c.name ?? c}
+                                            </th>
+                                          ))}
+                                        </tr>
+                                      </thead>
+                                    </table>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              )}
           </ModalContent>
         </ModalBody>
       )}
@@ -1014,13 +1103,13 @@ return {
                   <div
                     key={u.id}
                     onClick={() => setSelectedUser(u.id)}
-                    className={`cursor-pointer p-2 ${
+                    className={`cursor-pointer flex justify-between p-2 ${
                       selectedUser === u.id
-                        ? "bg-primary text-white"
+                        ? "bg-primary/30 text-white"
                         : "border-b hover:bg-gray-200 dark:border-gray-500 dark:text-white dark:hover:bg-gray-700"
                     }`}
-                  >
-                    {u.name} ({u.email})
+                  ><div >
+                    {u.name} <span className="text-primary">({u.email})</span></div><span>{u?.role.replaceAll("_"," ")}</span>
                   </div>
                 ))
               ) : (
@@ -1028,9 +1117,9 @@ return {
               )}
             </div>
 
-            <Label className="mb-1 block">Due Date</Label>
             <Input
               type="date"
+              label="Due Date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               className="mb-6"
@@ -1049,13 +1138,25 @@ return {
               <Button
                 title="Assign"
                 disabled={!selectedUser || !dueDate || assignMutation.isPending}
-                onClick={() =>
+                onClick={() => {
+                  if (!dueDate) return;
+
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const selectedDate = new Date(dueDate);
+                  selectedDate.setHours(0, 0, 0, 0);
+
+                  if (selectedDate < today) {
+                    toast.error("Due date should be a future date");
+                    return;
+                  }
+
                   assignMutation.mutate({
                     surveyId: modal.data?.id!,
                     assignedTo: selectedUser!,
                     dueDate,
-                  })
-                }
+                  });
+                }}
                 loading={assignMutation.isPending}
               />
             </div>
@@ -1069,7 +1170,7 @@ return {
         <ModalBody className="mx-3 w-full">
           <ModalContent className="w-full">
             <h2 className="mb-1 text-xl font-bold capitalize dark:text-white">
-              Send Reminder
+              Send Reminder Mail
             </h2>
             <p className="mb-5 text-sm text-gray-500 dark:text-gray-400">
               {modal.data.title}
@@ -1118,7 +1219,7 @@ return {
               <div className="flex flex-1 flex-wrap gap-x-6 gap-y-0.5 text-sm">
                 <span className="font-medium text-gray-800 dark:text-gray-100">{u.name}</span>
                 <span className="text-gray-500 dark:text-gray-400">{u.email}</span>
-                <span className="text-gray-400 dark:text-gray-500">Due: {u.expiry_date}</span>
+                <span className="text-primary">Due: {u.expiry_date}</span>
               </div>
             </label>
           ))}
@@ -1127,14 +1228,7 @@ return {
         </div>
 
                 {/* Shared fields */}
-                <Input
-                  label="Inspection Title"
-                  value={reminderForm.title}
-                  onChange={(e) =>
-                    setReminderForm((prev) => ({ ...prev, title: e.target.value }))
-                  }
-                  placeholder="e.g. Fire Inspection"
-                />
+                
 
                 <div className="flex flex-col gap-4 sm:flex-row">
                   <Input
@@ -1202,6 +1296,7 @@ return {
                 onClick={() =>
                   sendReminderMutation.mutate({
                     ...reminderForm,
+                        title: reminderForm.title ?? "",
                     users: reminderForm.users.filter((_, i) => selectedReminderUsers.includes(i)),
                   })
                 }              
@@ -1243,7 +1338,7 @@ function ViewFilledInspections({
           className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900"
         >
           {/* Assignee header */}
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between bg-primary/20 p-2 rounded-md">
             <div>
               <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                 Submitted by:{" "}

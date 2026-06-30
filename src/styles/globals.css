@@ -135,7 +135,7 @@ input:-webkit-autofill:active {
 }
 
 /* Make date picker icon white in dark mode */
-.dark input[type="date"]::-webkit-calendar-picker-indicator {
+/* .dark input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
-}
+} */
 }

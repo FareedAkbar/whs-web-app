@@ -85,7 +85,9 @@ const ROLES = {
     "show/hide:comments",
     "send:reminders",
     "pick:incident",
-    "complete:incident"
+    "complete:incident",
+    "create:inspections",
+
   ],
   P_AND_C_OFFICER: [
     "view:homeCounters",
