@@ -24,6 +24,7 @@ import HazardLinker, { HazardLinkValue } from "@/components/ui/HazardLinker";
 import { AREA_DATA } from "@/constants/area";
 import TableFiller, { FilledTable, TableRow } from "@/components/table/TableFiller";
 import DateField from "@/components/ui/DateField";
+import { getSeverityColor } from "@/constants/severity";
 
 // ── Local-only types ──────────────────────────────────────────────────────────
 
@@ -545,7 +546,7 @@ return {
               icon={<PlusIcon />}
             />
           </div>
-          <div className="mb-3 flex gap-3 px-1">
+          {/* <div className="mb-3 flex gap-3 px-1">
             {["All", "Created by me", "Assigned to me"].map((tab) => (
               <button
                 key={tab}
@@ -559,7 +560,7 @@ return {
                 {tab}
               </button>
             ))}
-          </div>
+          </div> */}
         </>
       )}
 
@@ -818,7 +819,7 @@ return {
                         {sec.notes && (
                           <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
                             <Label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">   
-                              Section Notes   
+                              Additional Notes   
                               </Label>
                               <p className="text-sm text-gray-500 dark:text-gray-400 whitespace-pre-wrap">
                                 {sec.notes}
@@ -828,8 +829,8 @@ return {
                           {/* ── Tables ── */}
                         {sec.tables && sec.tables.length > 0 && (
                           <div className="mt-5 space-y-4">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                              Tables
+                            <p className="text-xs font-semibold  tracking-wide text-gray-500 dark:text-gray-400">
+                              Table(s)
                             </p>
                             {sec.tables.map((tbl: any) => (
                               <TableFiller
@@ -851,7 +852,7 @@ return {
                         {/* Hazard linking */}
                       <div className="mt-5 space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
                         <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
-                          Linked Hazards
+                          Linked Hazard(s)
                         </p>
 
                         {state.hazardLinks.map((link, idx) => (
@@ -1460,7 +1461,7 @@ function ViewFilledInspections({
                         </div>
                       ))}
                   </div>
-                {/* Tables */}
+              {/* Tables */}
                   {sec.tables && sec.tables.length > 0 && (
                     <div className="mt-4">
                       <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
@@ -1523,34 +1524,32 @@ function ViewFilledInspections({
                   {/* Linked hazards */}
                   {sec.linkedHazards && sec.linkedHazards.length > 0 && (
                     <div className="mt-4">
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                        Linked Hazards
+                      <p className="mb-2 text-xs font-semibold  tracking-wide text-gray-500 dark:text-gray-400">
+                        Linked Hazard(s)
                       </p>
                       <div className="space-y-2">
                         {sec.linkedHazards.map((lh) => (
                           <div
                             key={lh.linkId}
-                            className="flex items-center justify-between rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm dark:border-orange-800 dark:bg-orange-950"
+                            className="flex items-center justify-between rounded-md border  px-3 py-2 text-sm border-primary/50 bg-primary/10"
                           >
                             <div>
-                              <p className="font-medium text-orange-800 dark:text-orange-300">
-                                #{lh.ticket_number} — {lh.reportTitle}
+                              <p className="font-medium dark:text-white">
+                                Ticket# {lh.ticket_number} — {lh.reportTitle}
                               </p>
                               {lh.linkDescription && (
-                                <p className="text-xs text-orange-600 dark:text-orange-400">
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
                                   {lh.linkDescription}
                                 </p>
                               )}
                             </div>
                             <div className="flex flex-col items-end gap-1">
                               <span
-                                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                  lh.reportPriority === "MAJOR"
-                                    ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-                                    : lh.reportPriority === "MINOR"
-                                      ? "bg-yellow-100 text-yellow-700"
-                                      : "bg-gray-100 text-gray-700"
-                                }`}
+                                className={`rounded-full px-2 py-0.5 text-xs font-medium `}
+                                style={{
+                                  color: getSeverityColor(lh?.reportPriority),
+                                  backgroundColor: `${getSeverityColor(lh?.reportPriority)}33`, // 33 for 20% opacity
+                                  }}
                               >
                                 {lh.reportPriority}
                               </span>
@@ -1561,6 +1560,14 @@ function ViewFilledInspections({
                           </div>
                         ))}
                       </div>
+                    </div>
+                  )}
+                  {sec.notes && (
+                    <div className="mt-4">
+                      <p className="mb-2 text-xs font-semibold  tracking-wide text-gray-500 dark:text-gray-400">
+                        Additional Notes
+                      </p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{sec.notes}</p>
                     </div>
                   )}
                 </div>
@@ -1697,34 +1704,50 @@ function renderQuestion(
         </div>
       );
 
-    case "DATE_RANGE":
-      return (
-        <div key={q.id}>
-          <Label>{q.title}</Label>
-          <div className="flex space-x-4">
-            <Input
-              type="date"
-              label="Start"
-              value={
-                typeof formValues[`${q.id}_start`] === "string"
-                  ? formValues[`${q.id}_start`]
-                  : ""
-              }
-              onChange={(e) => onChange(`${q.id}_start`, e.target.value)}
-            />
-            <Input
-              type="date"
-              label="End"
-              value={
-                typeof formValues[`${q.id}_end`] === "string"
-                  ? formValues[`${q.id}_end`]
-                  : ""
-              }
-              onChange={(e) => onChange(`${q.id}_end`, e.target.value)}
-            />
-          </div>
-        </div>
-      );
+    case "DATE_RANGE": {
+  const startVal =
+    typeof formValues[`${q.id}_start`] === "string"
+      ? (formValues[`${q.id}_start`] as string)
+      : "";
+  const endVal =
+    typeof formValues[`${q.id}_end`] === "string"
+      ? (formValues[`${q.id}_end`] as string)
+      : "";
+
+  return (
+    <div key={q.id}>
+      <Label>{q.title}</Label>
+      <div className="flex space-x-4">
+        <Input
+          type="date"
+          label="Start"
+          value={startVal}
+          onChange={(e) => {
+            const newStart = e.target.value;
+            if (endVal && newStart > endVal) {
+              toast.error("Start date cannot be after the end date.");
+              return; // block the update
+            }
+            onChange(`${q.id}_start`, newStart);
+          }}
+        />
+        <Input
+          type="date"
+          label="End"
+          value={endVal}
+          onChange={(e) => {
+            const newEnd = e.target.value;
+            if (startVal && newEnd < startVal) {
+              toast.error("End date cannot be before the start date.");
+              return; // block the update
+            }
+            onChange(`${q.id}_end`, newEnd);
+          }}
+        />
+      </div>
+    </div>
+  );
+}
 
     case "YES_NO":
       return (

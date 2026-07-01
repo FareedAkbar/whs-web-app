@@ -22,7 +22,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
   const { data: session } = useSession();
   const [showInput, setShowInput] = useState(false);
   const [comment, setComment] = useState("");
-  const [showToAll, setShowToAll] = useState(false);
+  const [showToAll, setShowToAll] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const addComment = api.reports.addComment.useMutation();

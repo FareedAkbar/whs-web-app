@@ -178,7 +178,7 @@ const handlePickIncident = () => {
     },
     {
       onSuccess: () => {
-        toast.success("Hazard picked successfully");
+        toast.success("Incident picked successfully");
         void refetch();
       },
       onError: (error: any) => {
@@ -263,7 +263,7 @@ const assignedToEmail = isSelectingSelf
                 style={{
                   color: severityMapping[report.priority] ?? "black",
                 }}
-              >T#{incident.incident?.ticket_number} - {" "}
+              >Ticket#{incident.incident?.ticket_number} - {" "}
                 {report.title}
               </h2>
 
@@ -387,7 +387,7 @@ const assignedToEmail = isSelectingSelf
             {/* Assigned to */}
             <div className="mt-4">
               {assignee ? (
-                <div className="mt-3 space-y-2">
+                <div className="mt-3 space-y-1">
                   <p className="text-sm font-semibold text-red-500">
                     {incident.incidentAssignee.assigntype === "SELF_ASSIGNED"
                       ? "Picked by:"
@@ -395,6 +395,9 @@ const assignedToEmail = isSelectingSelf
                   </p>
                   <p className="text-sm capitalize text-gray-700 dark:text-gray-300">
                     {assignee.name} ({assignee.role.replaceAll("_", " ")})
+                  </p>
+                  <p className="text-sm  text-gray-700 dark:text-gray-300">
+                    {assignee.email} 
                   </p>
                 </div>
               ) : (
@@ -452,7 +455,7 @@ const assignedToEmail = isSelectingSelf
   </div>
 ) : (
   <p className="mt-6 text-sm text-gray-500">
-    No images available for this hazard.
+    No images available for this incident.
   </p>
 )}
 
@@ -489,17 +492,17 @@ const assignedToEmail = isSelectingSelf
                   {incidentMeta?.treatmentType?.replaceAll("_", " ") ?? "N/A"}
                 </span>
               </div>
+{incidentMeta?.treatmentDescription && (
 
               <div className="flex gap-2">
                 <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Treatment Desc:
+                  Treatment Description:
                 </span>
                 <span className="font-semibold text-gray-800 dark:text-gray-200">
-                  {incidentMeta?.treatmentDescription != ""
-                    ? incidentMeta?.treatmentDescription
-                    : "Not Provided"}
+                  {incidentMeta?.treatmentDescription }
                 </span>
               </div>
+)}
 
               <div className="flex gap-2">
                 <span className="font-medium text-gray-600 dark:text-gray-400">
@@ -628,7 +631,7 @@ const assignedToEmail = isSelectingSelf
                           )
                           .map((o: User) => ({
                             value: o.id,
-                            label: o.name,
+                            label: `${o.name}-${o.email}(${o.role})`,
                           }))
                           .concat(
                             user?.id

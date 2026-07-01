@@ -339,7 +339,7 @@ const assignedToEmail = isSelectingSelf
               style={{
                 color: severityMapping[report.priority] ?? "black",
               }}
-            >T#{hazard.hazard?.ticket_number} - {" "}
+            >Ticket#{hazard.hazard?.ticket_number} - {" "}
               {report.title}
             </h2>
 
