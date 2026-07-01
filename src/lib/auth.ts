@@ -86,7 +86,6 @@ const ROLES = {
     "send:reminders",
     "pick:incident",
     "complete:incident",
-    "create:inspections",
 
   ],
   P_AND_C_OFFICER: [

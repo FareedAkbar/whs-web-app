@@ -17,7 +17,10 @@ export const severityDisplayMapping: Record<string, string> = {
   SEVERE: "SEVERE",
 };
 export const severityKeys = ["MINOR", "MODERATE", "MAJOR", "SEVERE"] as const;
-
+export function getSeverityColor(priority?: string): string {
+  if (!priority) return "#6C757D";
+  return severityMapping[priority] ?? "#6C757D";
+}
 export const severityDescriptionMapping: Record<string, string> = {
   MINOR: "No injury or damage occurs i.e. near miss/hit",
   MODERATE: "Incident occurs requiring minor first aid treatment (e.g. band aid), or damage having no effect in production",

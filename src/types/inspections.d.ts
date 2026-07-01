@@ -110,7 +110,7 @@ interface FilledSectionTable {
   order?: number;
   questions: AnsweredQuestion[];
   linkedHazards?: LinkedHazard[];
-  comments?: string;
+  notes?: string;
   tables?: FilledSectionTable[];        // template-level (no rows, but rows optional anyway)
 }
  interface LinkedInspection {

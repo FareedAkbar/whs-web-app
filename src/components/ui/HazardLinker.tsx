@@ -122,7 +122,7 @@ const HazardLinker: React.FC<HazardLinkerProps> = ({
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-xs font-semibold uppercase text-primary">
-                          {ticketNumber}
+                          Ticket# {ticketNumber}
                         </p>
                         <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
                           {item.report.title}
