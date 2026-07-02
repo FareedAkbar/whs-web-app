@@ -48,7 +48,6 @@ export default function IncidentsList() {
       "bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-50 text-yellow-600",
     COMPLETED:
       "bg-green-100 dark:bg-green-900 dark:bg-opacity-50 text-green-600",
-    CANCELLED: "bg-red-100 dark:bg-red-900 dark:bg-opacity-50 text-red-600",
     ASSIGNED:
       "bg-purple-100 dark:bg-purple-900 dark:bg-opacity-50 text-purple-600",
   };
@@ -383,14 +382,12 @@ export default function IncidentsList() {
 
     <div>
       <h2
-        className="font-semibold capitalize truncate"
+        className="font-semibold capitalize break-words"
         style={{
           color: severityMapping[item?.report?.priority] ?? "#000",
         }}
       >
-        {item.report.title.length > 25
-          ? `${item.report.title.slice(0, 25)}...`
-          : item.report.title}
+        { item.report.title}
       </h2>
 
       <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -405,7 +402,7 @@ export default function IncidentsList() {
     <span
       className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.report?.status as keyof typeof statusMapping]}`}
     >
-      {item.report?.status.replace("_", " ")}
+                {item.report.status=="ASSIGNED"&& item.incidentAssignee?.assignType=="SELF_ASSIGNED"?"PICKED":item.report?.status.replaceAll("_", " ")}
     </span>
     <span
       className="rounded px-2.5 py-0.5 text-xs font-semibold text-white"

@@ -112,12 +112,18 @@ if (
     path: "/dashboard/inspections",
   });
 }
-    navItems.push(
-      {
+if (
+  
+  role === "STAFF"
+){
+  navItems.push({
         name: "Gallery",
         icon: <IconPhoto size={20} />,
         path: "/dashboard/gallery",
-      },
+      },);
+}
+    navItems.push(
+      
      
       {
         name: "Profile",

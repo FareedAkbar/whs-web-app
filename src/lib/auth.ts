@@ -21,6 +21,8 @@ const ROLES = {
     "assign:inspections",
     "send:reminders",
     "view:filled-inspections",
+    "create:user",
+    "filter:users"
   ],
   WORKER: [
     "view:incidents",
@@ -60,7 +62,6 @@ const ROLES = {
     "update:inspections",
     "view:inspections",
     "view:filled-inspections",
-    "create:incidents",
     "view:hazards",
     "submit:inspection",
     "fill:inspections",

@@ -20,6 +20,7 @@ import { Comment, IncidentMedia } from "@/types/report";
 import Image from "next/image";
 import { statusMapping } from "@/utils/statusColors";
 import LogsSection from "@/components/ui/LogsSection";
+import HazardForm from "../../incident-form/page";
 
 
 // Add this component above HazardDetailScreen
@@ -339,14 +340,20 @@ const comments = isSelectingSelf
       <div className="rounded-lg border bg-white p-6 shadow-md dark:border-gray-500 dark:bg-gray-900 dark:text-white dark:shadow-gray-700">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-row items-center gap-4">
-            <h2
-              className="text-xl font-semibold capitalize"
-              style={{
-                color: severityMapping[report.priority] ?? "black",
-              }}
-            >Ticket#{hazard.hazard?.ticket_number} - {" "}
-              {report.title}
-            </h2>
+           <div>
+                
+               <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
+                Ticket#{hazard.hazard?.ticket_number}</span> 
+
+              <h2
+                className="text-xl font-semibold capitalize"
+                style={{
+                  color: severityMapping[report.priority] ?? "black",
+                }}
+              >     
+                {report.title}
+              </h2>
+              </div>
 
             <span
               className={`rounded-full px-3 py-1 text-xs ${
@@ -355,7 +362,7 @@ const comments = isSelectingSelf
                 ] ?? "bg-gray-100 text-gray-700"
               }`}
             >
-              {report?.status.replaceAll("_", " ")}
+                {report.status=="ASSIGNED"&& assignee?.assignType=="SELF_ASSIGNED"?"PICKED":report?.status.replaceAll("_", " ")}
             </span>
           </div>
 
@@ -538,38 +545,48 @@ const comments = isSelectingSelf
                 {hazard.links.map((link) => (
                   <div
                     key={link.linkId}
-                    className="flex items-center justify-between rounded-lg shadow dark:bg-gray-700 bg-gray-50 p-4"
+                    className="rounded-lg shadow dark:bg-gray-700 bg-gray-50 p-4"
                   >
-                    <div>
-                      <p className="font-medium">
-                        {link.reportTitle}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Type: {link.linkType}
-                      </p>
-                      {link.reportDescription && (
-                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                          {link.reportDescription}
-                        </p>
-                      )}
-                      {link.linkDescription && (
-                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                          {link.linkDescription}
-                        </p>
-                      )}
-
+                    {/* Top row: ticket + status */}
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
+                        Ticket#{link.ticket_number}
+                      </span>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs whitespace-nowrap ${
+                          statusMapping[link.reportStatus as keyof typeof statusMapping] ?? "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {link.reportStatus.replaceAll("_", " ")}
+                      </span>
                     </div>
-          {hasPermission(user?.role!, "view:incidents") && (
-                    <Button
-                      variant="primary"
-                      onClick={() =>
-                        router.push(
-                          `/dashboard/incidents/${link.reportId}?`
-                        )
-                      }
-                      title="View Incident"
-                    />
-                  )}
+
+                    {/* Content */}
+                    <p className="font-medium">Title: {link.reportTitle}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Type: {link.linkType}
+                    </p>
+                    {link.reportDescription && (
+                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        Description: {link.reportDescription}
+                      </p>
+                    )}
+                    {link.linkDescription && (
+                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        Detailed Description: {link.linkDescription}
+                      </p>
+                    )}
+
+                    {/* View button */}
+                    {hasPermission(user?.role!, "view:hazards") && (
+                      <div className="mt-3 flex justify-end">
+                        <Button
+                          variant="primary"
+                          onClick={() => router.push(`/dashboard/hazards/${link.reportId}`)}
+                          title="View Hazard"
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -593,18 +610,31 @@ const comments = isSelectingSelf
             {modalMode == "assign-officer" && (
               <ModalBody className="max-w-2xl p-4">
                 <div className="mt-4">
-                  <Select
-                    label="Assign Officer"
-                    className="mt-2 w-full rounded border p-2"
-                    onChange={(e) => setSelectedOfficer(e.target.value)}
-                    value={selectedOfficer}
-                    options={
-                      officers?.data?.map((o: User) => ({
-                        value: o.id,
-                        label: `${o.name} (${o.email.replaceAll("_", " ")})`,
-                      })) ?? []
-                    }
-                  />
+                  <div className="max-h-64 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-600">
+                    {(officers?.data ?? []).map((o: User) => (
+                      <button
+                        key={o.id}
+                        type="button"
+                        onClick={() => setSelectedOfficer(o.id)}
+                        className={`flex w-full items-center justify-between gap-3 border-b px-4 py-3 text-left last:border-0 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50 ${
+                          selectedOfficer === o.id ? "bg-primary/40" : ""
+                        }`}
+                      >
+                        {/* Left: name + email */}
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            {o.name}
+                          </p>
+                          <p className="text-xs text-red-500">{o.email}</p>
+                        </div>
+
+                        {/* Right: role */}
+                        <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                          {o.role.replaceAll("_", " ")}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                   <div className="mt-4 flex justify-end">
                     <Button
                       title="Confirm"
@@ -619,36 +649,55 @@ const comments = isSelectingSelf
           {modalMode == "reassign-officer" && (
   <ModalBody className="max-w-2xl p-4">
     <div className="mt-4">
-      <Select
-        label="Reassign Officer"
-        className="mt-2 w-full rounded border p-2"
-        onChange={(e) => setSelectedOfficer(e.target.value)}
-        value={selectedOfficer}
-        options={
-          (
-            officers?.data
-              ?.filter(
-                (o: User) =>
-                  o.id !== hazard?.incidentAssignee?.id &&
-                  o.id !== user?.id
-              )
-              .map((o: User) => ({
-                value: o.id,
-                label: o.name,
-              }))
-              .concat(
-                user?.id
-                  ? [
-                      {
-                        value: user.id,
-                        label: `${user.name} (You)`,
-                      },
-                    ]
-                  : []
-              ) ?? []
-          )
-        }
-      />
+       <div className="max-h-64 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-600">
+                    {(
+                      (officers?.data
+                        ?.filter(
+                          (o: User) =>
+                            o.id !== hazard?.incidentAssignee?.id &&
+                            o.id !== user?.id,
+                        )
+                        .map((o: User) => ({
+                          value: o.id,
+                          name: o.name,
+                          email: o.email,
+                          role: o.role.replaceAll("_", " "),
+                          isYou: false,
+                        })) ?? []
+                      ).concat(
+                        user?.id
+                          ? [{ value: user.id, name: user.name??"", email: user.email ?? "", role: "You", isYou: true }]
+                          : [],
+                      )
+                    ).map((o) => (
+                      <button
+                        key={o.value}
+                        type="button"
+                        onClick={() => setSelectedOfficer(o.value)}
+                        className={`flex w-full items-center justify-between gap-3 border-b px-4 py-3 text-left last:border-0 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50 ${
+                          selectedOfficer === o.value
+                            ? "bg-primary/40"
+                            : ""
+                        }`}
+                      >
+                        {/* Left: name + email */}
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            {o.name}
+                            {o.isYou && (
+                              <span className="ml-1 text-xs text-primary">(You)</span>
+                            )}
+                          </p>
+                          <p className="text-xs text-red-500">{o.email}</p>
+                        </div>
+
+                        {/* Right: role */}
+                        <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                          {o.role}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
 
       <div className="mt-4 flex justify-end">
         <Button

@@ -369,14 +369,12 @@ export default function HazardsList() {
 
     <div>
       <h2
-        className="font-semibold capitalize truncate"
+        className="font-semibold capitalize break-words"
         style={{
           color: severityMapping[item?.report?.priority] ?? "#000",
         }}
       >
-        {item.report.title.length > 25
-          ? `${item.report.title.slice(0, 25)}...`
-          : item.report.title}
+        {item.report.title}
       </h2>
 
       <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -391,7 +389,7 @@ export default function HazardsList() {
     <span
       className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.report?.status as keyof typeof statusMapping]}`}
     >
-      {item.report?.status.replace("_", " ")}
+                {item.report.status=="ASSIGNED"&& item.incidentAssignee?.assignType=="SELF_ASSIGNED"?"PICKED":item.report?.status.replaceAll("_", " ")}
     </span>
     <span
       className="rounded px-2.5 py-0.5 text-xs font-semibold text-white"

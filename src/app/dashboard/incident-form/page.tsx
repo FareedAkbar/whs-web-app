@@ -352,9 +352,9 @@ const HazardForm = () => {
                                 >
                                   <div className="flex items-start justify-between gap-3">
                                     <div>
-                                      <p className="text-xs font-semibold uppercase text-primary">
-                                        #{ticketNumber}
-                                      </p>
+                                      <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
+                                        Ticket#{ticketNumber}
+                                      </span>
                                       <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
                                         {item.report.title}
                                       </p>
