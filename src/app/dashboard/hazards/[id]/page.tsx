@@ -284,13 +284,18 @@ const assignedToEmail = isSelectingSelf
   ? user?.email
   : officers?.data?.find((o: User) => o.id === selectedOfficer)?.email;
   const isReassign = modalMode === "reassign-officer";
+const comments = isSelectingSelf
+    ? `Hazard is picked by ${user?.name} (${user?.email})`
+    : isReassign
+      ? `Hazard reassigned to ${assignedToName} (${assignedToEmail}) by ${user?.name} (${user?.email})`
+      : `Hazard assigned to ${assignedToName} (${assignedToEmail}) by ${user?.name} (${user?.email})`;
 
   assignIncidentToOfficer.mutate(
     {
       assignedTo: selectedOfficer,
       hazardId: hazard.hazard?.id ?? "",
       reportId: hazard.report.id,
-      comments:`Hazard ${isReassign ? "reassigned" : "assigned"} to ${assignedToName} (${assignedToEmail}) by ${user?.name} (${user?.email})`
+      comments    
     },
     {
       onSuccess: () => {

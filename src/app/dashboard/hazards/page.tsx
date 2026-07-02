@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import { hasPermission } from "@/lib/auth";
 import { IconAlertCircle } from "@tabler/icons-react";
 import { statusMapping } from "@/utils/statusColors";
+import { toast } from "react-toastify";
 
 export default function HazardsList() {
   const { data: hazards, isLoading } = api.incidents.getHazards.useQuery();
@@ -31,6 +32,7 @@ export default function HazardsList() {
   const [status, setStatus] = useState<string[]>([]);
   const [assignedTab, setAssignedTab] = useState("All");
   const session = useSession();
+  const [pickedByMe, setPickedByMe] = useState(false);
 
   const user = session?.data?.user;
   const handleAssignedTabChange = (tab: string) => {
@@ -62,6 +64,8 @@ export default function HazardsList() {
     setIsFilterOpen(false);
     setSearchTerm("");
     setFilteredHazards(hazards?.data ?? []);
+    setPickedByMe(false);
+    setAssignedTab("All");    
   };
   const handleFilter = () => {
     if (!hazards?.data) return;
@@ -90,6 +94,7 @@ export default function HazardsList() {
           .includes(searchTerm.toLowerCase()) ||
         item.report.title.toLowerCase().includes(searchTerm.toLowerCase());
       console.log("user?.id", user?.id);
+      const matchesPickedByMe = !pickedByMe || item.incidentAssignee?.id === user?.id;
 
       // Assigned tab logic
       const matchesTab =
@@ -104,7 +109,8 @@ export default function HazardsList() {
         matchesPriority &&
         matchesStatus &&
         matchesSearch &&
-        matchesTab
+        matchesTab &&
+        matchesPickedByMe
       );
     });
 
@@ -155,13 +161,27 @@ export default function HazardsList() {
                   <input
                     type="date"
                     value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (dateTo && val > dateTo) {
+                        toast.error("Start date cannot be after the end date.");
+                        return;
+                      }
+                      setDateFrom(val);
+                    }}
                     className="w-1/2 rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
                   />
                   <input
                     type="date"
                     value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (dateFrom && val < dateFrom) {
+                        toast.error("End date cannot be before the start date.");
+                        return;
+                      }
+                      setDateTo(val);
+                    }}
                     className="w-1/2 rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
                   />
                 </div>
@@ -217,7 +237,21 @@ export default function HazardsList() {
                   ))}
                 </div>
               </div>
-
+              {/* Picked by Me */}
+              <div>
+                <label className="text-sm font-medium">Assignment</label>
+                <div className="mt-1">
+                  <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={pickedByMe}
+                      onChange={(e) => setPickedByMe(e.target.checked)}
+                      className="accent-primary"
+                    />
+                    Picked / Assigned to me
+                  </label>
+                </div>
+              </div>
               {/* Assigned Person */}
               {/* {session.data?.user?.role == "ADMIN" && (
               <div>
@@ -316,62 +350,59 @@ export default function HazardsList() {
                 router.push(`/dashboard/hazards/${item.report.id}`)
               }
             >
-              <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
-                 <div className="flex gap-3">
-                  <div>
-                    <span className=" font-bold text-gray-500 block dark:text-gray-400 text-center">
-                      Ticket#{item.hazard?.ticket_number ?? item.report.ticketNumber ?? "No Ticket Number"}
-                    </span>
-                  <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
-                    <AlertTriangle
-                      size={40}
-                      color={`${severityMapping[item?.report?.priority] ?? "black"}`}
-                    />
-                  </div>
-                  </div>
-                  {/* <img
-                    src={item.media[0]?.url ?? "https://placehold.co/150x150"}
-                    alt="Incident"
-                    className="h-16 w-16 rounded-full object-cover shadow"
-                    width={64}
-                    height={64}
-                  /> */}
+             <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
+  <div className="flex gap-3">
+    <div className="flex flex-col items-center gap-1">
+      {/* Ticket badge */}
+      <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
+        Ticket#{item.hazard?.ticket_number ?? item.report.ticketNumber ?? "N/A"}
+      </span>
 
-                  <div>
-                    
-                    <h2
-                      className="font-semibold capitalize"
-                      style={{
-                        color:
-                          severityMapping[item?.report?.priority] ?? "#000",
-                      }}
-                    >
-                      {item.report.title}
-                    </h2>
+      {/* Triangle box — fixed size, unaffected by badge */}
+      <div className="h-fit w-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
+        <AlertTriangle
+          size={40}
+          color={`${severityMapping[item?.report?.priority] ?? "black"}`}
+        />
+      </div>
+    </div>
 
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {item.hazard?.hazardDescription?.length! > 100
-                        ? item.hazard?.hazardDescription?.slice(0, 100) + "..."
-                        : item.hazard?.hazardDescription}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end justify-end gap-2">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.report?.status as keyof typeof statusMapping]}`}
-                  >
-                    {item.report?.status.replace("_", " ")}
-                  </span>
-                  <span
-                    className="rounded px-2.5 py-0.5 text-xs font-semibold text-white"
-                    style={{
-                      backgroundColor: severityMapping[item.report.priority] || "#ccc"
-                    }}
-                  >
-                    {severityDisplayMapping[item.report.priority] || item.report.priority}
-                  </span>
-                </div>
-              </div>
+    <div>
+      <h2
+        className="font-semibold capitalize truncate"
+        style={{
+          color: severityMapping[item?.report?.priority] ?? "#000",
+        }}
+      >
+        {item.report.title.length > 25
+          ? `${item.report.title.slice(0, 25)}...`
+          : item.report.title}
+      </h2>
+
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        {item.report.description.length > 100
+          ? item.report.description.slice(0, 100) + "..."
+          : item.report.description}
+      </p>
+    </div>
+  </div>
+
+  <div className="flex flex-col items-end justify-end gap-2">
+    <span
+      className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.report?.status as keyof typeof statusMapping]}`}
+    >
+      {item.report?.status.replace("_", " ")}
+    </span>
+    <span
+      className="rounded px-2.5 py-0.5 text-xs font-semibold text-white"
+      style={{
+        backgroundColor: severityMapping[item.report.priority] || "#ccc",
+      }}
+    >
+      {severityDisplayMapping[item.report.priority] || item.report.priority}
+    </span>
+  </div>
+</div>
 
               {/* {item.incidentAssignee && item.incidentAssignee.length > 0 ? (
                 <div className="mt-3 flex flex-col gap-2 border-t pt-3">

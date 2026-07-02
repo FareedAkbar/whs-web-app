@@ -33,7 +33,9 @@ const LogsSection: FC<{ logs: IncidentLog[] }> = ({ logs }) => {
       </h3>
 
       <div className="flex flex-col gap-3">
-        {logs.map((log) => (
+        {[...logs]
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .map((log) => (
           <div
             key={log.id}
             className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"

@@ -128,6 +128,7 @@ const openReminderModal = (inspection: Inspection) => {
     subject: "Inspection reminder",
     subtitle: "",
   });
+  setSelectedReminderUsers([]); // ← reset so stale indices don't show
   setModal({ type: "reminder", data: inspection });
   setOpen(true);
 };
@@ -160,22 +161,23 @@ const openReminderModal = (inspection: Inspection) => {
   const session = useSession();
   const user = session.data?.user;
 
+const reminderRecipients = useMemo(() => {
+  if (modal.type !== "reminder" || !inspectionDetail?.data?.inspections) return [];
+  return inspectionDetail.data.inspections
+    .filter((i) => i.status === "INITIATED")
+    .map((i) => ({
+      name: i.assignedTo.name ?? "",
+      email: i.assignedTo.email ?? "",
+      expiry_date: (i.dueDate ?? "").split("T")[0] ?? "",
+    }));
+}, [modal.type, modal.data?.id, inspectionDetail?.data?.inspections]);
+
+// Auto-select all when recipients load
 useEffect(() => {
-  if (modal.type !== "reminder" || !inspectionDetail?.data?.inspections) return;
-
-  const initiatedUsers: { name: string; email: string; expiry_date: string }[] =
-    inspectionDetail.data.inspections
-      .filter((i) => i.status === "INITIATED")
-      .map((i) => ({
-        name: i.assignedTo.name ?? "",
-        email: i.assignedTo.email ?? "",
-        expiry_date: (i.dueDate ?? "").split("T")[0] ?? "",
-      }));
-
-  setReminderForm((prev) => ({ ...prev, users: initiatedUsers }));
-  setSelectedReminderUsers(initiatedUsers.map((_, i) => i)); // all selected by default
-}, [modal.type, inspectionDetail?.data?.inspections]);
-
+  if (reminderRecipients.length > 0) {
+    setSelectedReminderUsers(reminderRecipients.map((_, i) => i));
+  }
+}, [reminderRecipients]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState("");
@@ -227,18 +229,18 @@ useEffect(() => {
     }
   };
 
-  const filteredUsers = useMemo(
-    () =>
-      filterByRole(verifiedUsers?.data ?? [], user?.role!).filter(
-        (u) =>
-          u.name?.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          !inspectionDetail?.data?.inspections.some(
-            (i) => i.assignedTo?.id === u.id,
-          ),
-      ),
-    [searchTerm, verifiedUsers, inspectionDetail],
-  );
+const filteredUsers = useMemo(() => {
+  if (modal.type !== "assign") return [];
 
+  return filterByRole(verifiedUsers?.data ?? [], user?.role!)
+    .filter((u) => {
+      const matchesSearch = u.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      const notAlreadyAssigned = !inspectionDetail?.data?.inspections.some(
+        (i) => i.assignedTo?.id === u.id,
+      );
+      return matchesSearch && notAlreadyAssigned && u.role === "STAFF";
+    });
+}, [searchTerm, verifiedUsers, inspectionDetail, modal.type]);
   // ── Area helpers ──────────────────────────────────────────────────────────
 
   const selectedAreaData = AREA_DATA.find(
@@ -615,11 +617,12 @@ return {
                     <Button
                       title="Assign Inspection"
                       icon={<UserPlus size={16} />}
-                      onClick={() => {
-                        setSearchTerm("");
-                        setModal({ type: "assign", data: inspection });
-                        setOpen(true);
-                      }}
+                     onClick={() => {
+                      setSearchTerm("");
+                      setSelectedUser(null);
+                      setModal({ type: "assign", data: inspection });
+                      setOpen(true);
+                    }}
                     />
                   )}
               </div>
@@ -1166,14 +1169,13 @@ return {
       )}
 
       {/* ── Reminder Modal ── */}
-{/* ── Reminder Modal ── */}
       {modal.type === "reminder" && modal.data && (
         <ModalBody className="mx-3 w-full">
           <ModalContent className="w-full">
-            <h2 className="mb-1 text-xl font-bold capitalize dark:text-white">
+            <h2 className="mb-1  capitalize dark:text-white">
               Send Reminder Mail
             </h2>
-            <p className="mb-5 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mb-5 text-xl dark:text-white uppercase">
               {modal.data.title}
             </p>
 
@@ -1186,51 +1188,50 @@ return {
               <div className="space-y-5">
 
                 {/* Recipients — INITIATED assignees */}
-          <div>
-            <Label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Recipients{" "}
-              <span className="text-xs font-normal text-gray-400">
-                (only pending assignees)
-              </span>
-            </Label>
+                <div>
+                  <Label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Recipients{" "}
+                    <span className="text-xs font-normal text-gray-400">
+                      (only pending assignees)
+                    </span>
+                  </Label>
 
-          {reminderForm.users.length === 0 ? (
-            <p className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-              No pending assignees found for this inspection.
-            </p>
-          ) : (
-            <div className="space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
-          {reminderForm.users.map((u, idx) => (
-            <label
-              key={idx}
-              className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <input
-                type="checkbox"
-                checked={selectedReminderUsers.includes(idx)}
-                onChange={(e) => {
-                  setSelectedReminderUsers((prev) =>
-                    e.target.checked
-                      ? [...prev, idx]
-                      : prev.filter((i) => i !== idx),
-                  );
-                }}
-                className="h-4 w-4 accent-primary"
-              />
-              <div className="flex flex-1 flex-wrap gap-x-6 gap-y-0.5 text-sm">
-                <span className="font-medium text-gray-800 dark:text-gray-100">{u.name}</span>
-                <span className="text-gray-500 dark:text-gray-400">{u.email}</span>
-                <span className="text-primary">Due: {u.expiry_date}</span>
+                {/* Recipients */}
+                {reminderRecipients.length === 0 ? (
+                  <p className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                    No pending assignees found for this inspection.
+                  </p>
+                ) : (
+                  <div className="space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+                    {reminderRecipients.map((u, idx) => (
+                      <label
+                        key={idx}
+                        className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedReminderUsers.includes(idx)}
+                          onChange={(e) => {
+                            setSelectedReminderUsers((prev) =>
+                              e.target.checked
+                                ? [...prev, idx]
+                                : prev.filter((i) => i !== idx),
+                            );
+                          }}
+                          className="h-4 w-4 accent-primary"
+                        />
+                        <div className="flex flex-1 flex-wrap gap-x-6 gap-y-0.5 text-sm">
+                          <span className="font-medium text-gray-800 dark:text-gray-100">{u.name}</span>
+                          <span className="text-gray-500 dark:text-gray-400">{u.email}</span>
+                          <span className="text-primary">Due: {u.expiry_date}</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
-            </label>
-          ))}
-            </div>
-          )}
-        </div>
 
                 {/* Shared fields */}
-                
-
                 <div className="flex flex-col gap-4 sm:flex-row">
                   <Input
                     label="Email Subject"
@@ -1289,18 +1290,20 @@ return {
                 title="Send Reminder"
                 icon={<Bell size={15} />}
                 loading={sendReminderMutation.isPending}
-               disabled={
-                  selectedReminderUsers.length === 0 ||
-                  !reminderForm.title ||
-                  sendReminderMutation.isPending
-                }
-                onClick={() =>
-                  sendReminderMutation.mutate({
-                    ...reminderForm,
-                        title: reminderForm.title ?? "",
-                    users: reminderForm.users.filter((_, i) => selectedReminderUsers.includes(i)),
-                  })
-                }              
+             onClick={() =>
+                sendReminderMutation.mutate({
+                  ...reminderForm,
+                  title: reminderForm.title ?? "",
+                  users: reminderRecipients.filter((_, i) => selectedReminderUsers.includes(i)),
+                })
+              }
+
+              // And the disabled check:
+              disabled={
+                selectedReminderUsers.length === 0 ||
+                !reminderForm.title ||
+                sendReminderMutation.isPending
+              }           
                 />
             </div>
           </ModalContent>
