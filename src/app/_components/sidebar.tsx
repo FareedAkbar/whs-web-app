@@ -100,18 +100,25 @@ const Sidebar = ({
         path: "/dashboard/hazards",
       });
     }
-
+if (
+  role === "ADMIN" ||
+  role === "P_AND_C_MANAGER" ||
+  role === "FACILITY_MANAGER" ||
+  role === "STAFF"
+) {
+  navItems.push({
+    name: "Inspections",
+    icon: <IconChecklist size={20} />,
+    path: "/dashboard/inspections",
+  });
+}
     navItems.push(
       {
         name: "Gallery",
         icon: <IconPhoto size={20} />,
         path: "/dashboard/gallery",
       },
-      {
-        name: "Inspections",
-        icon: <IconChecklist size={20} />,
-        path: "/dashboard/inspections",
-      },
+     
       {
         name: "Profile",
         icon: <IconUserCircle size={20} />,
