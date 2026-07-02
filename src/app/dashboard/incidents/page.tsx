@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { ReportResponse } from "@/types/report";
 import { IconAlertCircle } from "@tabler/icons-react";
 import { hasPermission } from "@/lib/auth";
+import { toast } from "react-toastify";
 
 export default function IncidentsList() {
   const { data: incidents, isLoading } = api.incidents.getIncidents.useQuery();
@@ -37,6 +38,7 @@ export default function IncidentsList() {
   const session = useSession();
   const [assignedTab, setAssignedTab] = useState("All");
   const user = session?.data?.user;
+  const [pickedByMe, setPickedByMe] = useState(false);
   const handleAssignedTabChange = (tab: string) => {
     setAssignedTab(tab);
   };
@@ -77,6 +79,7 @@ export default function IncidentsList() {
     setSearchTerm("");
     setFilteredIncidents(incidents?.data ?? []);
     setAssignedTab("All");
+    setPickedByMe(false);
   };
   const handleFilter = () => {
     if (!incidents?.data) return;
@@ -112,13 +115,15 @@ export default function IncidentsList() {
           : assignedTab === "Assigned To Me"
             ? item.incidentAssignee?.id === user?.id
             : !(item.incidentAssignee?.id === user?.id);
+      const matchesPickedByMe = !pickedByMe || item.incidentAssignee?.id === user?.id;
 
       return (
         matchesDate &&
         matchesPriority &&
         matchesStatus &&
         matchesSearch &&
-        matchesTab
+        matchesTab&&
+        matchesPickedByMe
       );
     });
 
@@ -163,23 +168,37 @@ export default function IncidentsList() {
             <div className="flex flex-col gap-3 text-sm text-gray-700 dark:text-gray-200">
               <p className="border-b pb-2 font-bold">Filter</p>
               {/* Date Range */}
-              <div>
-                <label className="text-sm font-medium">Date Range</label>
-                <div className="mt-1 flex gap-2">
-                  <input
-                    type="date"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                    className="w-1/2 rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
-                  />
-                  <input
-                    type="date"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                    className="w-1/2 rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
-                  />
-                </div>
+            <div>
+              <label className="text-sm font-medium">Date Range</label>
+              <div className="mt-1 flex gap-2">
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (dateTo && val > dateTo) {
+                      toast.error("Start date cannot be after the end date.");
+                      return;
+                    }
+                    setDateFrom(val);
+                  }}
+                  className="w-1/2 rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
+                />
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (dateFrom && val < dateFrom) {
+                      toast.error("End date cannot be before the start date.");
+                      return;
+                    }
+                    setDateTo(val);
+                  }}
+                  className="w-1/2 rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
+                />
               </div>
+            </div>
 
               {/* Priority Checkboxes */}
               <div>
@@ -231,7 +250,21 @@ export default function IncidentsList() {
                   ))}
                 </div>
               </div>
-
+              {/* Picked by Me */}
+              <div>
+                <label className="text-sm font-medium">Assignment</label>
+                <div className="mt-1">
+                  <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={pickedByMe}
+                      onChange={(e) => setPickedByMe(e.target.checked)}
+                      className="accent-primary"
+                    />
+                    Picked / Assigned to me
+                  </label>
+                </div>
+              </div>                                  
               {/* Assigned Person */}
               {/* {session.data?.user?.role == "ADMIN" && (
               <div>
@@ -331,64 +364,59 @@ export default function IncidentsList() {
                 router.push(`/dashboard/incidents/${item.report.id}`)
               }
             >
-              <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
-                <div className="flex gap-3">
-                  <div>
-                    <span className=" font-bold text-gray-500 block dark:text-gray-400 text-center">
-                      Ticket#{item.incident?.ticket_number ?? item.report.ticketNumber ?? "No Ticket Number"}
-                    </span>
-                  <div className="h-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
-                    <AlertTriangle
-                      size={40}
-                      color={`${severityMapping[item?.report?.priority] ?? "black"}`}
-                    />
-                  </div>
-                  </div>
-                  {/* <img
-                    src={item.media[0]?.url ?? "https://placehold.co/150x150"}
-                    alt="Incident"
-                    className="h-16 w-16 rounded-full object-cover shadow"
-                    width={64}
-                    height={64}
-                  /> */}
+             <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
+  <div className="flex gap-3">
+    <div className="flex flex-col items-center gap-1">
+      {/* Ticket badge */}
+      <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
+        Ticket#{item.incident?.ticket_number ?? item.report.ticketNumber ?? "N/A"}
+      </span>
 
-                  <div>
-                    
-                    <h2
-                      className="font-semibold capitalize truncate"
-                      style={{
-                        color:
-                          severityMapping[item?.report?.priority] ?? "#000",
-                      }}
-                    >
-                      {item.report.title.length > 25
-                        ? `${item.report.title.slice(0, 25)}...`
-                        : item.report.title}
-                    </h2>
+      {/* Triangle box — fixed size, unaffected by badge */}
+      <div className="h-fit w-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
+        <AlertTriangle
+          size={40}
+          color={`${severityMapping[item?.report?.priority] ?? "black"}`}
+        />
+      </div>
+    </div>
 
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {item.report.description.length > 100
-                        ? item.report.description.slice(0, 100) + "..."
-                        : item.report.description}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end justify-end gap-2">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.report?.status as keyof typeof statusMapping]}`}
-                  >
-                    {item.report?.status.replace("_", " ")}
-                  </span>
-                  <span
-                    className="rounded px-2.5 py-0.5 text-xs font-semibold text-white"
-                    style={{
-                      backgroundColor: severityMapping[item.report.priority] || "#ccc"
-                    }}
-                  >
-                    {severityDisplayMapping[item.report.priority] || item.report.priority}
-                  </span>
-                </div>
-              </div>
+    <div>
+      <h2
+        className="font-semibold capitalize truncate"
+        style={{
+          color: severityMapping[item?.report?.priority] ?? "#000",
+        }}
+      >
+        {item.report.title.length > 25
+          ? `${item.report.title.slice(0, 25)}...`
+          : item.report.title}
+      </h2>
+
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        {item.report.description.length > 100
+          ? item.report.description.slice(0, 100) + "..."
+          : item.report.description}
+      </p>
+    </div>
+  </div>
+
+  <div className="flex flex-col items-end justify-end gap-2">
+    <span
+      className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.report?.status as keyof typeof statusMapping]}`}
+    >
+      {item.report?.status.replace("_", " ")}
+    </span>
+    <span
+      className="rounded px-2.5 py-0.5 text-xs font-semibold text-white"
+      style={{
+        backgroundColor: severityMapping[item.report.priority] || "#ccc",
+      }}
+    >
+      {severityDisplayMapping[item.report.priority] || item.report.priority}
+    </span>
+  </div>
+</div>
 
               {/* {item.incidentAssignee && item.incidentAssignee.length > 0 ? (
                 <div className="mt-3 flex flex-col gap-2 border-t pt-3">

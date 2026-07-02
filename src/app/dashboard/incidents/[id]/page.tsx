@@ -201,13 +201,18 @@ const assignedToEmail = isSelectingSelf
   ? user?.email
   : officers?.data?.find((o: User) => o.id === selectedOfficer)?.email;
   const isReassign = modalMode === "reassign-officer";
+ const comments = isSelectingSelf
+    ? `Incident is picked by ${user?.name} (${user?.email})`
+    : isReassign
+      ? `Incident reassigned to ${assignedToName} (${assignedToEmail}) by ${user?.name} (${user?.email})`
+      : `Incident assigned to ${assignedToName} (${assignedToEmail}) by ${user?.name} (${user?.email})`;
 
   assignIncidentToOfficer.mutate(
     {
       assignedTo: selectedOfficer,
       incidentId: incident.incident?.id ?? "",
       reportId: incident.report.id,
-      comments:`incident ${isReassign ? "reassigned" : "assigned"} to ${assignedToName} (${assignedToEmail}) by ${user?.name} (${user?.email})`
+      comments
 
     },
     {
@@ -409,55 +414,54 @@ const assignedToEmail = isSelectingSelf
           </div>
 
           {/* Images */}
-         {/* Images */}
-{incident.media?.length > 0 ? (
-  <div className="mt-6">
-    <h3 className="font-semibold text-gray-800 dark:text-gray-200">
-      Incident Gallery
-    </h3>
+          {incident.media?.length > 0 ? (
+            <div className="mt-6">
+              <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                Incident Gallery
+              </h3>
 
-    <div className="mt-2 flex flex-wrap gap-2">
-      {incident.media.map(
-        (
-          image: { id?: string; url?: string; status?: string },
-          index: number,
-        ) => (
-          <div
-            key={image.id ?? index}
-            className="relative cursor-pointer rounded-lg"
-          >
-            <Image
-              src={image.url ?? "/images/n-img.jpg"}
-              alt={`Incident Image ${index + 1}`}
-              className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
-              onClick={() =>
-                image.url && window.open(image.url, "_blank")
-              }
-              width={112}
-              height={112}
-            />
-            
-            {/* <button
-              onClick={() =>
-                handleDownload(
-                  image.url,
-                  `hazard_${index}.jpg`,
-                )
-              }
-              className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
-            >
-              <DownloadIcon className="h-3 w-3" color="red" />
-            </button> */}
-          </div>
-        ),
-      )}
-    </div>
-  </div>
-) : (
-  <p className="mt-6 text-sm text-gray-500">
-    No images available for this incident.
-  </p>
-)}
+              <div className="mt-2 flex flex-wrap gap-2">
+                {incident.media.map(
+                  (
+                    image: { id?: string; url?: string; status?: string },
+                    index: number,
+                  ) => (
+                    <div
+                      key={image.id ?? index}
+                      className="relative cursor-pointer rounded-lg"
+                    >
+                      <Image
+                        src={image.url ?? "/images/n-img.jpg"}
+                        alt={`Incident Image ${index + 1}`}
+                        className="h-20 w-20 rounded-lg object-cover shadow-md transition-transform duration-200 hover:scale-105 sm:h-28 sm:w-28"
+                        onClick={() =>
+                          image.url && window.open(image.url, "_blank")
+                        }
+                        width={112}
+                        height={112}
+                      />
+                      
+                      {/* <button
+                        onClick={() =>
+                          handleDownload(
+                            image.url,
+                            `hazard_${index}.jpg`,
+                          )
+                        }
+                        className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-xs shadow"
+                      >
+                        <DownloadIcon className="h-3 w-3" color="red" />
+                      </button> */}
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="mt-6 text-sm text-gray-500">
+              No images available for this incident.
+            </p>
+          )}
 
           {/* Medical Details */}
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -492,17 +496,17 @@ const assignedToEmail = isSelectingSelf
                   {incidentMeta?.treatmentType?.replaceAll("_", " ") ?? "N/A"}
                 </span>
               </div>
-{incidentMeta?.treatmentDescription && (
+              {incidentMeta?.treatmentDescription!="" && (
 
-              <div className="flex gap-2">
-                <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Treatment Description:
-                </span>
-                <span className="font-semibold text-gray-800 dark:text-gray-200">
-                  {incidentMeta?.treatmentDescription }
-                </span>
-              </div>
-)}
+                            <div className="flex gap-2">
+                              <span className="font-medium text-gray-600 dark:text-gray-400">
+                                Treatment Description:
+                              </span>
+                              <span className="font-semibold text-gray-800 dark:text-gray-200">
+                                {incidentMeta?.treatmentDescription }
+                              </span>
+                            </div>
+              )}
 
               <div className="flex gap-2">
                 <span className="font-medium text-gray-600 dark:text-gray-400">
@@ -584,21 +588,39 @@ const assignedToEmail = isSelectingSelf
           <div className="mt-4 flex items-center gap-4">
             {/* Pick Incident (for P_AND_C_OFFICER or any user who can self pick) */}
 
-            {modalMode == "assign-officer" && (
+            {modalMode === "assign-officer" && (
               <ModalBody className="max-w-2xl p-4">
                 <div className="mt-4">
-                  <Select
-                    label="Assign Officer"
-                    className="mt-2 w-full rounded border p-2"
-                    onChange={(e) => setSelectedOfficer(e.target.value)}
-                    value={selectedOfficer}
-                    options={
-                      officers?.data?.map((o: User) => ({
-                        value: o.id,
-                        label: o.name,
-                      })) ?? []
-                    }
-                  />
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Assign Officer
+                  </label>
+
+                  <div className="max-h-64 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-600">
+                    {(officers?.data ?? []).map((o: User) => (
+                      <button
+                        key={o.id}
+                        type="button"
+                        onClick={() => setSelectedOfficer(o.id)}
+                        className={`flex w-full items-center justify-between gap-3 border-b px-4 py-3 text-left last:border-0 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50 ${
+                          selectedOfficer === o.id ? "bg-primary/10 dark:bg-primary/20" : ""
+                        }`}
+                      >
+                        {/* Left: name + email */}
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            {o.name}
+                          </p>
+                          <p className="text-xs text-red-500">{o.email}</p>
+                        </div>
+
+                        {/* Right: role */}
+                        <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                          {o.role.replaceAll("_", " ")}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
                   <div className="mt-4 flex justify-end">
                     <Button
                       title="Confirm"
@@ -613,39 +635,63 @@ const assignedToEmail = isSelectingSelf
                 </div>
               </ModalBody>
             )}
-           {modalMode == "reassign-officer" && (
+           {modalMode === "reassign-officer" && (
               <ModalBody className="max-w-2xl p-4">
                 <div className="mt-4">
-                  <Select
-                    label="Reassign Officer"
-                    className="mt-2 w-full rounded border p-2"
-                    onChange={(e) => setSelectedOfficer(e.target.value)}
-                    value={selectedOfficer}
-                    options={
-                      (
-                        officers?.data
-                          ?.filter(
-                            (o: User) =>
-                              o.id !== incident?.incidentAssignee?.id &&
-                              o.id !== user?.id
-                          )
-                          .map((o: User) => ({
-                            value: o.id,
-                            label: `${o.name}-${o.email}(${o.role})`,
-                          }))
-                          .concat(
-                            user?.id
-                              ? [
-                                  {
-                                    value: user.id,
-                                    label: `${user.name} (You)`,
-                                  },
-                                ]
-                              : []
-                          ) ?? []
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Reassign Officer
+                  </label>
+
+                  {/* Custom dropdown list */}
+                  <div className="max-h-64 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-600">
+                    {(
+                      (officers?.data
+                        ?.filter(
+                          (o: User) =>
+                            o.id !== incident?.incidentAssignee?.id &&
+                            o.id !== user?.id,
+                        )
+                        .map((o: User) => ({
+                          value: o.id,
+                          name: o.name,
+                          email: o.email,
+                          role: o.role.replaceAll("_", " "),
+                          isYou: false,
+                        })) ?? []
+                      ).concat(
+                        user?.id
+                          ? [{ value: user.id, name: user.name??"", email: user.email ?? "", role: "You", isYou: true }]
+                          : [],
                       )
-                    }
-                  />
+                    ).map((o) => (
+                      <button
+                        key={o.value}
+                        type="button"
+                        onClick={() => setSelectedOfficer(o.value)}
+                        className={`flex w-full items-center justify-between gap-3 border-b px-4 py-3 text-left last:border-0 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50 ${
+                          selectedOfficer === o.value
+                            ? "bg-primary/10 dark:bg-primary/20"
+                            : ""
+                        }`}
+                      >
+                        {/* Left: name + email */}
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            {o.name}
+                            {o.isYou && (
+                              <span className="ml-1 text-xs text-primary">(You)</span>
+                            )}
+                          </p>
+                          <p className="text-xs text-red-500">{o.email}</p>
+                        </div>
+
+                        {/* Right: role */}
+                        <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                          {o.role}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
 
                   <div className="mt-4 flex justify-end">
                     <Button
