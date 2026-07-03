@@ -68,13 +68,7 @@ export default function IncidentDetailScreen() {
     ASSIGNED:
       "bg-purple-100 dark:bg-purple-900 dark:bg-opacity-50 text-purple-600",
   };
-  const statusOrder = [
-    "INITIATED",
-    "ASSIGNED",
-    "IN_PROGRESS",
-    "COMPLETED",
-    "CANCELLED",
-  ];
+
   const handleAcceptAndReject = async (flag: boolean) => {
     if (!incident) return;
     await incidentAcceptance.mutateAsync(

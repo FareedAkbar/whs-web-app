@@ -53,7 +53,6 @@ const DashboardCounters: React.FC = () => {
     dashboard.incidents && Object.keys(dashboard.incidents).length > 0;
   const hasHazards =
     dashboard.hazards && Object.keys(dashboard.hazards).length > 0;
-console.log("incidents",dashboard);
 
   return (
     <div className="flex flex-wrap gap-6">

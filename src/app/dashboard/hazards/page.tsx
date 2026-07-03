@@ -378,9 +378,9 @@ export default function HazardsList() {
       </h2>
 
       <p className="text-sm text-gray-600 dark:text-gray-400">
-        {item.report.description.length > 100
-          ? item.report.description.slice(0, 100) + "..."
-          : item.report.description}
+        {item.hazard?.hazardDescription.length! > 100
+          ? item.hazard?.hazardDescription.slice(0, 100) + "..."
+          : item.hazard?.hazardDescription}
       </p>
     </div>
   </div>
