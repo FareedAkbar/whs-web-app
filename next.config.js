@@ -18,7 +18,7 @@ const config = {
       },
     ],
   },
-  allowedDevOrigins: ["192.168.18.145"],
+  allowedDevOrigins: ["192.168.18.103"],
 };
 
 export default config;

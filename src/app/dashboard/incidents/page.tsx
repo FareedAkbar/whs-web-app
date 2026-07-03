@@ -146,16 +146,16 @@ export default function IncidentsList() {
     <div className="page-container">
       <div className="mb-4 flex w-full flex-col gap-2 sm:flex-row sm:items-center">
         {/* Search + Filter row */}
-        <div className="sticky top-0 z-10 flex min-w-0 flex-1 items-stretch backdrop-blur">
+         <div className="sticky top-0 z-10 flex flex-1 items-center justify-between backdrop-blur">
           <input
             type="text"
             placeholder="Search incidents..."
-            className="my-2 min-w-0 flex-1 rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="my-2 w-full rounded-l-md border border-gray-300 px-2 py-3 text-sm shadow-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <Dropdown
             button={
-              <button className="flex h-full shrink-0 flex-row items-center whitespace-nowrap border border-l-0 border-gray-300 bg-[#F9F9F9] px-3 py-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:px-4">
+              <button className="flex w-full flex-row items-center border border-gray-300 bg-[#F9F9F9] px-4 py-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                 Filters
                 <ChevronDown className="ml-2 inline" size={16} />
               </button>
@@ -312,10 +312,11 @@ export default function IncidentsList() {
               />
             </div>
           </Dropdown>
-          <div className="shrink-0 rounded-r-md bg-primary p-[15px]">
+          <div className="rounded-r-md bg-primary p-[15px]">
             <Search className="" size={16} color="white" />
           </div>
         </div>
+
 
         {/* Report button — full width on mobile, auto on sm+ */}
         {user && hasPermission(user.role, "create:incidents") && (
