@@ -94,8 +94,8 @@ function LinkedInspectionsCard({ linkedInspections }: { linkedInspections: any[]
             {/* Sections list */}
             {item.sections?.length > 0 && (
               <div>
-                <p className="mb-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                  Sections
+                <p className="mb-1 text-xs font-semibold text-gray-500 dark:text-gray-400  tracking-wide">
+                  Linked Section:
                 </p>
                 <ul className="space-y-0.5">
                   {[...item.sections]
