@@ -66,7 +66,7 @@ html {
     }
 
     .table-scroll {
-      @apply min-w-0 overflow-x-auto;
+      @apply w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain;
     }
 
     .custom-scrollbar::-webkit-scrollbar {

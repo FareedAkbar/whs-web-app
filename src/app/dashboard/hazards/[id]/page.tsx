@@ -356,7 +356,7 @@ const comments = isSelectingSelf
               </div>
 
             <span
-              className={`rounded-full px-3 py-1 text-xs ${
+              className={`rounded-full w-fit px-3 py-1 text-xs ${
                 statusMapping[
                   report?.status as keyof typeof statusMapping
                 ] ?? "bg-gray-100 text-gray-700"
@@ -380,7 +380,7 @@ const comments = isSelectingSelf
                 />
               )}
             {hasPermission(user?.role!, "assign:officer") &&
-              hazard.hazard?.status === "ASSIGNED" &&
+              hazard.report?.status === "ASSIGNED" &&
               hazard?.incidentAssignee && (
                 <Button
                   title="Reassign Officer"
@@ -558,7 +558,7 @@ const comments = isSelectingSelf
                         Ticket#{link.ticket_number}
                       </span>
                       <span
-                        className={`rounded-full px-3 py-1 text-xs whitespace-nowrap ${
+                        className={`rounded-full  px-3 py-1 text-xs whitespace-nowrap ${
                           statusMapping[link.reportStatus as keyof typeof statusMapping] ?? "bg-gray-100 text-gray-700"
                         }`}
                       >
@@ -583,12 +583,12 @@ const comments = isSelectingSelf
                     )}
 
                     {/* View button */}
-                    {hasPermission(user?.role!, "view:hazards") && (
+                    {hasPermission(user?.role!, "view:incidents") && (
                       <div className="mt-3 flex justify-end">
                         <Button
                           variant="primary"
-                          onClick={() => router.push(`/dashboard/hazards/${link.reportId}`)}
-                          title="View Hazard"
+                          onClick={() => router.push(`/dashboard/incidents/${link.reportId}`)}
+                          title="View Incident"
                         />
                       </div>
                     )}

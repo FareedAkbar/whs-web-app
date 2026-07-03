@@ -25,6 +25,7 @@ import { AREA_DATA } from "@/constants/area";
 import TableFiller, { FilledTable, TableRow } from "@/components/table/TableFiller";
 import DateField from "@/components/ui/DateField";
 import { getSeverityColor } from "@/constants/severity";
+import { statusMapping } from "@/utils/statusColors";
 
 // ── Local-only types ──────────────────────────────────────────────────────────
 
@@ -501,6 +502,7 @@ return {
 
     const payload = buildPayload();
     if (!payload) return;
+    console.log("submit inspection",payload);
 
     submitInspection.mutate(payload as any, {
       onSuccess: (res: any) => {
@@ -858,29 +860,37 @@ return {
                           Linked Hazard(s)
                         </p>
 
-                        {state.hazardLinks.map((link, idx) => (
-                          <div
-                            key={idx}
-                            className="relative rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
-                          >
-                            <div className="mb-3 flex items-center justify-between">
-                              <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                                Hazard {idx + 1}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => removeHazardLink(sec.id, idx)}
-                                className="text-xs text-red-500 hover:text-red-700 dark:text-red-400"
-                              >
-                                Remove
-                              </button>
+                        {state.hazardLinks.map((link, idx) => {
+                          const alreadySelectedIds = state.hazardLinks
+                            .filter((_, i) => i !== idx)
+                            .filter((l) => l.mode === "existing" && l.hazardId)
+                            .map((l) => l.hazardId!);
+
+                          return (
+                            <div
+                              key={idx}
+                              className="relative rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
+                            >
+                              <div className="mb-3 flex items-center justify-between">
+                                <span className="text-xs font-semibold uppercase tracking-wide text-primary">
+                                  Hazard {idx + 1}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => removeHazardLink(sec.id, idx)}
+                                  className="text-xs text-red-500 hover:text-red-700 dark:text-red-400"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                              <HazardLinker
+                                value={link}
+                                onChange={(val) => updateHazardLink(sec.id, idx, val)}
+                                excludeHazardIds={alreadySelectedIds}  // ← pass here
+                              />
                             </div>
-                            <HazardLinker
-                              value={link}
-                              onChange={(val) => updateHazardLink(sec.id, idx, val)}
-                            />
-                          </div>
-                        ))}
+                          );
+                        })}
                         <Button
                           onClick={() => addHazardLink(sec.id)}
                           icon={ <PlusIcon size={15} />}
@@ -1014,8 +1024,8 @@ return {
                         {/* ── NEW: Tables (template view — column names only) ── */}
                         {sec.tables && sec.tables.length > 0 && (
                           <div className="mt-4">
-                            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
-                              Tables
+                            <p className="mb-2 text-xs font-semibold  tracking-wide text-gray-400 dark:text-gray-500">
+                              Table(s)
                             </p>
                             <div className="space-y-3">
                               {sec.tables.map((tbl: any) => (
@@ -1326,14 +1336,53 @@ function ViewFilledInspections({
   templateSections,
   isUserAdmin,
 }: ViewFilledInspectionsProps) {
-  const completed = inspectionItems.filter((item) => itemHasAnswers(item));
+ const completed = inspectionItems.filter((item) => itemHasAnswers(item));
 
-  if (completed.length === 0) {
+if (completed.length === 0) {
+  const assignedNotCompleted = inspectionItems.filter(
+    (item) => !!item.assignedTo && !itemHasAnswers(item),
+  );
+
+  if (assignedNotCompleted.length === 0) {
     return (
-      <p className="text-sm text-gray-500 dark:text-gray-400">No submissions yet.</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400">
+        Not assigned.
+      </p>
     );
   }
 
+  return (
+    <div className="space-y-2">
+      <p className="text-sm text-gray-500 dark:text-gray-400">
+        Assigned but not yet completed.
+      </p>
+      <ul className="space-y-2">
+        {assignedNotCompleted.map((item) => (
+          <li
+            key={item.id}
+            className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+          >
+            <p className="font-medium text-gray-800 dark:text-gray-100">
+              {item.assignedTo!.name}
+            </p>
+            <p className="text-gray-500 dark:text-gray-400">
+              {item.assignedTo!.email}
+            </p>
+            <p className="text-gray-500 dark:text-gray-400">
+              {item.assignedTo!.role.replaceAll("_", " ")}
+            </p>
+            <p className="text-primary">
+              Due:{" "}
+              {item.dueDate
+                ? new Date(item.dueDate).toLocaleDateString()
+                : "N/A"}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
   return (
     <div className="space-y-8">
       {completed.map((item) => (
@@ -1537,12 +1586,13 @@ function ViewFilledInspections({
                             className="flex items-center justify-between rounded-md border  px-3 py-2 text-sm border-primary/50 bg-primary/10"
                           >
                             <div>
-                              <p className="font-medium dark:text-white">
-                                Ticket# {lh.ticket_number} — {lh.reportTitle}
-                              </p>
+               <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
+                                Ticket# {lh.ticket_number}
+                              </span>
+                              <p className="dark:text-white capitalize">Title: {lh.reportTitle}</p>
                               {lh.linkDescription && (
                                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                                  {lh.linkDescription}
+                                  Description: {lh.linkDescription}
                                 </p>
                               )}
                             </div>
@@ -1556,9 +1606,14 @@ function ViewFilledInspections({
                               >
                                 {lh.reportPriority}
                               </span>
-                              <span className="text-xs text-orange-500 dark:text-orange-400">
-                                {lh.reportStatus}
-                              </span>
+                              <span
+                                                      className={`rounded-full px-3 py-1 text-xs whitespace-nowrap ${
+                                                        statusMapping[lh.reportStatus as keyof typeof statusMapping] ?? "bg-gray-100 text-gray-700"
+                                                      }`}
+                                                    >
+                                                      {lh.reportStatus.replaceAll("_", " ")}
+                                                    </span>
+                             
                             </div>
                           </div>
                         ))}
