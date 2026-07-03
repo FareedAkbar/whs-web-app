@@ -44,8 +44,8 @@ const ContractorPage = () => {
   }
 
   return (
-    <div className="flex w-full flex-col px-8">
-      <div className="sticky top-0 z-10 mb-4 flex items-center justify-between backdrop-blur">
+    <div className="page-container">
+      <div className="sticky top-0 z-10 mb-4 backdrop-blur">
         <input
           type="text"
           placeholder="Search by name or email"
@@ -54,8 +54,8 @@ const ContractorPage = () => {
         />
       </div>
 
-      <div className="mb-3 flex-1 overflow-x-auto overflow-y-auto rounded-lg border bg-white shadow dark:border-gray-500 dark:bg-gray-800">
-        <table className="min-w-full table-auto text-sm">
+      <div className="table-scroll mb-3 flex-1 rounded-lg border bg-white shadow dark:border-gray-500 dark:bg-gray-800">
+        <table className="min-w-max w-full table-auto text-sm">
           <thead className="bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-200">
             <tr>
               <th className="p-4 text-left font-medium">Name</th>

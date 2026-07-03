@@ -195,7 +195,7 @@ const HazardForm = () => {
   const treatmentTypeValue = watch("treatmentType");
 
   return (
-    <div className="flex flex-col p-6">
+    <div className="page-container">
       {/* People and Culture Notice Banner */}
       <div className="mb-6 rounded-lg border-l-4 border-blue-400 bg-blue-50 p-4 dark:border-blue-700 dark:bg-blue-950">
         <div className="flex">
@@ -214,7 +214,7 @@ const HazardForm = () => {
         </div>
       </div>
 
-      <div className="rounded-lg bg-white p-6 shadow dark:border-gray-500 dark:bg-gray-800 dark:text-white dark:shadow-gray-700">
+      <div className="rounded-lg bg-white p-4 shadow dark:border-gray-500 dark:bg-gray-800 dark:text-white dark:shadow-gray-700 sm:p-6">
         <FormProvider {...methods}>
           <form
             onSubmit={handleSubmit(onSubmit)}
@@ -861,7 +861,7 @@ const HazardForm = () => {
             </div> */}
 
             {/* Action buttons */}
-            <div className="mt-4 flex w-full justify-start gap-4">
+            <div className="mt-4 flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-start sm:gap-4">
               <Button
                 variant="secondary"
                 title="Back"

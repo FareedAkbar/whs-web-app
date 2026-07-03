@@ -77,7 +77,7 @@ const ProfileScreen = () => {
     );
   }
   return (
-    <div className="m-8 h-fit rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+    <div className="mx-4 my-4 h-fit rounded-lg bg-white p-4 shadow-lg dark:bg-gray-800 sm:m-6 sm:p-6 lg:m-8">
       {/* Header Image */}
       <div className="relative h-48 w-full overflow-hidden rounded-lg">
         <Image
@@ -110,8 +110,8 @@ const ProfileScreen = () => {
       </div> */}
 
       {/* Name & Role */}
-      <div className="flex flex-row justify-between">
-        <div className="-mt-8 flex items-center gap-4 pl-5">
+      <div className="flex flex-col gap-4 md:flex-row md:justify-between">
+        <div className="-mt-8 flex min-w-0 items-center gap-4 pl-0 sm:pl-5">
           {/* Profile Image / Icon */}
           <div className="relative flex items-end justify-end overflow-visible">
             <Image
@@ -140,7 +140,7 @@ const ProfileScreen = () => {
           </div>
         </div>
         {user && hasPermission(user.role, "change:role") && (
-          <div className="pt-5">
+          <div className="pt-0 md:pt-5">
             {!isChangingRole ? (
               <Button
                 title="Change Role"

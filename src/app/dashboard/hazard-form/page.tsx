@@ -113,7 +113,7 @@ const HazardForm = () => {
   };
 
   return (
-    <div className="flex flex-col p-6">
+    <div className="page-container">
       {/* Linked Safety Inspection Notice */}
       {inspectionId && (
         <div className="mb-6 rounded-lg border-l-4 border-emerald-400 bg-emerald-50 p-4 dark:border-emerald-700 dark:bg-emerald-950">
@@ -125,7 +125,7 @@ const HazardForm = () => {
         </div>
       )}
 
-      <div className="rounded-lg bg-white p-6 shadow dark:border-gray-500 dark:bg-gray-800 dark:text-white dark:shadow-gray-700">
+      <div className="rounded-lg bg-white p-4 shadow dark:border-gray-500 dark:bg-gray-800 dark:text-white dark:shadow-gray-700 sm:p-6">
         <FormProvider {...methods}>
           <form
             onSubmit={handleSubmit(onSubmit)}
@@ -340,7 +340,7 @@ const HazardForm = () => {
             />
 
             {/* Action buttons */}
-            <div className="mt-4 flex w-full justify-start gap-4">
+            <div className="mt-4 flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-start sm:gap-4">
               <Button
                 variant="secondary"
                 title="Back"

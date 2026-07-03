@@ -107,14 +107,14 @@ export const ModalBody = ({
             opacity: 0,
             backdropFilter: "blur(0px)",
           }}
-          className="fixed inset-0 top-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto [perspective:800px] [transform-style:preserve-3d]"
+          className="fixed inset-0 top-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto p-2 sm:p-4 [perspective:800px] [transform-style:preserve-3d]"
         >
           <Overlay />
 
           <motion.div
             ref={modalRef}
             className={cn(
-              "relative z-50 flex max-h-[90%] w-full flex-1 flex-col overflow-hidden border bg-white py-3 dark:bg-gray-950 md:max-w-[60%] md:rounded-2xl",
+              "relative z-50 flex max-h-[90vh] w-full max-w-full flex-col overflow-hidden border bg-white py-3 dark:bg-gray-950 sm:max-h-[90%] md:max-w-[60%] md:rounded-2xl",
               className,
             )}
             initial={{
@@ -166,7 +166,7 @@ export const ModalContent = ({
   return (
     <div
       className={cn(
-        "custom-scrollbar flex flex-1 flex-col overflow-y-auto p-8",
+        "custom-scrollbar flex flex-1 flex-col overflow-y-auto p-4 sm:p-6 md:p-8",
         className,
       )}
     >
@@ -185,7 +185,7 @@ export const ModalFooter = ({
   return (
     <div
       className={cn(
-        "flex justify-end bg-white p-4 dark:bg-gray-950",
+        "flex flex-col-reverse gap-2 bg-white p-4 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-3 dark:bg-gray-950",
         className,
       )}
     >

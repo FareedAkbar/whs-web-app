@@ -538,7 +538,7 @@ return {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-4 p-6">
+    <div className="page-container space-y-4">
       {user && hasPermission(user.role, "create:inspections") && (
         <>
           <div className="flex w-full items-center justify-end">
@@ -566,13 +566,13 @@ return {
         </>
       )}
 
-      <div className="w-full space-y-6 p-6">
+      <div className="w-full space-y-6">
         {filteredInspections?.map((inspection: Inspection) => (
           <div
             key={inspection.id}
-            className="relative w-full rounded-lg bg-gray-50 p-6 text-left shadow-md dark:bg-gray-800 dark:text-white dark:shadow-gray-700"
+            className="relative w-full rounded-lg bg-gray-50 p-4 text-left shadow-md dark:bg-gray-800 dark:text-white dark:shadow-gray-700 sm:p-6"
           >
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h2 className="text-xl font-bold capitalize">{inspection.title}</h2>
                 <p className="text-gray-600 dark:text-gray-400">{inspection.description}</p>
@@ -1065,7 +1065,7 @@ return {
               <span className="font-semibold">{modal.data.title}</span>? This action cannot be
               undone.
             </p>
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-3">
               <Button
                 title="Delete"
                 loading={deleteInspection.isPending}
@@ -1130,7 +1130,7 @@ return {
               min={new Date().toISOString().split("T")[0]}
             />
 
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-3">
               <Button
                 title="Cancel"
                 variant="secondary"
@@ -1277,7 +1277,7 @@ return {
               </div>
             )}
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-3">
               <Button
                 title="Cancel"
                 variant="secondary"

@@ -80,7 +80,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
   };
 
   return (
-    <div className="mt-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div className="mt-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-6">
       <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-200">
         Comments
       </h2>
@@ -188,7 +188,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
 
          ) }
            
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-3">
               <Button
                 title="Cancel"
                 onClick={() => {

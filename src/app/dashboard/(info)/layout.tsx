@@ -9,7 +9,7 @@ export default function InfoLayout({
         {/* <h1 className="mb-10 text-center text-3xl font-bold text-primary">
           Information Center
         </h1> */}
-        <div className="space-y-6 rounded-2xl bg-white p-8 leading-relaxed shadow-lg dark:bg-gray-800 dark:text-white">
+        <div className="space-y-6 rounded-2xl bg-white p-4 leading-relaxed shadow-lg dark:bg-gray-800 dark:text-white sm:p-6 lg:p-8">
           {children}
         </div>
       </div>

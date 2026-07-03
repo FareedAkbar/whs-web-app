@@ -90,15 +90,15 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
   }, [dropdownOpen]);
 
   return (
-    <div className="flex w-full items-center justify-between gap-4 bg-white px-6 py-5 dark:bg-gray-950 dark:text-white">
-      <button className="block md:hidden" onClick={toggleDrawer}>
+    <div className="flex w-full min-w-0 items-center justify-between gap-2 bg-white px-3 py-4 dark:bg-gray-950 dark:text-white sm:gap-4 sm:px-6 sm:py-5">
+      <button className="shrink-0 md:hidden" onClick={toggleDrawer}>
         <MenuIcon size={28} />
       </button>
       <div
-        className="flex pl-6 cursor-pointer flex-col "
+        className="flex min-w-0 flex-1 cursor-pointer flex-col md:pl-0"
         // onClick={() => router.push("/dashboard")}
       >
-        <span className=" font-semibold capitalize text-2xl">
+        <span className="truncate font-semibold capitalize text-lg sm:text-2xl">
           {path.split("/")[2]?.replaceAll("-", " ") ??
             path.split("/")[1]?.replaceAll("-", " ")}
         </span>
@@ -106,7 +106,7 @@ export default function TopBar({ toggleDrawer }: { toggleDrawer: () => void }) {
                 ({session.data?.user.role.replaceAll("_"," ") ?? "role"})
               </p>
       </div>
-      <div className="flex">
+      <div className="flex shrink-0">
         {session.data?.user.email ? (
           <div className="flex items-center gap-4">
             {/* <Link
