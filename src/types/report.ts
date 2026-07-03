@@ -156,7 +156,7 @@ export interface AssigneeUser {
   role: "DEPARTMENT_MANAGER" | "STAFF"; // Add more roles if needed
   providedImageUrl: string;
   phoneNumber: string;
-  assigntype: "SELF_ASSIGNED" | "MANAGER_ASSIGNED";
+  assignType: "SELF_ASSIGNED" | "MANAGER_ASSIGNED";
 }
 
 export interface GroupData {

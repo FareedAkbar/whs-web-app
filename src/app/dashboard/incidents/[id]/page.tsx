@@ -65,17 +65,10 @@ export default function IncidentDetailScreen() {
       "bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-50 text-yellow-600",
     COMPLETED:
       "bg-green-100 dark:bg-green-900 dark:bg-opacity-50 text-green-600",
-    CANCELLED: "bg-red-100 dark:bg-red-900 dark:bg-opacity-50 text-red-600",
     ASSIGNED:
       "bg-purple-100 dark:bg-purple-900 dark:bg-opacity-50 text-purple-600",
   };
-  const statusOrder = [
-    "INITIATED",
-    "ASSIGNED",
-    "IN_PROGRESS",
-    "COMPLETED",
-    "CANCELLED",
-  ];
+
   const handleAcceptAndReject = async (flag: boolean) => {
     if (!incident) return;
     await incidentAcceptance.mutateAsync(
@@ -247,7 +240,7 @@ const assignedToEmail = isSelectingSelf
   const assignee = incident.incidentAssignee ?? null;
 
   const reporter = allUsersRes?.data?.find((u) => u.id === report.userId);
-  const reporterText = reporter ? `${reporter.name} (${reporter.email})` : "N/A";
+console.log("assignee",assignee);
 
   return (
     <div className="flex w-full flex-col px-8 py-6">
@@ -263,19 +256,25 @@ const assignedToEmail = isSelectingSelf
           <div className="flex flex-col gap-1">
            
             <div className="flex flex-row items-center gap-4">
+              <div>
+                
+               <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
+                Ticket#{incident.incident?.ticket_number}</span> 
+
               <h2
                 className="text-xl font-semibold capitalize"
                 style={{
                   color: severityMapping[report.priority] ?? "black",
                 }}
-              >Ticket#{incident.incident?.ticket_number} - {" "}
+              >     
                 {report.title}
               </h2>
+              </div>
 
               <span
                 className={`rounded-full px-3 py-1 text-xs ${statusMapping[report?.status as keyof typeof statusMapping]}`}
               >
-                {report?.status.replaceAll("_", " ")}
+                {report.status=="ASSIGNED"&& assignee?.assignType=="SELF_ASSIGNED"?"PICKED":report?.status.replaceAll("_", " ")}
               </span>
             </div>
           </div>
@@ -394,7 +393,7 @@ const assignedToEmail = isSelectingSelf
               {assignee ? (
                 <div className="mt-3 space-y-1">
                   <p className="text-sm font-semibold text-red-500">
-                    {incident.incidentAssignee.assigntype === "SELF_ASSIGNED"
+                    {incident.incidentAssignee.assignType === "SELF_ASSIGNED"
                       ? "Picked by:"
                       : "Assigned to:"}
                   </p>
@@ -528,42 +527,52 @@ const assignedToEmail = isSelectingSelf
             {incident.links?.length ? (
               <div className="space-y-4">
                 {incident.links.map((link) => (
-                  <div
-                    key={link.linkId}
-                    className="flex items-center justify-between rounded-lg shadow dark:bg-gray-700 bg-gray-50 p-4"
-                  >
-                    <div>
-                      <p className="font-medium">
-                        {link.reportTitle}
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Type: {link.linkType}
-                      </p>
-                      {link.reportDescription && (
-                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                          {link.reportDescription}
-                        </p>
-                      )}
-                      {link.linkDescription && (
-                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                          {link.linkDescription}
-                        </p>
-                      )}
+  <div
+    key={link.linkId}
+    className="rounded-lg shadow dark:bg-gray-700 bg-gray-50 p-4"
+  >
+    {/* Top row: ticket + status */}
+    <div className="flex items-center justify-between gap-2 mb-2">
+      <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
+        Ticket#{link.ticket_number}
+      </span>
+      <span
+        className={`rounded-full px-3 py-1 text-xs whitespace-nowrap ${
+          statusMapping[link.reportStatus as keyof typeof statusMapping] ?? "bg-gray-100 text-gray-700"
+        }`}
+      >
+        {link.reportStatus.replaceAll("_", " ")}
+      </span>
+    </div>
 
-                    </div>
-          {hasPermission(user?.role!, "view:hazards") && (
-                    <Button
-                      variant="primary"
-                      onClick={() =>
-                        router.push(
-                          `/dashboard/hazards/${link.reportId}?`
-                        )
-                      }
-                      title="View Hazard"
-                    />
-                  )}
-                  </div>
-                ))}
+    {/* Content */}
+    <p className="font-medium">Title: {link.reportTitle}</p>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Type: {link.linkType}
+    </p>
+    {link.reportDescription && (
+      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        Description: {link.reportDescription}
+      </p>
+    )}
+    {link.linkDescription && (
+      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        Detailed Description: {link.linkDescription}
+      </p>
+    )}
+
+    {/* View button */}
+    {hasPermission(user?.role!, "view:hazards") && (
+      <div className="mt-3 flex justify-end">
+        <Button
+          variant="primary"
+          onClick={() => router.push(`/dashboard/hazards/${link.reportId}`)}
+          title="View Hazard"
+        />
+      </div>
+    )}
+  </div>
+))}
               </div>
             ) : (
               <p className="text-sm text-gray-500">No linked hazard found.</p>
@@ -602,7 +611,7 @@ const assignedToEmail = isSelectingSelf
                         type="button"
                         onClick={() => setSelectedOfficer(o.id)}
                         className={`flex w-full items-center justify-between gap-3 border-b px-4 py-3 text-left last:border-0 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50 ${
-                          selectedOfficer === o.id ? "bg-primary/10 dark:bg-primary/20" : ""
+                          selectedOfficer === o.id ? "bg-primary/40" : ""
                         }`}
                       >
                         {/* Left: name + email */}
@@ -670,7 +679,7 @@ const assignedToEmail = isSelectingSelf
                         onClick={() => setSelectedOfficer(o.value)}
                         className={`flex w-full items-center justify-between gap-3 border-b px-4 py-3 text-left last:border-0 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50 ${
                           selectedOfficer === o.value
-                            ? "bg-primary/10 dark:bg-primary/20"
+                            ? "bg-primary/40"
                             : ""
                         }`}
                       >
