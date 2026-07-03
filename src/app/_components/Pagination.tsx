@@ -23,7 +23,7 @@ const Pagination = ({
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex items-center">
+      <div className="flex min-w-0 items-center overflow-x-auto">
         <button
           className="mr-2 rounded border bg-gray-100 p-2 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-500 dark:bg-gray-700 dark:text-white"
           onClick={() => setPage(page - 1)}

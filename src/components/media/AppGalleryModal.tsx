@@ -145,7 +145,7 @@ export default function AppGalleryModal({
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {selected.length} selected
           </p>
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
             <Button title="Cancel" variant="secondary" onClick={handleClose} />
             <Button
               title="Add selected"

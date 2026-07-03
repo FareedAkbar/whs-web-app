@@ -173,7 +173,7 @@ export const QuestionInput: React.FC<Props> = ({
           </div>
         )}
 
-        <div className="flex justify-end gap-3 pt-4">
+        <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-3">
           <Button
             title="Done"
             onClick={handleDone}

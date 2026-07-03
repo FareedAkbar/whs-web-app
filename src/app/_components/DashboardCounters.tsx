@@ -55,7 +55,7 @@ const DashboardCounters: React.FC = () => {
     dashboard.hazards && Object.keys(dashboard.hazards).length > 0;
 
   return (
-    <div className="flex flex-wrap gap-6">
+    <div className="flex min-w-0 flex-wrap gap-4 sm:gap-6">
       {/* Dynamically render available cards in equal space */}
       {[
         dashboard.users && Object.keys(dashboard.users).length > 0 && (

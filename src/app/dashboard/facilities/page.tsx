@@ -130,7 +130,7 @@ export default function FacilityScreen() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-4 p-6">
+    <div className="page-container space-y-4">
       <div className="flex w-full items-center justify-between">
         <Button
           onClick={() => {
@@ -171,15 +171,15 @@ export default function FacilityScreen() {
         </div>
       )}
 
-      <div className="w-full space-y-6 p-6">
+      <div className="w-full space-y-6">
         {facilities.map((dept) => (
           <div
             key={dept.id}
             className="rounded-lg border bg-white p-6 shadow-md dark:bg-gray-800 dark:text-white"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-xl font-bold">{dept.name}</h2>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Button
                   title="Assign Staff"
                   //   size="sm"
@@ -216,7 +216,7 @@ export default function FacilityScreen() {
         ))}
       </div>
 
-      <ModalBody className="mx-3 w-full overflow-y-auto">
+      <ModalBody className="mx-0 w-full max-w-full overflow-y-auto sm:mx-3">
         {selectedFacility && (
           <ModalContent className="w-full space-y-4">
             <h2 className="text-2xl font-bold dark:text-white">

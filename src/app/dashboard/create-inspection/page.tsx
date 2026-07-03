@@ -429,7 +429,7 @@ const deleteQuestion = (sectionIndex: number, questionIndex: number) => {
           icon={<Plus size={16} />}
           disabled={isEditingAnywhere}
         />
-        <div className="mt-4 flex w-full justify-start gap-4">
+        <div className="mt-4 flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-start sm:gap-4">
           <Button
             variant="secondary"
             title="Back"

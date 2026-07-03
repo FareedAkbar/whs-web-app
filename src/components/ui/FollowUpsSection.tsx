@@ -66,7 +66,7 @@ const FollowUpsSection: React.FC<FollowUpsSectionProps> = ({
   };
 
   return (
-    <div className="mt-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div className="mt-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-6">
       <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-200">
         Follow Ups
       </h2>
@@ -119,7 +119,7 @@ const FollowUpsSection: React.FC<FollowUpsSectionProps> = ({
               rows={3}
               className="w-full rounded-md border bg-gray-50 p-3 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:bg-gray-700 dark:text-white dark:autofill:text-white"
             />
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-3">
               <Button
                 title={"Cancel"}
                 onClick={() => {

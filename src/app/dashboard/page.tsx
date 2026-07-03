@@ -59,7 +59,7 @@ const Dashboard = () => {
   // }
 
   return (
-    <div className="flex flex-col justify-between p-6">
+    <div className="flex flex-col justify-between p-4 sm:p-6">
       {/* Dashboard cards */}
       {/* <div>
         {user?.role === "ADMIN" &&
@@ -74,7 +74,7 @@ const Dashboard = () => {
       <DashboardCounters />
 
       {/* Bottom buttons aligned at the end */}
-      <div className="flex w-full justify-between gap-4 p-6">
+      <div className="flex w-full flex-col gap-4 p-4 sm:flex-row sm:justify-between sm:p-6">
         {/* {user && hasPermission(user.role, "fill:checklist") && (
           <Button
             title="WHS Inspection Checklist"

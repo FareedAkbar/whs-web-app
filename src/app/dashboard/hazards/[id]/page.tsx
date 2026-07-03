@@ -329,7 +329,7 @@ const comments = isSelectingSelf
   const assignee = hazard.incidentAssignee ?? null;
 
   return (
-    <div className="flex w-full flex-col px-8 py-6">
+    <div className="page-container py-6">
       <button
         onClick={() => router.back()}
         className="mb-4 flex items-center text-sm text-primary"
@@ -337,9 +337,9 @@ const comments = isSelectingSelf
         ← Back to List
       </button>
 
-      <div className="rounded-lg border bg-white p-6 shadow-md dark:border-gray-500 dark:bg-gray-900 dark:text-white dark:shadow-gray-700">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-row items-center gap-4">
+      <div className="rounded-lg border bg-white p-4 shadow-md dark:border-gray-500 dark:bg-gray-900 dark:text-white dark:shadow-gray-700 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
            <div>
                 
                <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
@@ -366,7 +366,7 @@ const comments = isSelectingSelf
             </span>
           </div>
 
-          <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-wrap gap-2">
             {/* Cancel (example) */}
             {hasPermission(user?.role!, "assign:officer") &&
               !hazard?.incidentAssignee && (
@@ -470,12 +470,17 @@ const comments = isSelectingSelf
             {/* Assigned to */}
             <div className="mt-4">
               {assignee ? (
-                <div className="mt-3 space-y-2">
+                <div className="mt-3 space-y-1">
                   <p className="text-sm font-semibold text-red-500">
-                    Assigned to:
+                    {hazard.incidentAssignee.assignType === "SELF_ASSIGNED"
+                      ? "Picked by:"
+                      : "Assigned to:"}
                   </p>
                   <p className="text-sm capitalize text-gray-700 dark:text-gray-300">
                     {assignee.name} ({assignee.role.replaceAll("_", " ")})
+                  </p>
+                  <p className="text-sm  text-gray-700 dark:text-gray-300">
+                    {assignee.email} 
                   </p>
                 </div>
               ) : (

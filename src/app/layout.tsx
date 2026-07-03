@@ -30,7 +30,7 @@ export default async function RootLayout({
               <ModalProvider>
                 <NextTopLoader color="#cc0000" showSpinner={false} />
                 <ThemedToast />
-                <div className="h-full w-screen overflow-hidden">
+                <div className="min-h-screen w-full overflow-x-hidden">
                   {children}
                 </div>
               </ModalProvider>

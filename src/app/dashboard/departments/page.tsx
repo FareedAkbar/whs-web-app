@@ -148,7 +148,7 @@ export default function DepartmentsScreen() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-4 p-6">
+    <div className="page-container space-y-4">
       <div className="flex w-full items-center justify-end">
         <Button
           onClick={() => {
@@ -178,7 +178,7 @@ export default function DepartmentsScreen() {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Enter department description"
           />
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row">
             <Button
               title={editMode ? "Update Department" : "Submit Department"}
               onClick={handleSubmit}
@@ -202,7 +202,7 @@ export default function DepartmentsScreen() {
         </div>
       )}
 
-      <div className="w-full space-y-6 p-6">
+      <div className="w-full space-y-6">
         {departments.map((dept) => {
           const noManager = !dept.manager;
           const noStaff = !dept.staff || dept.staff.length === 0;
@@ -211,8 +211,8 @@ export default function DepartmentsScreen() {
               key={dept.id}
               className="rounded-lg border bg-white p-6 shadow-md dark:border-gray-500 dark:bg-gray-800 dark:text-white"
             >
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
                   <h2 className="text-xl font-bold capitalize">{dept.name}</h2>
                   {/* <p className="text-sm text-gray-500 dark:text-gray-300">
                     {dept.description
@@ -221,7 +221,7 @@ export default function DepartmentsScreen() {
                   </p> */}
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {noManager && noStaff ? (
                     <Button
                       title="Assign"

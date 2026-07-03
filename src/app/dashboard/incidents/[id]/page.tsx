@@ -243,7 +243,7 @@ const assignedToEmail = isSelectingSelf
 console.log("assignee",assignee);
 
   return (
-    <div className="flex w-full flex-col px-8 py-6">
+    <div className="page-container py-6">
       <button
         onClick={() => router.back()}
         className="mb-4 flex items-center text-sm text-primary"
@@ -251,11 +251,11 @@ console.log("assignee",assignee);
         ← Back to List
       </button>
 
-      <div className="rounded-lg border bg-white p-6 shadow-md dark:border-gray-500 dark:bg-gray-900 dark:text-white dark:shadow-gray-700">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-col gap-1">
+      <div className="rounded-lg border bg-white p-4 shadow-md dark:border-gray-500 dark:bg-gray-900 dark:text-white dark:shadow-gray-700 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex min-w-0 flex-col gap-1">
            
-            <div className="flex flex-row items-center gap-4">
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
               <div>
                 
                <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
@@ -279,7 +279,7 @@ console.log("assignee",assignee);
             </div>
           </div>
 
-          <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-wrap gap-2">
             {/* Cancel (example) */}
             {hasPermission(user?.role!, "assign:officer") &&
               !incident?.incidentAssignee && (
@@ -463,7 +463,7 @@ console.log("assignee",assignee);
           )}
 
           {/* Medical Details */}
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-6">
             <h4 className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">
               Medical Details
             </h4>
@@ -519,7 +519,7 @@ console.log("assignee",assignee);
               </div>
             </div>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-6">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold">Linked Hazard</h3>
             </div>

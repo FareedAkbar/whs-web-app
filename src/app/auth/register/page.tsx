@@ -205,7 +205,7 @@ export default function Register() {
           />
         </div>
 
-        <div className="flex h-full w-full flex-row gap-5">
+        <div className="flex h-full w-full flex-col gap-3 sm:flex-row sm:gap-5">
           <Button
             title="Back"
             variant="secondary"
