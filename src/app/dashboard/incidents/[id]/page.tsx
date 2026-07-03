@@ -272,7 +272,7 @@ console.log("assignee",assignee);
               </div>
 
               <span
-                className={`rounded-full px-3 py-1 text-xs ${statusMapping[report?.status as keyof typeof statusMapping]}`}
+                className={`rounded-full px-3 py-1 w-fit text-xs ${statusMapping[report?.status as keyof typeof statusMapping]}`}
               >
                 {report.status=="ASSIGNED"&& assignee?.assignType=="SELF_ASSIGNED"?"PICKED":report?.status.replaceAll("_", " ")}
               </span>

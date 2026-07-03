@@ -272,41 +272,48 @@ console.log("user",user);
   }
 
   return (
-    <div className="page-container">
-      <div className="sticky top-0 z-10 my-2 mb-4 flex flex-col gap-2 backdrop-blur lg:flex-row lg:items-center">
-        <div className="flex min-w-0 flex-1 items-stretch">
+    <div className="page-container overflow-x-hidden">
+              <div className="sticky top-0 z-10 my-2 mb-4 flex items-center justify-between backdrop-blur md:gap-0">
         <input
           type="text"
           placeholder="Search by name or email"
-          className="min-w-0 flex-1 rounded-md rounded-r-none border border-gray-300 px-2 py-3 text-sm shadow-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:border-gray-600 dark:bg-gray-700 dark:text-white lg:rounded-r-none"
+          className="w-full rounded-md border border-gray-300 px-2 py-3 text-sm shadow-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:border-gray-600 dark:bg-gray-700 dark:text-white md:rounded-r-none"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
        {hasPermission(user?.role!, "filter:users") && (
-          <div className="shrink-0">
-            <Dropdown
-              button={
-                <button className="flex h-full flex-row items-center whitespace-nowrap border border-l-0 border-gray-300 bg-[#F9F9F9] px-3 py-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:px-4">
-                  Filters
-                  <ChevronDown className="ml-2 inline" size={16} />
-                </button>
-              }
-              className="absolute right-0 z-50"
-              dropdownClassName="w-80 max-w-[calc(100vw-2rem)] rounded-md border bg-white p-4 shadow-lg dark:border-gray-600 dark:bg-gray-800"
-              isOpen={isFilterOpen}
-              setIsOpen={setIsFilterOpen}
-            >
-              <FilterComponent />
-            </Dropdown>
-          </div>
-        )}
-        <div className="shrink-0 rounded-r-md bg-primary p-[15px]">
+  <div className="">
+    <Dropdown
+      button={
+        <button className="flex w-full flex-row items-center border border-gray-300 bg-[#F9F9F9] px-4 py-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+          Filters
+          <ChevronDown className="ml-2 inline" size={16} />
+        </button>
+      }
+      className="absolute right-0 z-50"
+      dropdownClassName="w-80 rounded-md border bg-white p-4 shadow-lg dark:border-gray-600 dark:bg-gray-800"
+      isOpen={isFilterOpen}
+      setIsOpen={setIsFilterOpen}
+    >
+      <FilterComponent />
+    </Dropdown>
+  </div>
+)}
+        {/* <button
+          className="self-end rounded p-3.5 dark:border-gray-600 dark:bg-gray-700"
+          onClick={() => {
+            setFilterModalOpen(true);
+            setOpen(true);
+          }}
+        >
+          <Filter size={18} color="white" />
+        </button> */}
+        <div className="rounded-r-md bg-primary p-[15px]">
           <Search className="" size={16} color="white" />
-        </div>
         </div>
         {hasPermission(user?.role!, "create:user") && (
           <Button
             title="Add new User"
-            className="w-full shrink-0 lg:ml-2 lg:w-auto"
+            className="ml-2 p-3"
             onClick={() => {
               setCreateModalOpen(true);
               setViewModalOpen(false);
@@ -315,86 +322,67 @@ console.log("user",user);
           />
         )}      
         </div>
-      <div className="custom-scrollbar table-scroll mb-3 flex-1 rounded-lg border bg-white shadow dark:border-gray-500 dark:bg-gray-800">
-        <table className="min-w-max w-full table-auto text-sm">
-          <thead className="bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-200">
-            <tr>
-              <th></th>
-              {/* <th className="w-10 p-4">
-                <input type="checkbox" className="accent-primary" />
-              </th> */}
-              <th className="p-4 text-left font-medium">Name</th>
-              <th className="p-4 text-left font-medium">Email</th>
-              <th className="p-4 text-left font-medium">Role</th>
-              <th className="p-4 text-left font-medium">Status</th>
-              <th className="p-4 text-center font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedUsers.map((user, index) => (
-              <tr
-                key={user.id}
-                className="border-t dark:border-gray-600 dark:text-white"
-              >
-                <td className="p-4">
-                  {page * pageSize - pageSize + index + 1}.
-                </td>
-                {/* <td className="p-4 text-center">
-                  <input type="checkbox" className="accent-primary" />
-                </td> */}
-                <td className="p-4 capitalize">{user.name}</td>
-                <td className="p-4">{user.email}</td>
-                <td className="p-4">{user.role.replaceAll("_", " ")}</td>
-                <td className="p-4">
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerifiedByAdmin ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-500 dark:bg-yellow-900 dark:bg-opacity-50"}`}
-                  >
-                    <span className="h-2 w-2 rounded-full bg-current"></span>
-                    {user.isVerifiedByAdmin ? "Approved" : "Pending"}
-                  </span>
-                </td>
-                <td className="space-x-2 p-4 text-center">
-                  <button
-                    className="text-primary"
-                    onClick={() => {
-                      setSelectedUser(user);
-                      setViewModalOpen(true);
-                      setCreateModalOpen(false);
-                      setOpen(true);
-                    }}
-                    title="View"
-                  >
-                    <Eye size={18} />
-                  </button>
-                  {/* <button
-              className="text-green-600 hover:text-green-800"
-              onClick={() => {
-                setSelectedUser(user);
-                setSelectedRole(user.role ?? "");
-                setOpen(true);
-              }}
-              title="Edit"
-            >
-              <Pencil size={18} />
-            </button>
-            <button
-              className="text-red-600 hover:text-red-800"
-              onClick={() => handleDeleteUser(user.id)}
-              title="Delete"
-            >
-              <Trash size={18} />
-            </button> */}
-                </td>
+
+      <div className="mb-3 w-full min-w-0 max-w-full rounded-lg border bg-white shadow dark:border-gray-500 dark:bg-gray-800">
+        <div className="table-scroll">
+          <table className="min-w-max w-full table-auto text-sm">
+            <thead className="bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-200">
+              <tr>
+                <th></th>
+                <th className="whitespace-nowrap p-4 text-left font-medium">Name</th>
+                <th className="whitespace-nowrap p-4 text-left font-medium">Email</th>
+                <th className="whitespace-nowrap p-4 text-left font-medium">Role</th>
+                <th className="whitespace-nowrap p-4 text-left font-medium">Status</th>
+                <th className="whitespace-nowrap p-4 text-center font-medium">Actions</th>
               </tr>
-            ))}
-            {/* {paginatedUsers} */}
-          </tbody>
-        </table>
-        <Pagination
-          totalItems={filteredUsers.length}
-          page={page}
-          setPage={setPage}
-        />
+            </thead>
+            <tbody>
+              {paginatedUsers.map((user, index) => (
+                <tr
+                  key={user.id}
+                  className="border-t dark:border-gray-600 dark:text-white"
+                >
+                  <td className="p-4">
+                    {page * pageSize - pageSize + index + 1}.
+                  </td>
+                  <td className="whitespace-nowrap p-4 capitalize">{user.name}</td>
+                  <td className="whitespace-nowrap p-4">{user.email}</td>
+                  <td className="whitespace-nowrap p-4">{user.role.replaceAll("_", " ")}</td>
+                  <td className="p-4">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerifiedByAdmin ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-500 dark:bg-yellow-900 dark:bg-opacity-50"}`}
+                    >
+                      <span className="h-2 w-2 rounded-full bg-current"></span>
+                      {user.isVerifiedByAdmin ? "Approved" : "Pending"}
+                    </span>
+                  </td>
+                  <td className="space-x-2 p-4 text-center">
+                    <button
+                      className="text-primary"
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setViewModalOpen(true);
+                        setCreateModalOpen(false);
+                        setOpen(true);
+                      }}
+                      title="View"
+                    >
+                      <Eye size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="w-full min-w-0 max-w-full overflow-x-hidden">
+          <Pagination
+            totalItems={filteredUsers.length}
+            page={page}
+            setPage={setPage}
+          />
+        </div>
       </div>
 
      {isViewModalOpen && selectedUser && (

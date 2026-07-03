@@ -38,7 +38,7 @@ const HazardLinker: React.FC<HazardLinkerProps> = ({
     () =>
       hazardsList.filter((item) => {
         const id = item.hazard?.id ?? "";
-        if (excludeHazardIds.includes(id)) return false;
+        // if (excludeHazardIds.includes(id)) return false;
         const title = item.report.title?.toLowerCase() ?? "";
         const desc = (item.hazard?.hazardDescription ?? item.report.description ?? "").toLowerCase();
         const term = searchTerm.toLowerCase();
@@ -98,58 +98,64 @@ const HazardLinker: React.FC<HazardLinkerProps> = ({
           {loadingHazards ? (
             <p className="text-sm text-gray-500">Loading hazards…</p>
           ) : (
-            <div className="grid gap-3 md:grid-cols-2">
-              {filteredHazards.map((item) => {
-                const hazardId = item.hazard?.id ?? "";
-                const ticketNumber =
-                  item.hazard?.ticket_number ??
-                  item.report.ticketNumber ??
-                  `HZ-${item.report.id.substring(0, 8).toUpperCase()}`;
-                const isSelected = value.hazardId === hazardId;
+           // Replace the filteredHazards map inside value.mode === "existing":
+<div className="grid gap-3 md:grid-cols-2">
+  {filteredHazards.map((item) => {
+    const hazardId = item.hazard?.id ?? "";
+    const ticketNumber =
+      item.hazard?.ticket_number ??
+      item.report.ticketNumber ??
+      `HZ-${item.report.id.substring(0, 8).toUpperCase()}`;
+    const isSelected = value.hazardId === hazardId;
+    const isAlreadyAdded = excludeHazardIds.includes(hazardId); // ← check
 
-                return (
-                  <button
-                    type="button"
-                    key={item.report.id}
-                    disabled={!hazardId}
-                    onClick={() => setHazardId(hazardId)}
-                    className={`rounded-lg border p-4 text-left transition ${
-                      isSelected
-                        ? "border-primary bg-white shadow-md dark:bg-gray-800"
-                        : "border-gray-200 bg-white hover:border-primary/60 dark:border-gray-700 dark:bg-gray-800"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-semibold uppercase text-primary">
-                          Ticket# {ticketNumber}
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
-                          {item.report.title}
-                        </p>
-                      </div>
-                      <span
-                        className={`mt-1 h-4 w-4 rounded-full border ${
-                          isSelected
-                            ? "border-primary bg-primary"
-                            : "border-gray-300"
-                        }`}
-                      />
-                    </div>
-                    <p className="mt-2 line-clamp-3 text-sm text-gray-600 dark:text-gray-300">
-                      {item.hazard?.hazardDescription ||
-                        item.report.description ||
-                        "No description provided"}
-                    </p>
-                  </button>
-                );
-              })}
-              {filteredHazards.length === 0 && (
-                <p className="col-span-2 rounded-md border border-dashed border-gray-300 p-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-300">
-                  No hazards found.
-                </p>
+    return (
+      <button
+        type="button"
+        key={item.report.id}
+        disabled={!hazardId || isAlreadyAdded} // ← disable if already added
+        onClick={() => !isAlreadyAdded && setHazardId(hazardId)}
+        className={`rounded-lg border p-4 text-left transition ${
+          isAlreadyAdded
+            ? "cursor-not-allowed border-gray-100 bg-gray-50 opacity-60 dark:border-gray-800 dark:bg-gray-900"
+            : isSelected
+              ? "border-primary bg-primary/20 shadow-md"
+              : "border-gray-200 bg-white hover:border-primary/60 dark:border-gray-700 dark:bg-gray-800"
+        }`}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
+                Ticket# {ticketNumber}
+              </span>
+              {isAlreadyAdded && ( // ← badge
+                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                  Already added
+                </span>
               )}
             </div>
+            <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+              {item.report.title}
+            </p>
+          </div>
+          <span
+            className={`mt-1 h-4 w-4 rounded-full border ${
+              isSelected
+                ? "border-primary bg-primary"
+                : "border-gray-300"
+            }`}
+          />
+        </div>
+        <p className="mt-2 line-clamp-3 text-sm text-gray-600 dark:text-gray-300">
+          {item.hazard?.hazardDescription ||
+            item.report.description ||
+            "No description provided"}
+        </p>
+      </button>
+    );
+  })}
+</div>
           )}
           {!value.hazardId && (
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
