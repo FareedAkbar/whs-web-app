@@ -22,7 +22,9 @@ const ROLES = {
     "send:reminders",
     "view:filled-inspections",
     "create:user",
-    "filter:users"
+    "filter:users",
+        "view:unfilled-inspections",
+
   ],
   WORKER: [
     "view:incidents",
@@ -68,7 +70,9 @@ const ROLES = {
     "show/hide:comments",
     "pick:hazard",
     "complete:hazard",
-    "send:reminders"
+    "send:reminders",
+        "view:unfilled-inspections",
+
   ],
   // P_AND_C_MEMBER: ["view:homeCounters", "create:incidents"],
   P_AND_C_MANAGER: [
@@ -87,6 +91,8 @@ const ROLES = {
     "send:reminders",
     "pick:incident",
     "complete:incident",
+        "view:unfilled-inspections",
+
 
   ],
   P_AND_C_OFFICER: [
