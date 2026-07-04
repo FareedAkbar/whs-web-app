@@ -211,7 +211,15 @@ useEffect(() => {
 
   const { data: verifiedUsers, isLoading: loadingUsers } =
     api.users.getVerifiedUsers.useQuery();
+const isManager =
+  user?.role === "P_AND_C_MANAGER" || user?.role === "FACILITY_MANAGER";
 
+const getCreatorRole = (creatorId?: string) =>
+  verifiedUsers?.data?.find((u) => u.id === creatorId)?.role;
+
+const canManageInspection = (inspection: Inspection) =>
+  user?.id === inspection.createdBy ||
+  (isManager && inspection.createdByUser?.role === "ADMIN");
   const filterByRole = (users: User[], currentUserRole: UserRole) => {
     if (!users) return [];
     switch (currentUserRole) {
@@ -603,30 +611,32 @@ return {
                       <Trash2 size={20} />
                     </button>
                   )}
-                  {user?.id === inspection.createdBy && (
-                    <button
-                      onClick={() => openReminderModal(inspection)}
-                      className="text-primary hover:scale-105"
-                      title="Send Reminder"
-                    >
-                      <Bell size={20} />
-                    </button>
-                  )}
+                 {canManageInspection(inspection) && (
+  <button
+    onClick={() => openReminderModal(inspection)}
+    className="text-primary hover:scale-105"
+    title="Send Reminder"
+  >
+    <Bell size={20} />
+  </button>
+)}
+
                 </div>
                 {user &&
-                  hasPermission(user.role, "assign:inspections") &&
-                  inspection.createdBy === user.id && (
-                    <Button
-                      title="Assign Inspection"
-                      icon={<UserPlus size={16} />}
-                     onClick={() => {
-                      setSearchTerm("");
-                      setSelectedUser(null);
-                      setModal({ type: "assign", data: inspection });
-                      setOpen(true);
-                    }}
-                    />
-                  )}
+  hasPermission(user.role, "assign:inspections") &&
+  canManageInspection(inspection) && (
+    <Button
+      title="Assign Inspection"
+      icon={<UserPlus size={16} />}
+      onClick={() => {
+        setSearchTerm("");
+        setSelectedUser(null);
+        setModal({ type: "assign", data: inspection });
+        setOpen(true);
+      }}
+    />
+  )}
+
               </div>
             </div>
           </div>
@@ -643,15 +653,27 @@ return {
             <h2 className="mb-4 text-2xl font-bold capitalize dark:text-white">
               {modal.data.title}
             </h2>
-            <p className="mb-4 text-gray-600 dark:text-gray-400">
+            <p className=" text-gray-600 dark:text-gray-400">
               {modal.data.description}
             </p>
+            <div>
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Created by:
+              </p>
+              <p> {inspectionDetail.data?.createdByUser?.name} ({inspectionDetail.data?.createdByUser?.email}) - {inspectionDetail.data?.createdByUser?.role.replaceAll("_", " ")} </p>
+            </div>
 
             {/* 1. View-only: template questions */}
-            {inspectionDetail.data?.sections &&
+            {/* {inspectionDetail.data?.sections &&
               inspectionDetail.data.sections.length > 0 &&
-              !canFill &&
-              !hasPermission(user?.role!, "view:filled-inspections") && (
+             (
+    (!canFill && !hasPermission(user?.role!, "view:filled-inspections")) ||
+    (
+      (user?.id === modal.data.createdBy ||
+        (isManager && inspectionDetail.data?.createdByUser?.role === "ADMIN")) &&
+      !inspectionDetail.data?.inspections?.some((i) => itemHasAnswers(i))
+    )
+  )  && (
                 <div className="mb-3 space-y-4">
                   {inspectionDetail.data.sections
                     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
@@ -695,7 +717,7 @@ return {
                       </div>
                     ))}
                 </div>
-              )}
+              )} */}
 
             {/* 2. Admin / manager: view filled answers */}
             {user &&
@@ -970,15 +992,17 @@ return {
                 )}
               </div>
             )}
-            {inspectionDetail.data?.sections &&
+
+           {inspectionDetail.data?.sections &&
               inspectionDetail.data.sections.length > 0 &&
-              (
-                (!canFill && !hasPermission(user?.role!, "view:filled-inspections")) ||
-                (
-                  user?.id === modal.data.createdBy &&
-                  !inspectionDetail.data?.inspections?.some((i) => itemHasAnswers(i))
-                )
-              ) && (
+             (
+    (!canFill && !hasPermission(user?.role!, "view:filled-inspections")) ||
+    (
+      (user?.id === modal.data.createdBy ||
+        (isManager && inspectionDetail.data?.createdByUser?.role === "ADMIN")) &&
+      !inspectionDetail.data?.inspections?.some((i) => itemHasAnswers(i))
+    )
+  )  && (
                 <div className="my-3 space-y-4">
                   {inspectionDetail.data.sections
                     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))

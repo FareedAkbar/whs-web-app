@@ -278,7 +278,7 @@ console.log("user",user);
           type="text"
           placeholder="Search by name or email"
           className="w-full rounded-md border border-gray-300 px-2 py-3 text-sm shadow-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none dark:border-gray-600 dark:bg-gray-700 dark:text-white md:rounded-r-none"
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => setSearchTerm(e.target.value.trim())}
         />
        {hasPermission(user?.role!, "filter:users") && (
   <div className="">
@@ -324,7 +324,7 @@ console.log("user",user);
         </div>
 
       <div className="mb-3 w-full min-w-0 max-w-full rounded-lg border bg-white shadow dark:border-gray-500 dark:bg-gray-800">
-        <div className="table-scroll">
+        <div className="table-scroll w-full min-w-0 max-w-full overflow-x-auto">
           <table className="min-w-max w-full table-auto text-sm">
             <thead className="bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-200">
               <tr>
@@ -332,7 +332,8 @@ console.log("user",user);
                 <th className="whitespace-nowrap p-4 text-left font-medium">Name</th>
                 <th className="whitespace-nowrap p-4 text-left font-medium">Email</th>
                 <th className="whitespace-nowrap p-4 text-left font-medium">Role</th>
-                <th className="whitespace-nowrap p-4 text-left font-medium">Status</th>
+                <th className="whitespace-nowrap p-4 text-left font-medium">Admin Verification</th>
+                <th className="whitespace-nowrap p-4 text-left font-medium">Self Verification</th>
                 <th className="whitespace-nowrap p-4 text-center font-medium">Actions</th>
               </tr>
             </thead>
@@ -348,12 +349,20 @@ console.log("user",user);
                   <td className="whitespace-nowrap p-4 capitalize">{user.name}</td>
                   <td className="whitespace-nowrap p-4">{user.email}</td>
                   <td className="whitespace-nowrap p-4">{user.role.replaceAll("_", " ")}</td>
-                  <td className="p-4">
+                  <td className="whitespace-nowrap p-4">
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerifiedByAdmin ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-500 dark:bg-yellow-900 dark:bg-opacity-50"}`}
                     >
                       <span className="h-2 w-2 rounded-full bg-current"></span>
                       {user.isVerifiedByAdmin ? "Approved" : "Pending"}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap p-4">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerified ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-500 dark:bg-yellow-900 dark:bg-opacity-50"}`}
+                    >
+                      <span className="h-2 w-2 rounded-full bg-current"></span>
+                      {user.isVerified ? "Verified" : "Unverified"}
                     </span>
                   </td>
                   <td className="space-x-2 p-4 text-center">
