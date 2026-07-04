@@ -28,35 +28,49 @@ export default function Login() {
   } = useForm<InputType>({
     resolver: zodResolver(inputs),
   });
-  const onSubmit = async (data: InputType) => {
-    toast.loading("Logging in...");
+const onSubmit = async (data: InputType) => {
+  toast.loading("Logging in...");
 
-    try {
-      // Attempt NextAuth sign-in first
-      const response = await signIn("credentials", {
-        ...data,
-        redirect: false,
-      });
-      const session = await getSession();
+  try {
+    // Attempt NextAuth sign-in first
+    const response = await signIn("credentials", {
+      ...data,
+      redirect: false,
+    });
+    const session = await getSession();
 
-      if (session !== null && response?.ok && !response.error) {
-        toast.dismiss();
-        toast.success("Successfully Logged in!");
-        router.push("/dashboard");
-      } else {
-        toast.dismiss();
-        toast.error("Invalid Credentials");
-      }
-    } catch (error: unknown) {
+    if (session !== null && response?.ok && !response.error) {
       toast.dismiss();
-
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("Something went wrong");
-      }
+      toast.success("Successfully Logged in!");
+      router.push("/dashboard");
+    } else {
+      toast.dismiss();
+      toast.error("Invalid Credentials");
     }
-  };
+  } catch (error: unknown) {
+    toast.dismiss();
+
+    if (error instanceof Error) {
+      toast.error(error.message);
+    } else {
+      toast.error("Something went wrong");
+    }
+  }
+};
+
+const onError = (formErrors: typeof errors) => {
+  if (formErrors.email) {
+    toast.error(
+      formErrors.email.type === "invalid_string"
+        ? "Please enter a valid email address"
+        : formErrors.email.message ?? "Please enter a valid email address",
+    );
+    return;
+  }
+  if (formErrors.password) {
+    toast.error(formErrors.password.message ?? "Please enter a valid password");
+  }
+};
 
   async function handleLoginClick() {
     toast
@@ -81,7 +95,7 @@ export default function Login() {
       <p className="mt-2 max-w-sm text-xs text-gray-500">
         Enter your email and password to sign in
       </p>
-      <form className="mt-5" onSubmit={handleSubmit(onSubmit)}>
+      <form className="mt-5" onSubmit={handleSubmit(onSubmit,onError)}>
         <Controller
           name="email"
           control={control}
@@ -108,7 +122,7 @@ export default function Login() {
               label="Password"
               // className="bg-neutral-200/20 text-black backdrop-blur-lg dark:bg-neutral-200/20 dark:text-black"
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleSubmit(onSubmit)();
+                if (e.key === "Enter") handleSubmit(onSubmit,onError)();
               }}
             />
           )}
@@ -122,7 +136,7 @@ export default function Login() {
         <div className="flex h-full w-full flex-col gap-2">
           <Button
             title="Sign in"
-            onClick={handleSubmit(onSubmit)}
+            onClick={handleSubmit(onSubmit,onError)}
             loading={isSubmitting}
           />
           <div className="pt-3">
