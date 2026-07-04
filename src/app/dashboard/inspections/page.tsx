@@ -1155,15 +1155,19 @@ return {
               )}
             </div>
 
-            <Input
+           <div className="mb-6">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Due Date
+            </label>
+            <input
               type="date"
-              label="Due Date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="mb-6"
-              min={new Date().toISOString().split("T")[0]}
-            />
 
+              min={new Date().toISOString().split("T")[0]}
+              className="w-full rounded border border-gray-300 px-2 py-1 dark:bg-gray-800"
+            />
+          </div>
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-3">
               <Button
                 title="Cancel"
