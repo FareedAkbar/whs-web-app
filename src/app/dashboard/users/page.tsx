@@ -272,7 +272,7 @@ console.log("user",user);
   }
 
   return (
-    <div className="page-container overflow-x-hidden">
+    <div className="page-container overflow-x-hidden min-w-0">
               <div className="sticky top-0 z-10 my-2 mb-4 flex items-center justify-between backdrop-blur md:gap-0">
         <input
           type="text"
@@ -323,76 +323,76 @@ console.log("user",user);
         )}      
         </div>
 
-      <div className="mb-3 w-full min-w-0 max-w-full rounded-lg border bg-white shadow dark:border-gray-500 dark:bg-gray-800">
-        <div className="table-scroll w-full min-w-0 max-w-full overflow-x-auto">
-          <table className="min-w-max w-full table-auto text-sm">
-            <thead className="bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-200">
-              <tr>
-                <th></th>
-                <th className="whitespace-nowrap p-4 text-left font-medium">Name</th>
-                <th className="whitespace-nowrap p-4 text-left font-medium">Email</th>
-                <th className="whitespace-nowrap p-4 text-left font-medium">Role</th>
-                <th className="whitespace-nowrap p-4 text-left font-medium">Admin Verification</th>
-                <th className="whitespace-nowrap p-4 text-left font-medium">Self Verification</th>
-                <th className="whitespace-nowrap p-4 text-center font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedUsers.map((user, index) => (
-                <tr
-                  key={user.id}
-                  className="border-t dark:border-gray-600 dark:text-white"
-                >
-                  <td className="p-4">
-                    {page * pageSize - pageSize + index + 1}.
-                  </td>
-                  <td className="whitespace-nowrap p-4 capitalize">{user.name}</td>
-                  <td className="whitespace-nowrap p-4">{user.email}</td>
-                  <td className="whitespace-nowrap p-4">{user.role.replaceAll("_", " ")}</td>
-                  <td className="whitespace-nowrap p-4">
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerifiedByAdmin ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-500 dark:bg-yellow-900 dark:bg-opacity-50"}`}
-                    >
-                      <span className="h-2 w-2 rounded-full bg-current"></span>
-                      {user.isVerifiedByAdmin ? "Approved" : "Pending"}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap p-4">
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerified ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-500 dark:bg-yellow-900 dark:bg-opacity-50"}`}
-                    >
-                      <span className="h-2 w-2 rounded-full bg-current"></span>
-                      {user.isVerified ? "Verified" : "Unverified"}
-                    </span>
-                  </td>
-                  <td className="space-x-2 p-4 text-center">
-                    <button
-                      className="text-primary"
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setViewModalOpen(true);
-                        setCreateModalOpen(false);
-                        setOpen(true);
-                      }}
-                      title="View"
-                    >
-                      <Eye size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+     {/* Table Container */}
+<div className="mb-3 w-full rounded-lg border bg-white shadow dark:border-gray-500 dark:bg-gray-800">
+  
+  {/* Table with horizontal scroll - ONLY this scrolls */}
+  <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+    <table className="min-w-[900px] w-full table-auto text-sm">  {/* Increased min-width */}
+      <thead className="bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-200 sticky top-0 z-10">
+        <tr>
+          <th className="whitespace-nowrap p-4 text-left font-medium w-12"></th>
+          <th className="whitespace-nowrap p-4 text-left font-medium">Name</th>
+          <th className="whitespace-nowrap p-4 text-left font-medium">Email</th>
+          <th className="whitespace-nowrap p-4 text-left font-medium">Role</th>
+          <th className="whitespace-nowrap p-4 text-left font-medium">Admin Verification</th>
+          <th className="whitespace-nowrap p-4 text-left font-medium">Self Verification</th>
+          <th className="whitespace-nowrap p-4 text-center font-medium w-24">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {paginatedUsers.map((user, index) => (
+          <tr
+            key={user.id}
+            className="border-t dark:border-gray-600 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50"
+          >
+            <td className="p-4 text-gray-500">
+              {page * pageSize - pageSize + index + 1}.
+            </td>
+            <td className="whitespace-nowrap p-4 capitalize">{user.name}</td>
+            <td className="whitespace-nowrap p-4">{user.email}</td>
+            <td className="whitespace-nowrap p-4">{user.role.replaceAll("_", " ")}</td>
+            <td className="whitespace-nowrap p-4">
+              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerifiedByAdmin ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-500 dark:bg-yellow-900 dark:bg-opacity-50"}`}>
+                <span className="h-2 w-2 rounded-full bg-current"></span>
+                {user.isVerifiedByAdmin ? "Approved" : "Pending"}
+              </span>
+            </td>
+            <td className="whitespace-nowrap p-4">
+              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${user.isVerified ? "bg-green-100 text-green-500 dark:bg-green-900 dark:bg-opacity-50" : "bg-yellow-100 text-yellow-500 dark:bg-yellow-900 dark:bg-opacity-50"}`}>
+                <span className="h-2 w-2 rounded-full bg-current"></span>
+                {user.isVerified ? "Verified" : "Unverified"}
+              </span>
+            </td>
+            <td className="space-x-2 p-4 text-center">
+              <button
+                className="text-primary hover:text-primary/80 transition-colors"
+                onClick={() => {
+                  setSelectedUser(user);
+                  setViewModalOpen(true);
+                  setCreateModalOpen(false);
+                  setOpen(true);
+                }}
+                title="View"
+              >
+                <Eye size={18} />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 
-        <div className="w-full min-w-0 max-w-full overflow-x-hidden">
-          <Pagination
-            totalItems={filteredUsers.length}
-            page={page}
-            setPage={setPage}
-          />
-        </div>
-      </div>
+  {/* Pagination - NO horizontal scroll */}
+  <div className="border-t dark:border-gray-700 px-4 py-4 overflow-x-hidden">
+    <Pagination
+      totalItems={filteredUsers.length}
+      page={page}
+      setPage={setPage}
+    />
+  </div>
+</div>
 
      {isViewModalOpen && selectedUser && (
         <ModalBody onClose={() => { setViewModalOpen(false); setSelectedUser(null); }}>

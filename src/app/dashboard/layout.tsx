@@ -64,7 +64,7 @@ export default function RootLayout({
         <div className="relative flex h-full min-w-0 overflow-hidden">
           <Sidebar isDrawerOpen={isDrawerOpen} toggleDrawer={toggleDrawer} />
 
-          <div className="flex flex-1 flex-col">
+          <div className="flex flex-1 flex-col min-w-0">
             {/* TopBar - fixed height */}
             <div className="h-fit shrink-0">
               <TopBar toggleDrawer={toggleDrawer} />
