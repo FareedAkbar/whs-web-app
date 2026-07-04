@@ -996,13 +996,10 @@ return {
            {inspectionDetail.data?.sections &&
               inspectionDetail.data.sections.length > 0 &&
              (
-    (!canFill && !hasPermission(user?.role!, "view:filled-inspections")) ||
-    (
-      (user?.id === modal.data.createdBy ||
-        (isManager && inspectionDetail.data?.createdByUser?.role === "ADMIN")) &&
-      !inspectionDetail.data?.inspections?.some((i) => itemHasAnswers(i))
-    )
-  )  && (
+              (hasPermission(user?.role!, "view:unfilled-inspections")) &&
+                !inspectionDetail.data?.inspections?.some((i) => itemHasAnswers(i))
+              )
+              && (
                 <div className="my-3 space-y-4">
                   {inspectionDetail.data.sections
                     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))

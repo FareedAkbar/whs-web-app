@@ -242,7 +242,7 @@ if (
 
         <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent" />
 
-        <nav className="mt-4 flex max-h-[58vh] flex-col gap-2 overflow-y-auto">
+        <nav className="mt-2 flex max-h-[55vh] flex-col gap-2 overflow-y-auto">
           {navItems.map((item, index) => (
             <Link
               key={index}
@@ -273,7 +273,7 @@ if (
           ))}
         </nav>
 
-        <div className="absolute bottom-10 w-3/4">
+        <div className="absolute bottom-5 w-3/4">
           {/* <Button
             title="Logout"
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
