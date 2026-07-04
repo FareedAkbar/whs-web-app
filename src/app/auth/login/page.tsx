@@ -170,14 +170,14 @@ export default function Login() {
             </button> */}
 
             {/* Apple Button - Icon only */}
-            <button
+            {/* <button
               type="button"
               // onClick={() => handleLoginClick("apple")}
               className="group relative flex h-12 w-12 items-center justify-center rounded-md bg-zinc-100 shadow-[0_0_1px_1px_var(--neutral-800)] transition hover:scale-110 dark:bg-zinc-800"
             >
               <img src="/images/apple.png" alt="Apple" className="h-6 w-6" />
               <BottomGradient />
-            </button>
+            </button> */}
           </div>
         </div>
         {/* <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-700 to-transparent" /> */}
