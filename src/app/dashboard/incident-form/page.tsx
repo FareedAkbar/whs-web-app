@@ -165,18 +165,14 @@ const HazardForm = () => {
 
       payload.hazard = newHazardData;
     }
+console.log("incident data",payload);
 
     try {
       await reportIncident.mutateAsync(payload, {
         onSuccess: () => {
           toast.success("Incident reported successfully!");
           router.push("/dashboard/incidents");
-          // reset({
-          //   incidentTitle: "",
-          //   generalHazardDescription: "",
-          //   incidentDescription: "",
-          //   incidentReportDescription: "",
-          // });
+         
         },
         onError: (error) => {
           console.error("Error reporting incident:", error);
@@ -184,7 +180,6 @@ const HazardForm = () => {
         },
       });
 
-      // await reportIncident.mutateAsync(incidentData);
     } catch (error) {
       console.error("Error reporting incident:", error);
       toast.error("Failed to report incident");
@@ -770,8 +765,8 @@ const HazardForm = () => {
                 </div> */}
               </div>
             )}
-<div className="flex flex-wrap gap-4">
-<div className="min-w-[220px] flex-1">
+            <div className="flex flex-wrap gap-4">
+            <div className="min-w-[220px] flex-1">
               <Controller
                 name="address"
                 control={control}
@@ -800,7 +795,7 @@ const HazardForm = () => {
                 />
               )}
             />  
-</div>
+          </div>
          
           {/* Commented out Map (location) */}
             {/* <div className="relative z-0 mt-4 h-60 overflow-hidden rounded-md border">
