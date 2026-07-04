@@ -660,7 +660,7 @@ return {
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Created by:
               </p>
-              <p> {inspectionDetail.data?.createdByUser?.name} ({inspectionDetail.data?.createdByUser?.email}) - {inspectionDetail.data?.createdByUser?.role.replaceAll("_", " ")} </p>
+              <p className="dark:text-white"> {inspectionDetail.data?.createdByUser?.name} ({inspectionDetail.data?.createdByUser?.email}) - {inspectionDetail.data?.createdByUser?.role.replaceAll("_", " ")} </p>
             </div>
 
             {/* 1. View-only: template questions */}

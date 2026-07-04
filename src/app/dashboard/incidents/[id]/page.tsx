@@ -167,7 +167,7 @@ const handlePickIncident = () => {
       assignedTo: user.id,
       incidentId: incident.incident?.id ?? "",
       reportId: incident.report.id,
-      comments:`Incident is picked by ${user.name}(${user.email})`
+      comments:`Incident is picked by ${user.name} (${user.email})`
     },
     {
       onSuccess: () => {

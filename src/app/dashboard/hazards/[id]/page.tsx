@@ -257,7 +257,7 @@ const handlePickHazard = () => {
       assignedTo: user.id,
       hazardId: hazard.hazard?.id ?? "",
       reportId: hazard.report.id,
-      comments:`Hazard is picked by ${user.name}(${user.email})`
+      comments:`Hazard is picked by ${user.name} (${user.email})`
 
     },
     {
