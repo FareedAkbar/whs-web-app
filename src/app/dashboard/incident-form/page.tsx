@@ -165,7 +165,6 @@ const HazardForm = () => {
 
       payload.hazard = newHazardData;
     }
-console.log("incident data",payload);
 
     try {
       await reportIncident.mutateAsync(payload, {
