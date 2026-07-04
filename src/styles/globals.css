@@ -21,6 +21,16 @@
   :root {
     --font-family: 'var(--font-geist-sans)'; /* Default font */
   }
+  :root {
+    --primary-color: 236 28 41; /* RGB values of #EC1C29 */
+    color-scheme: light;
+}
+:root {
+    --font-family: 'var(--font-geist-sans)'; /* Default font */
+}
+.dark {
+    color-scheme: dark;
+}
 .font-nulshock {
     font-family: 'nulshock', sans-serif;
 }
@@ -141,7 +151,16 @@ input:-webkit-autofill:active {
 .dark *:hover {
   scrollbar-color: #4b5563 transparent;
 }
-
+.scrollbar-thin::-webkit-scrollbar {
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 20px;
+}
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+}
 /* Make date picker icon white in dark mode */
 /* .dark input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
