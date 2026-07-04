@@ -438,7 +438,7 @@ const comments = isSelectingSelf
                   // variant="secondary"
                 />
               )}
-            {hasPermission(session.data?.user?.role!, "cancel:incidents") &&
+            {/* {hasPermission(session.data?.user?.role!, "cancel:incidents") &&
               report.status === "INITIATED" && (
                 <Button
                   title="Cancel Hazard"
@@ -448,7 +448,7 @@ const comments = isSelectingSelf
                     // open modal logic left to you — this demonstrates the button
                   }}
                 />
-              )}
+              )} */}
           </div>
         </div>
 

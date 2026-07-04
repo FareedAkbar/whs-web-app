@@ -239,8 +239,6 @@ const assignedToEmail = isSelectingSelf
   const incidentMeta = incident.incident;
   const assignee = incident.incidentAssignee ?? null;
 
-  const reporter = allUsersRes?.data?.find((u) => u.id === report.userId);
-console.log("assignee",assignee);
 
   return (
     <div className="page-container py-6">
@@ -352,7 +350,7 @@ console.log("assignee",assignee);
                   // variant="secondary"
                 />
               )}
-            {hasPermission(session.data?.user?.role!, "cancel:incidents") &&
+            {/* {hasPermission(session.data?.user?.role!, "cancel:incidents") &&
               report.status === "INITIATED" && (
                 <Button
                   title="Cancel Incident"
@@ -362,7 +360,7 @@ console.log("assignee",assignee);
                     // open modal logic left to you — this demonstrates the button
                   }}
                 />
-              )}
+              )} */}
           </div>
         </div>
 
@@ -527,52 +525,52 @@ console.log("assignee",assignee);
             {incident.links?.length ? (
               <div className="space-y-4">
                 {incident.links.map((link) => (
-  <div
-    key={link.linkId}
-    className="rounded-lg shadow dark:bg-gray-700 bg-gray-50 p-4"
-  >
-    {/* Top row: ticket + status */}
-    <div className="flex items-center justify-between gap-2 mb-2">
-      <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
-        Ticket#{link.ticket_number}
-      </span>
-      <span
-        className={`rounded-full px-3 py-1 text-xs whitespace-nowrap ${
-          statusMapping[link.reportStatus as keyof typeof statusMapping] ?? "bg-gray-100 text-gray-700"
-        }`}
-      >
-        {link.reportStatus.replaceAll("_", " ")}
-      </span>
-    </div>
+              <div
+                key={link.linkId}
+                className="rounded-lg shadow dark:bg-gray-700 bg-gray-50 p-4"
+              >
+                {/* Top row: ticket + status */}
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
+                    Ticket#{link.ticket_number}
+                  </span>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs whitespace-nowrap ${
+                      statusMapping[link.reportStatus as keyof typeof statusMapping] ?? "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {link.reportStatus.replaceAll("_", " ")}
+                  </span>
+                </div>
 
-    {/* Content */}
-    <p className="font-medium">Title: {link.reportTitle}</p>
-    <p className="text-sm text-gray-600 dark:text-gray-400">
-      Type: {link.linkType}
-    </p>
-    {link.reportDescription && (
-      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-        Description: {link.reportDescription}
-      </p>
-    )}
-    {link.linkDescription && (
-      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-        Detailed Description: {link.linkDescription}
-      </p>
-    )}
+                {/* Content */}
+                <p className="font-medium">Title: {link.reportTitle}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Type: {link.linkType}
+                </p>
+                {link.reportDescription && (
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    Description: {link.reportDescription}
+                  </p>
+                )}
+                {link.linkDescription && (
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    Detailed Description: {link.linkDescription}
+                  </p>
+                )}
 
-    {/* View button */}
-    {hasPermission(user?.role!, "view:hazards") && (
-      <div className="mt-3 flex justify-end">
-        <Button
-          variant="primary"
-          onClick={() => router.push(`/dashboard/hazards/${link.reportId}`)}
-          title="View Hazard"
-        />
-      </div>
-    )}
-  </div>
-))}
+                {/* View button */}
+                {hasPermission(user?.role!, "view:hazards") && (
+                  <div className="mt-3 flex justify-end">
+                    <Button
+                      variant="primary"
+                      onClick={() => router.push(`/dashboard/hazards/${link.reportId}`)}
+                      title="View Hazard"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
               </div>
             ) : (
               <p className="text-sm text-gray-500">No linked hazard found.</p>

@@ -156,6 +156,7 @@ interface FilledSectionTable {
   status?: string;
   dueDate?: string;
   createdBy: string;
+  createdByUser: User;
 };
 
  interface InspectionItem {
@@ -195,6 +196,7 @@ interface FilledSectionTable {
   title: string;
   description: string;
   createdBy: string;
+  createdByUser:User;
   status?: string;
   dueDate?: string;
   /** Template sections (no answers) */

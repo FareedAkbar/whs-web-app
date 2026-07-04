@@ -105,7 +105,8 @@ export default function IncidentsList() {
         item.report.description
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        item.report.title.toLowerCase().includes(searchTerm.toLowerCase());
+        item.report.title.toLowerCase().includes(searchTerm.toLowerCase())||
+        item.incident?.ticket_number?.toString().includes(searchTerm.toLowerCase());
 
       // Assigned tab logic
       const matchesTab =
@@ -365,56 +366,56 @@ export default function IncidentsList() {
               }
             >
              <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
-  <div className="flex gap-3">
-    <div className="flex flex-col items-center gap-1">
-      {/* Ticket badge */}
-      <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
-        Ticket#{item.incident?.ticket_number ?? item.report.ticketNumber ?? "N/A"}
-      </span>
+              <div className="flex gap-3">
+                <div className="flex flex-col items-center gap-1">
+                  {/* Ticket badge */}
+                  <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap">
+                    Ticket#{item.incident?.ticket_number ?? item.report.ticketNumber ?? "N/A"}
+                  </span>
 
-      {/* Triangle box — fixed size, unaffected by badge */}
-      <div className="h-fit w-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
-        <AlertTriangle
-          size={40}
-          color={`${severityMapping[item?.report?.priority] ?? "black"}`}
-        />
-      </div>
-    </div>
+                  {/* Triangle box — fixed size, unaffected by badge */}
+                  <div className="h-fit w-fit rounded-xl bg-gradient-to-r from-gray-300 via-[#F9F9F9] to-gray-300 p-2 dark:from-gray-600 dark:via-gray-700 dark:to-gray-600">
+                    <AlertTriangle
+                      size={40}
+                      color={`${severityMapping[item?.report?.priority] ?? "black"}`}
+                    />
+                  </div>
+                </div>
 
-    <div>
-      <h2
-        className="font-semibold capitalize break-words"
-        style={{
-          color: severityMapping[item?.report?.priority] ?? "#000",
-        }}
-      >
-        { item.report.title}
-      </h2>
+                <div>
+                  <h2
+                    className="font-semibold capitalize break-words"
+                    style={{
+                      color: severityMapping[item?.report?.priority] ?? "#000",
+                    }}
+                  >
+                    { item.report.title}
+                  </h2>
 
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        {item.report.description.length > 100
-          ? item.report.description.slice(0, 100) + "..."
-          : item.report.description}
-      </p>
-    </div>
-  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {item.report.description.length > 100
+                      ? item.report.description.slice(0, 100) + "..."
+                      : item.report.description}
+                  </p>
+                </div>
+              </div>
 
-  <div className="flex flex-col items-end justify-end gap-2">
-    <span
-      className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.report?.status as keyof typeof statusMapping]}`}
-    >
-                {item.report.status=="ASSIGNED"&& item.incidentAssignee?.assignType=="SELF_ASSIGNED"?"PICKED":item.report?.status.replaceAll("_", " ")}
-    </span>
-    <span
-      className="rounded px-2.5 py-0.5 text-xs font-semibold text-white"
-      style={{
-        backgroundColor: severityMapping[item.report.priority] || "#ccc",
-      }}
-    >
-      {severityDisplayMapping[item.report.priority] || item.report.priority}
-    </span>
-  </div>
-</div>
+              <div className="flex flex-col items-end justify-end gap-2">
+                <span
+                  className={`rounded-full px-3 py-1 text-xs ${statusMapping[item.report?.status as keyof typeof statusMapping]}`}
+                >
+                            {item.report.status=="ASSIGNED"&& item.incidentAssignee?.assignType=="SELF_ASSIGNED"?"PICKED":item.report?.status.replaceAll("_", " ")}
+                </span>
+                <span
+                  className="rounded px-2.5 py-0.5 text-xs font-semibold text-white"
+                  style={{
+                    backgroundColor: severityMapping[item.report.priority] || "#ccc",
+                  }}
+                >
+                  {severityDisplayMapping[item.report.priority] || item.report.priority}
+                </span>
+              </div>
+            </div>
 
               {/* {item.incidentAssignee && item.incidentAssignee.length > 0 ? (
                 <div className="mt-3 flex flex-col gap-2 border-t pt-3">

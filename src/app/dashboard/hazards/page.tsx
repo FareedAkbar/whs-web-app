@@ -92,8 +92,8 @@ export default function HazardsList() {
         item.report.description
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        item.report.title.toLowerCase().includes(searchTerm.toLowerCase());
-      console.log("user?.id", user?.id);
+        item.report.title.toLowerCase().includes(searchTerm.toLowerCase())||
+        item.hazard?.ticket_number?.toString().includes(searchTerm.toLowerCase());
       const matchesPickedByMe = !pickedByMe || item.incidentAssignee?.id === user?.id;
 
       // Assigned tab logic
