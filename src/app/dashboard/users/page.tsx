@@ -140,7 +140,6 @@ const UserPage = () => {
   }, [selectedUser]);
   const session = useSession();
     const user = session.data?.user;
-console.log("user",user);
 
   const handleAssignRole = async () => {
     if (!selectedUser) return;
@@ -398,12 +397,12 @@ console.log("user",user);
         <ModalBody onClose={() => { setViewModalOpen(false); setSelectedUser(null); }}>
           <ModalContent>
             <div className="flex flex-col items-center border-b pb-4">
-              <img
+              {/* <img
                 src={selectedUser?.providerImageUrl !== "" ? selectedUser?.providerImageUrl : "https://placehold.co/150x150"}
                 alt={selectedUser?.name}
                 className="h-20 w-20 rounded-full border border-gray-300 object-cover"
-              />
-              <h2 className="mt-3 flex items-center gap-1 text-xl font-semibold text-gray-900 dark:text-white">
+              /> */}
+              <h2 className="mt-3 flex items-center gap-1 capitalize text-xl font-semibold text-gray-900 dark:text-white">
                 {selectedUser?.name}
                 {selectedUser?.isVerified ? (
                   <IconRosetteDiscountCheckFilled className="text-green-600" size={20} />
